@@ -1,0 +1,400 @@
+@keyframes loading {
+    0%{background-position:0% 52%}
+    50%{background-position:100% 49%}
+    100%{background-position:0% 52%}
+}
+
+* {
+    box-sizing: border-box;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+
+html, body {
+    margin: 0px;
+    padding: 0px;
+    background: #111111;
+    color: white;
+}
+
+button.button {
+    background-color: black;
+    color: white;
+    border: 1px solid #1e1e1e;
+    border-radius: 3px;
+    filter: drop-shadow(0px 0px 5px black);
+
+    transition-property: border, background-color;
+    transition-duration: 0.25s;
+    padding: 0.5rem;
+}
+
+.subtitle {
+    font-style: italic;
+    opacity: 0.6;
+}
+
+button.button:disabled {
+    border: 1px solid #333333;
+}
+
+button.button:hover:not(:disabled) {
+    border: 1px solid #555555;
+}
+
+button.button:focus:not(:disabled)  {
+    border: 1px solid #888888;
+    outline: none;
+}
+
+button.button:active:not(:disabled) {
+    background: white;
+}
+
+button.button.toggle[data-checked] {
+    background: #7700cc;
+}
+
+input[type="text"] {
+    display: inline-block;
+    color: inherit;
+    background: none;
+    font-size: inherit;
+    width: 100%;
+    
+    border: none;
+    border-bottom: 2px solid #777777;
+    padding: 0.5rem;
+
+    transition-duration: 0.35s;
+    transition-property: border, color;
+    will-change: border, color;
+}
+
+input[type="text"][data-error] {
+    border-bottom: 2px solid #ff0000;
+    color: red;
+}
+
+input[type="text"]:focus {
+    border-bottom: 2px solid #ffffff;
+    outline: none;
+}
+
+div::-webkit-scrollbar {
+    -webkit-appearance: none;
+    appearance: none;
+    overflow-x: visible;
+    width: 6px;
+    height: 6px;
+}
+
+div::-webkit-scrollbar-thumb {
+    background: #aaaaaa;
+    border-radius: 3px;
+    width: 6px;
+    height: 6px;
+}
+
+
+
+div.config, div.files, div.edit, div.logs {
+    width: 90vw;
+    min-width: 400px;
+    max-width: 1000px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid #333333;
+    border-radius: 1rem;
+    background: #171717;
+
+    display: none;
+}
+
+body[data-mode="config"] div.config {
+    display: block;
+}
+
+body[data-mode="edit"] div.edit {
+    display: block;
+}
+
+body[data-mode="files"] div.files {
+    display: block;
+}
+
+body[data-mode="logs"] div.logs {
+    display: block;
+}
+
+body[data-mode="console"] div.logs {
+    display: block;
+}
+
+div.server-line.cont {
+    padding: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 1rem;
+    background-image: linear-gradient(135deg, black, rgb(55, 6, 35));
+    border: 1px solid #333333;
+
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    text-align: center; 
+    align-items: center;
+    gap: 1rem;
+}
+
+div.server-line.cont:not([data-id]):not(.editor) {
+    background: #333333;
+}
+
+div.server-line.cont[data-running] {
+    background-image: linear-gradient(135deg, #1e0033, #db188a);
+}
+
+div.server-line.cont a.server-line.alias {
+    pointer-events: none;
+    color: white;
+    text-decoration: none;
+}
+
+div.server-line.cont[data-running] a.server-line.alias {
+    pointer-events: all;
+    text-decoration: underline;
+}
+
+div.edit[data-running] div.editor.server-line.cont {
+    background-image: linear-gradient(135deg, #1e0033, #db188a);
+}
+
+div.edit[data-running] button.button.editor.nur {
+    display: none;
+}
+
+div.edit:not([data-running]) button.button.editor.run {
+    display: none;
+}
+
+a.editor.telegraph.alias {
+    pointer-events: none;
+    color: white;
+    text-decoration: none;
+}
+
+div.edit[data-running] a.editor.telegraph.alias {
+    pointer-events: all;
+    text-decoration: underline;
+}
+
+
+div.editor.staging {
+    display: none;
+    font-style: italic;
+    color: white;
+    background-color: #7700cc;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+div.editor.staging[data-active] {
+    display: block;
+}
+
+
+
+div.file-line.cont {
+    display: grid;
+    grid-template-columns: 2em 1fr 2em;
+    align-items: center;
+    gap: 0.75em;
+    padding: 1em;
+    border: 1px solid #333333;
+    border-radius: 1em;
+    background: #222222;
+    margin-bottom: 0.5em;
+}
+
+div.file-line.cont[data-staged] {
+    background-image: linear-gradient(90deg, #222222, #aa0000);
+}
+
+div.file-line.cont[data-folder] {
+    cursor: pointer;
+}
+
+img.file-line.img {
+    height: 2em;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+div.file-line.name {
+    pointer-events: none;
+}
+
+div.file-line.delete {
+    height: 2em;
+    width: 2em;
+    background: url(svg/delete.svg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+}
+
+div.uploads-cont {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+div.logs-canvas {
+    background:black;
+    min-height: 45vh;
+    max-height: 70vh;
+    background: black;
+    padding: 1rem;
+    border-radius: 4px;
+    font-family: 'Inconsolata', monospace;
+    overflow-y: auto;
+}
+
+div.logs-canvas-self {
+    background:black;
+    min-height: 50vh;
+    max-height: 80vh;
+    background: black;
+    padding: 1rem;
+    border-radius: 4px;
+    font-family: 'Inconsolata', monospace;
+    overflow-y: auto;
+}
+
+div.runtime-logs {
+    background:black;
+    height: 20vh;
+    background: black;
+    padding: 1rem;
+    border-radius: 4px;
+    font-family: 'Inconsolata', monospace;
+    overflow-y: auto;
+}
+
+div.runtime-logs[data-thinking] {
+    background-image: linear-gradient(315deg, #000000, #db188a);
+    background-size: 400% 400%;
+    animation: loading 4s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+}
+
+div.logs-line.rooter {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    align-items: center;
+    font-family: 'Inconsolata', monospace;
+    color: white;
+}
+
+div.logs-line.rooter.info::before {
+    content: "LOG";
+    margin-right: 2.5ex;
+    color: #7700cc;
+}
+
+div.logs-line.rooter.error::before {
+    content: "ERR";
+    margin-right: 2.5ex;
+    color: #aa0000;
+}
+
+div.splash {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+    z-index: -1;
+
+    transition-property: opacity, z-index;
+    transition-duration: 0.3s;
+    transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+div.splash[data-active] {
+    opacity: 1;
+    pointer-events: all;
+    user-select: initial;
+    z-index: 10;
+}
+
+div.splash > div.inside {
+    background: #222222;
+    min-width: 200px;
+    min-height: 200px;
+    max-width: 90vw;
+    max-height: 90vh;
+
+    width: max-content;
+    height: min-content;
+
+    position: absolute;
+    padding: 1.5rem;
+    border: 1px solid #333333;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+@media only screen and (min-width: 600px) {
+    div.splash > div.inside {
+        width: 40vw;
+    }
+}
+
+button.self-logs-open {
+    position: absolute;
+    bottom: 1rem;
+    padding: 1.5rem;
+    border-radius: 50%;
+    left: 1rem;
+    height: 1rem;
+    width: 1rem;
+    border: none !important;
+    background-image: url("/svg/terminal.svg");
+    background-size: 50% 50%;
+    background-repeat: no-repeat;
+    background-position: center center;
+    z-index: 2;
+}
+
+div.logs-broken {
+    font-size: 2rem;
+    display: none;
+}
+
+body[data-mode="broken"] div.logs-broken {
+    display: block;
+    padding-bottom: 1rem;
+}
+
+div.logs-runner {
+    display: none;
+}
+
+body[data-mode="console"] div.logs-runner {
+    display: block;
+    padding-top: 1rem;
+}
+

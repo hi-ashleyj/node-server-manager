@@ -1,0 +1,22 @@
+{
+  "name": "node-server-manager",
+  "version": "0.9.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hi-ashleyj/node-server-manager.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/hi-ashleyj/node-server-manager/issues"
+  },
+  "homepage": "https://github.com/hi-ashleyj/node-server-manager#readme",
+  "dependencies": {
+    "ws": "^7.4.0"
+  }
+}
