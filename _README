@@ -23,3 +23,10 @@
  -- ADDING SERVERS -- 
 
 Note: this requires being signed in with "Configure" permissions
+1. Select the add button at the top of the main page
+2. Enter an id (this must be unique), a port number for the production server, and the entry point file (such as app.js)
+3. Specify a git repository to pull from. This must not require authentication
+4. Choose whether this server is "always on" (or will run on boot) - this setting only affects the production instance
+5. Choose create
+
+
