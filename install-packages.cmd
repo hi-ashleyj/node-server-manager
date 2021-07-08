@@ -1,0 +1,1 @@
+..\node\npm.cmd ci --production --no-optional

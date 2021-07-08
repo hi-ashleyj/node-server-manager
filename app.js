@@ -25,7 +25,7 @@ let r403 = function(res) {
     res.end();
 };
 
-let networkingPort = 80;
+let networkingPort = 7436;
 let remoteServer;
 
 let remoteSend = async function(cl, type, data) {
@@ -52,16 +52,16 @@ Manager.getServer;
 /**
  * servers: {
  *      id: "",
- *      alias: "",
  *      port: "",
  *      runatboot: (true|false),
  *      runfile: "app.js" (or similar array of path)
  * }
  */
 
-Manager.runningServers = {};
+Manager.runningServers = { test: {}, production: {} };
 
-let SpawnedServer = function(id, process, silent) {
+let SpawnedServer = function(type, id, process, silent) {
+    this.type = type;
     this.id = id;
     this.log = [];
     this.running = true;
@@ -86,7 +86,7 @@ let SpawnedServer = function(id, process, silent) {
         let entry = { type: "log", data: chunk.toString() };
         u.log.push(entry);
         if (!silent) {
-            Manager.broadcast("log", u.id, entry);
+            Manager.broadcast("log", u.id, u.type, entry);
         }
         
         while (u.log.length > 100) {
@@ -98,7 +98,7 @@ let SpawnedServer = function(id, process, silent) {
         let entry = { type: "err", data: chunk.toString() };
         u.log.push(entry);
         if (!silent) {
-            Manager.broadcast("log", u.id, entry);
+            Manager.broadcast("log", u.id, u.type, entry);
         }
 
         while (u.log.length > 100) {
@@ -118,7 +118,7 @@ let SpawnedServer = function(id, process, silent) {
 
         u.running = false;
         if (!silent) {
-            Manager.broadcast("stop", u.id);
+            Manager.broadcast("stop", u.id, u.type);
         }
     });
 
@@ -133,7 +133,7 @@ let SpawnedServer = function(id, process, silent) {
     return this;
 };
 
-let documentsFolder = path.resolve(os.homedir(), "rpi-ws-manager");
+let documentsFolder = path.resolve(process.cwd(), "store");
 
 if (!fsSync.existsSync(documentsFolder)) { // Create folders and default users
     try {
@@ -152,6 +152,18 @@ if (!fsSync.existsSync(documentsFolder)) { // Create folders and default users
     });
 }
 
+if (!fsSync.existsSync(path.resolve(process.cwd(), "test"))) {
+    try {
+        fs.mkdir(path.resolve(process.cwd(), "test"));
+    } catch (_err) { }
+}
+
+if (!fsSync.existsSync(path.resolve(process.cwd(), "production"))) {
+    try {
+        fs.mkdir(path.resolve(process.cwd(), "production"));
+    } catch (_err) { }
+}
+
 Manager.save = async function() {
     try {
         await fs.writeFile(path.resolve(documentsFolder, "servers.json"), JSON.stringify(Manager.servers));
@@ -166,9 +178,11 @@ Manager.broadcast = function(type, ...data) {
 
     if (type == "start" || type == "stop") {
         output.target = data[0];
+        output.space = data[1];
     } else if (type == "log") {
         output.target = data[0];
-        output.message = data[1];
+        output.space = data[1];
+        output.message = data[2];
     } else if (type == "script-complete") {
         Object.assign(output, data[0]);
     }
@@ -176,15 +190,15 @@ Manager.broadcast = function(type, ...data) {
     remoteSend(null, type, output);
 };
 
-Manager.stopServer = function(id) {
+Manager.stopServer = function(type, id) {
     return new Promise(async (resolve, _reject) => {
-        if (Manager.runningServers[id]) {
-            if (Manager.runningServers[id].running) {
-                Manager.runningServers[id].on("stop", (_stopped) => {
+        if (Manager.runningServers[type][id]) {
+            if (Manager.runningServers[type][id].running) {
+                Manager.runningServers[type][id].on("stop", (_stopped) => {
                     resolve();
                 });
 
-                Manager.runningServers[id].stop();
+                Manager.runningServers[type][id].stop();
             } else {
                 resolve();
             }
@@ -194,7 +208,7 @@ Manager.stopServer = function(id) {
     })
 };
 
-Manager.spawnServer = function(id) {
+Manager.spawnServer = function(type, id) {
     if (Manager.servers[id].runfile.length == 0) {
         return;
     }
@@ -208,7 +222,7 @@ Manager.spawnServer = function(id) {
 
     let process = child_process.spawn("node", args, options);
 
-    Manager.runningServers[id] = new SpawnedServer(id, process);
+    Manager.runningServers[type][id] = new SpawnedServer(id, process);
     Manager.broadcast("start", id);
 };
 
@@ -237,7 +251,6 @@ Manager.newServer = async function(payload) {
     if (payload && payload.id && payload.alias && payload.port) {
         let config = {
             id: payload.id,
-            alias: payload.alias,
             port: payload.port,
             runatboot: (payload.runatboot) ? true : false,
             runfile: (payload.runfile) ? payload.runfile : "app.js"
@@ -341,23 +354,57 @@ Manager.listServers = function() {
     return work;
 };
 
-Manager.getLogfile = function(id) {
+Manager.getLogfile = function(id, temp) {
     if (Manager.runningServers[id]) {
         return Manager.runningServers[id].log;
     }
     return [];
 };
 
-Manager.runNPM = function(id, args) {
+Manager.runNPM = function(type, id, args) {
     return new Promise(async (resolve, reject) => {
         if (args.length > 0) {
             let options = {};
         
-            options.cwd = path.resolve(documentsFolder, "" + id);
+            options.cwd = path.resolve(process.cwd(), type, "" + id);
 
-            let npmLoc = (os.platform == "win32" || process.platform == "win32") ? "npm.cmd" : "npm";
+            let npmLoc = path.resolve(process.cwd(), "node", "npm.cmd");
         
             let process = child_process.spawn(npmLoc, args, options);
+
+            let instance = new SpawnedServer(id, process);
+
+            instance.on("stop", (code) => {
+                let logs = instance.log;
+
+                let res = { id: id, logs: logs, root: "npm" };
+                Manager.broadcast("script-complete", res);
+                resolve(res);
+            });
+
+            instance.on("exit", (code) => {
+                let logs = instance.log;
+
+                let res = { id: id, logs: logs, root: "npm" };
+                Manager.broadcast("script-complete", res);
+                resolve(res);
+            });
+        } else {
+            resolve(null);
+        }
+    }); 
+};
+
+Manager.runGit = function(id, args) {
+    return new Promise(async (resolve, reject) => {
+        if (args.length > 0) {
+            let options = {};
+        
+            options.cwd = path.resolve(process.cwd(), type, "" + id);
+
+            let gitLoc = path.resolve(process.cwd(), "git", "bin", "git.exe");
+        
+            let process = child_process.spawn(gitLoc, args, options);
 
             let instance = new SpawnedServer(id, process);
 

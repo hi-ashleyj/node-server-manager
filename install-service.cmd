@@ -1,0 +1,1 @@
+..\node\node.exe .\install-service.js

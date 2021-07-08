@@ -372,13 +372,10 @@ find("button.button.editor.fileman").when("click", () => { UI.files.show([]) });
 UI.edit.updateInfo = async function () {
     try {
         let id = UI.editing.id;
-        let alias = find("input.editor.alias").value;
         let port = parseInt(find("input.editor.port").value);
         let runonboot = !(!(find("button.toggle.editor.runonboot").getr("data-checked")));
         let runfile = find("input.editor.runfile").value;
-        let work = {
-            id: id, alias: alias, port: port, runonboot: runonboot, runfile: runfile
-        };
+        let work = { id, port, runonboot, runfile };
 
         let sevn = await Home.servers.update(work);
 
@@ -391,20 +388,16 @@ UI.edit.updateInfo = async function () {
 UI.edit.createServer = async function() {
     try {
         let id = find("input.create.server-line.id").value;
-        let alias = find("input.create.server-line.alias").value;
         let port = parseInt(find("input.create.server-line.port").value);
         let runonboot = !(!(find("button.toggle.create.server-line.runonboot").getr("data-checked")));
         let runfile = find("input.create.server-line.runfile").value;
-        let work = {
-            id: id, alias: alias, port: port, runonboot: runonboot, runfile: runfile
-        };
+        let work = { id, port, runonboot, runfile };
 
         let sevn = await Home.servers.new(work);
         
         console.log(sevn);
 
         find("input.create.server-line.id").value = "";
-        find("input.create.server-line.alias").value = "";
         find("input.create.server-line.port").value = "";
         find("button.toggle.create.server-line.runonboot").attr("data-checked", true);
         find("input.create.server-line.runfile").value = "";
