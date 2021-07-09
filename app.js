@@ -224,14 +224,14 @@ Manager.spawnServer = function(type, id) {
     let args = [];
 
     args.push(Manager.servers[id].runfile);
-    args.push("port:" + Manager.servers[id].port);
+    args.push("port:" + (((type == "test") ? 30000 : 0) + Manager.servers[id].port));
 
     options.cwd = path.resolve(rootFolder, type, "" + id);
 
     let process = child_process.spawn("node", args, options);
 
     Manager.runningServers[type][id] = new SpawnedServer(type, id, process);
-    Manager.broadcast("start", id);
+    Manager.broadcast("start", id, type);
 };
 
 Manager.autoStart = function() {
@@ -550,7 +550,7 @@ Requests.startServer = function(_req, res, data) {
         Manager.spawnServer(body.type, body.id);
         if (body.type == "production") Manager.restartCounters[body.id] = [];
         res.writeHead(200, http.STATUS_CODES[200]); 
-        res.end();
+        res.end("{}");
     } else {
         res.writeHead(404, http.STATUS_CODES[404]);
         res.end();
@@ -562,7 +562,7 @@ Requests.stopServer = function(_req, res, data) {
     if (body.id) {
         Manager.stopServer(body.type, body.id).then(() => { 
             res.writeHead(200, http.STATUS_CODES[200]); 
-            res.end(); 
+            res.end("{}"); 
         });
     } else {
         res.writeHead(404, http.STATUS_CODES[404]);

@@ -106,7 +106,7 @@ Home.script.npm = async function(type, id, args) {
 Home.script.git = async function(type, id, args) {
     return new Promise(async (resolve, reject) => {
         try {
-            let logs = JSON.parse(await Comms.post("runnpm", JSON.stringify({ type, id, args: args })));
+            let logs = JSON.parse(await Comms.post("rungit", JSON.stringify({ type, id, args: args })));
             resolve(logs);
         } catch (err) {
             resolve([]);
@@ -128,6 +128,7 @@ Home.self.logs = async function() {
 let UI = {};
 UI.events = [];
 UI.editing;
+UI.managing = { id: null, type: null }
 UI.Presets = {};
 UI.edit = {};
 UI.files = {};
@@ -287,7 +288,7 @@ UI.edit.read = function() {
 
     if (mode == "create") {
         UI.edit.createServer(work);
-    } else if (mode == "edit" && find("div.splash.server-editor").getr("data-id") == id) {
+    } else if (mode == "edit") {
         UI.edit.updateInfo(work);
     }
     
@@ -303,8 +304,18 @@ UI.showManage = async function(type, id) {
         find(".manage-telegraph-id").chng("innerText", id);
         find("a.manage-telegraph-id").chng("href", "http://" + window.location.hostname + ":" + ((type == "test") ? 30000 + goals.port : goals.port));
 
+        if (goals.running[type]) {
+            find("div.manage").attr("data-running", true);
+        } else {
+            find("div.manage").rmtr("data-running");
+        }
+
         let container = find("div.logs-canvas");
         let list = await Home.servers.logs(type, id);
+
+        UI.managing.id = id;
+        UI.managing.type = type;
+        UI.editing = goals;
 
         container.innerHTML = "";
         for (let i in list) {
@@ -351,9 +362,27 @@ UI.runScript = async function(type, id, command) {
     }
 };
 
-find("button.button.editor.start").when("click", () => { Home.servers.start(UI.editing.id) });
-find("button.button.editor.stop").when("click", () => { Home.servers.stop(UI.editing.id) });
-find("button.button.editor.restart").when("click", () => { Home.servers.restart(UI.editing.id) });
+UI.script = {};
+
+UI.script.npmCIProduction = function() {
+    let { type, id } = UI.managing;
+    UI.runScript(type, id, "npm ci --production --no-optional");
+};
+
+UI.script.gitPull = function() {
+    let { type, id } = UI.managing;
+    UI.runScript(type, id, "git pull");
+};
+
+UI.script.gitClone = function() {
+    let { type, id } = UI.managing;
+    let repo = UI.editing.giturl;
+    UI.runScript(type, id, `git clone ${repo} ${id}`);
+};
+
+find("button.button.editor.start").when("click", () => { Home.servers.start(UI.managing.type, UI.managing.id) });
+find("button.button.editor.stop").when("click", () => { Home.servers.stop(UI.managing.type, UI.managing.id) });
+find("button.button.editor.restart").when("click", () => { Home.servers.restart(UI.managing.type, UI.managing.id) });
 
 find("div.splash").when("click", (e) => {
     if (e.target.classList.contains("splash")) {
@@ -377,31 +406,33 @@ find("button.button.self-logs-open").when("click", async () => {
 
 // Socket based refreshes
 Socket.on("start", (data) => {
+    console.log(data);
     let mode = document.body.getr("data-mode");
     if (mode == "config") {
         UI.showConfig();
-    } else if (mode == "edit") {
-        if (UI.editing.id == data.target) {
-            UI.showEdit(UI.editing.id);
+    } else if (mode == "manage") {
+        if (UI.managing.id == data.target && UI.managing.type == data.space) {
+            UI.showManage(UI.managing.type, UI.managing.id);
         }
     }
 });
 
 Socket.on("stop", (data) => {
+    console.log(data);
     let mode = document.body.getr("data-mode");
     if (mode == "config") {
         UI.showConfig();
-    } else if (mode == "edit") {
-        if (UI.editing.id == data.target) {
-            UI.showEdit(UI.editing.id);
+    } else if (mode == "manage") {
+        if (UI.managing.id == data.target && UI.managing.type == data.space) {
+            UI.showManage(UI.managing.type, UI.managing.id);
         }
     }
 });
 
 Socket.on("log", (data) => {
     let mode = document.body.getr("data-mode");
-    if (mode == "logs") {
-        if (UI.editing.id == data.target) {
+    if (mode == "manage") {
+        if (UI.managing.id == data.target && UI.managing.type == data.space) {
             UI.Components.logline(find("div.logs-canvas"), data.message);
         }
     }

@@ -81,6 +81,11 @@ input[type="text"]:focus {
     outline: none;
 }
 
+input[type="text"]:disabled {
+    color: #999999;
+    cursor: not-allowed;
+}
+
 .switch {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -236,13 +241,14 @@ div.manage:not([data-running]) button.button.editor.run {
     display: none;
 }
 
-a.editor.telegraph.alias {
+a.manage-telegraph-id {
     pointer-events: none;
-    color: white;
     text-decoration: none;
+    font-size: 2rem;
+    color: white;
 }
 
-div.manage[data-running] a.editor.telegraph.alias {
+div.manage[data-running] a.manage-telegraph-id {
     pointer-events: all;
     text-decoration: underline;
 }
@@ -251,11 +257,6 @@ div.manage-telegraph-type {
     font-style: italic;
     font-size: 2rem;
     color: #777777;
-}
-
-a.manage-telegraph-id {
-    font-size: 2rem;
-    color: white;
 }
 
 div.editor.staging {
