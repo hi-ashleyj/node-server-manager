@@ -228,11 +228,11 @@ div.server-line.cont[data-running] a.server-line.id {
     background-image: linear-gradient(135deg, #1e0033, #db188a);
 }
 
-div.edit[data-running] button.button.editor.nur {
+div.manage[data-running] button.button.editor.nur {
     display: none;
 }
 
-div.edit:not([data-running]) button.button.editor.run {
+div.manage:not([data-running]) button.button.editor.run {
     display: none;
 }
 
@@ -242,11 +242,21 @@ a.editor.telegraph.alias {
     text-decoration: none;
 }
 
-div.edit[data-running] a.editor.telegraph.alias {
+div.manage[data-running] a.editor.telegraph.alias {
     pointer-events: all;
     text-decoration: underline;
 }
 
+div.manage-telegraph-type {
+    font-style: italic;
+    font-size: 2rem;
+    color: #777777;
+}
+
+a.manage-telegraph-id {
+    font-size: 2rem;
+    color: white;
+}
 
 div.editor.staging {
     display: none;
@@ -262,8 +272,6 @@ div.editor.staging {
 div.editor.staging[data-active] {
     display: block;
 }
-
-
 
 div.file-line.cont {
     display: grid;
@@ -430,6 +438,14 @@ div.splash.server-editor[data-mode="edit"] div.title.edit-telegraph {
     display: block;
 }
 
+div.splash.server-editor[data-mode="create"] button.button.action.confirm-edit::after {
+    content: "Create"
+}
+
+div.splash.server-editor[data-mode="edit"] button.button.action.confirm-edit::after {
+    content: "Save"
+}
+
 button.self-logs-open {
     position: absolute;
     bottom: 1rem;
@@ -457,11 +473,7 @@ body[data-mode="broken"] div.logs-broken {
 }
 
 div.logs-runner {
-    display: none;
-}
-
-body[data-mode="console"] div.logs-runner {
-    display: block;
     padding-top: 1rem;
 }
+
 

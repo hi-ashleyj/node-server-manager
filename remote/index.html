@@ -13,34 +13,20 @@
             <div class="configcanvas"></div>
         </div>
 
-        <div class="edit">
-            Edit: <br />
-            <div class="editor inside server-line cont">
-                
-            </div><br />
-            <div class="editor staging">Changes Staged, Reboot Required</div>
-            <div style="text-align: center;">
-                
-            </div>
-            <br />
-            <button class="button editor return">Back</button>
-        </div>
-
         <div class="manage">
-            <div style="display: grid;">
+            <div style="display: grid; grid-template-columns: repeat(2, max-content) 1fr repeat(2, max-content); gap: 1rem; align-items: center;">
                 <button class="button action manager return">&lt;&nbsp;Back</button>
-            </div>
-            <br />
-            <div class="logs-canvas"></div>
-
-            <div style="display: grid; grid-template-columns: repeat(3, max-content); gap: 1rem; text-align: center;">
+                <div class="manage-telegraph-type"></div>
+                <a class="manage-telegraph-id"></a>
                 <button class="button editor nur start">Start</button>
                 <button class="button editor run stop">Stop</button>
                 <button class="button editor run restart">Restart</button>
             </div>
+            <br />
+            <div class="logs-canvas"></div>
 
             <div class="logs-runner">
-                <div style="display: grid; grid-template-columns: max-content max-content max-content max-content; align-items: center; gap: 0.5rem; padding-bottom: 2rem">
+                <div style="display: grid; grid-template-columns: max-content max-content max-content max-content; align-items: center; gap: 0.5rem; padding-bottom: 1rem">
                     <span>RUN COMMAND: </span>
                     <button style="font-family: 'Inconsolata';" class="button action logger runtime npm-ci-production">npm ci --production --no-optional</button>
                     <button style="font-family: 'Inconsolata';" class="button action logger runtime git-pull">git pull</button>
@@ -65,14 +51,14 @@
                 
                 <br />
                 <div style="text-align: right;">
-                    <button class="button action confirm-edit">Create</button>
+                    <button class="button action confirm-edit"></button>
                 </div>
             </div>
         </div>
 
         <div class="splash self-log">
             <div class="inside">
-                <div class="logs-broken">Process Broken. Logs below.</div>
+                <div class="logs-broken">A critical error has occured. Please provide the logs below to the developers, then restart NSM.</div>
                 <div class="logs-canvas-self"></div>
             </div>
         </div>

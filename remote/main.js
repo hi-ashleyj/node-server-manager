@@ -248,6 +248,8 @@ UI.showConfig = async function() {
     }
 };
 
+find("button.button.action.manager.return").when("click", UI.showConfig);
+
 UI.edit.updateInfo = async function (payload) {
     try {
         let sevn = await Home.servers.update(payload);
@@ -295,6 +297,12 @@ find("button.button.action.confirm-edit").when("click", UI.edit.read);
 
 UI.showManage = async function(type, id) {
     try {
+        let goals = await Home.servers.get(id);
+
+        find(".manage-telegraph-type").chng("innerText", type);
+        find(".manage-telegraph-id").chng("innerText", id);
+        find("a.manage-telegraph-id").chng("href", "http://" + window.location.hostname + ":" + ((type == "test") ? 30000 + goals.port : goals.port));
+
         let container = find("div.logs-canvas");
         let list = await Home.servers.logs(type, id);
 

@@ -520,15 +520,21 @@ Requests.path = function(req, res) {
     } else {
         // Test if this should be a redirect endpoint
         let id;
+        let type;
         for (var i in Manager.servers) {
-            if (parseIt.pathname == ("/" + Manager.servers[i].alias)) {
+            if (parseIt.pathname == ("/test/" + i)) {
                 id = i;
+                type = "test";
                 break;
+            }
+            if (parseIt.pathname == ("/production/" + i)) {
+                id = i;
+                type = "production"
             }
         }
 
         if (id) { // If it is
-            res.setHeader("Location", "http://" + req.headers.host + ":" + Manager.servers[id].port + "/");
+            res.setHeader("Location", "http://" + req.headers.host + ":" + (((type == "test") ? 30000 : 0) + Manager.servers[id].port) + "/");
             res.writeHead(307, http.STATUS_CODES[307]);
             res.end();
         } else { // If it isn't
