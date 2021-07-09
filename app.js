@@ -44,6 +44,7 @@ let remoteSend = async function(cl, type, data) {
 let Manager = {};
 Manager.servers = {};
 Manager.autoStartOnce = false;
+Manager.restartCounters = {};
 Manager.autoStart;
 Manager.broadcast;
 Manager.listServers;
@@ -67,6 +68,7 @@ let SpawnedServer = function(type, id, process, silent) {
     this.running = true;
     this.process = process;
     this.events = [];
+    this.isMisbehaving = true;
 
     this.on = function(type, call) {
         this.events.push({ type, call });
@@ -120,6 +122,10 @@ let SpawnedServer = function(type, id, process, silent) {
         if (!silent) {
             Manager.broadcast("stop", u.id, u.type);
         }
+
+        if (u.isMisbehaving) {
+            Manager.misbehaved(u);
+        }
     });
 
     this.process.on("error", (...args) => {
@@ -127,6 +133,7 @@ let SpawnedServer = function(type, id, process, silent) {
     });
 
     this.stop = function() {
+        u.isMisbehaving = false;
         u.process.kill();
     };
 
@@ -223,7 +230,7 @@ Manager.spawnServer = function(type, id) {
 
     let process = child_process.spawn("node", args, options);
 
-    Manager.runningServers[type][id] = new SpawnedServer(id, process);
+    Manager.runningServers[type][id] = new SpawnedServer(type, id, process);
     Manager.broadcast("start", id);
 };
 
@@ -382,12 +389,12 @@ Manager.runNPM = function(type, id, args) {
         
             let process = child_process.spawn(npmLoc, args, options);
 
-            let instance = new SpawnedServer(id, process);
+            let instance = new SpawnedServer(type, id, process);
 
             instance.on("stop", (code) => {
                 let logs = instance.log;
 
-                let res = { id: id, logs: logs, root: "npm" };
+                let res = { type, id, logs: logs, root: "npm" };
                 Manager.broadcast("script-complete", res);
                 resolve(res);
             });
@@ -395,7 +402,7 @@ Manager.runNPM = function(type, id, args) {
             instance.on("exit", (code) => {
                 let logs = instance.log;
 
-                let res = { id: id, logs: logs, root: "npm" };
+                let res = { type, id, logs: logs, root: "npm" };
                 Manager.broadcast("script-complete", res);
                 resolve(res);
             });
@@ -410,18 +417,18 @@ Manager.runGit = function(type, id, args) {
         if (args.length > 0) {
             let options = {};
         
-            options.cwd = path.resolve(rootFolder, type, "" + id);
+            options.cwd = path.resolve(rootFolder, type, (args.includes("clone")) ? ("") : ("" + id));
 
             let gitLoc = path.resolve(rootFolder, "git", "bin", "git.exe");
         
             let process = child_process.spawn(gitLoc, args, options);
 
-            let instance = new SpawnedServer(id, process);
+            let instance = new SpawnedServer(type, id, process);
 
             instance.on("stop", (code) => {
                 let logs = instance.log;
 
-                let res = { id: id, logs: logs, root: "git" };
+                let res = { type, id, logs: logs, root: "git" };
                 Manager.broadcast("script-complete", res);
                 resolve(res);
             });
@@ -429,7 +436,7 @@ Manager.runGit = function(type, id, args) {
             instance.on("exit", (code) => {
                 let logs = instance.log;
 
-                let res = { id: id, logs: logs, root: "git" };
+                let res = { type, id, logs: logs, root: "git" };
                 Manager.broadcast("script-complete", res);
                 resolve(res);
             });
@@ -437,6 +444,33 @@ Manager.runGit = function(type, id, args) {
             resolve(null);
         }
     }); 
+};
+
+Manager.misbehaved = function(server) {
+    let type = server.type;
+    let id = server.id;
+    let logs = server.log;
+
+    if (Manager.runningServers[type][id] == server && type == "production") {
+        if (!Manager.restartCounters[id]) Manager.restartCounters[id] = [];
+        Manager.restartCounters[id].push((new Date()).toISOString());
+
+        let fiveMinutesAgoish = (new Date()).valueOf() - (1000 * 60 * 5);
+
+        for (let i = Manager.restartCounters[id].length - 1; i >= 0; i--) {
+            if ((new Date(Manager.restartCounters[id][i])).valueOf() < fiveMinutesAgoish) {
+                Manager.restartCounters[id].splice(i, 1);
+            }
+        }
+
+        if (Manager.restartCounters[id].length < 3) {
+            window.setTimeout(() => { 
+                Manager.spawnServer(type, id);
+            }, 1000);
+        }
+
+        fs.writeFile(path.resolve(storeFolder, `log-${type}-${id}-${(new Date()).toISOString().replace(":", "-")}.txt`), `${logs.map((val) => { return val.type.toUpperCase() + " | " + val.data.split("\n").join("\n      ") }).join("\n")}`);
+    }
 };
 
 // --- HTTP STUFF --- //
@@ -507,7 +541,8 @@ Requests.path = function(req, res) {
 Requests.startServer = function(_req, res, data) {
     let body = JSON.parse(data.toString("utf8"));
     if (body.id) {
-        Manager.spawnServer(body.id);
+        Manager.spawnServer(body.type, body.id);
+        if (body.type == "production") Manager.restartCounters[body.id] = [];
         res.writeHead(200, http.STATUS_CODES[200]); 
         res.end();
     } else {
@@ -519,7 +554,7 @@ Requests.startServer = function(_req, res, data) {
 Requests.stopServer = function(_req, res, data) {
     let body = JSON.parse(data.toString("utf8"));
     if (body.id) {
-        Manager.stopServer(body.id).then(() => { 
+        Manager.stopServer(body.type, body.id).then(() => { 
             res.writeHead(200, http.STATUS_CODES[200]); 
             res.end(); 
         });

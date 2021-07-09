@@ -159,12 +159,12 @@ UI.fire = function(type, data) {
 
 UI.Components = {};
 
-UI.Components.serverbox = function(type, id, port) {
+UI.Components.serverbox = function(type, id) {
     let box = document.createElement("div");
     box.className = "serverbox-root " + type;
     box.innerText = type[0].toUpperCase() + type.slice(1).toLowerCase();
     box.attr("data-type", type).attr("data-id", id);
-    // box.href = "http://" + window.location.hostname + ":" + ((type == "test") ? port + 30000 : port);
+    box.when("click", UI.manageHandler)
     return box;
 };
 
@@ -174,7 +174,7 @@ UI.Components.serverLine = function(payload) {
     let aliasEL = document.createElement("a").chng("className", "server-line id").chng("type", "text").chng("innerText", payload.id).chng("href", "/" + payload.alias).chng("target", "_blank").chng("rel", "nofollow");
     let portEL = document.createElement("div").chng("className", "server-line port").chng("type", "text").chng("innerText", payload.port);
     let testBox = UI.Components.serverbox("test", payload.id, payload.port);
-    let productionBox = UI.Components.serverbox("production", payload.id, payload.port);
+    let productionBox = UI.Components.serverbox("production", payload.id);
     let editEL = document.createElement("button").chng("className", "button server-line edit").chng("innerText", "Edit").attr("data-id", payload.id);
     if (payload.running.test) {
         testBox.attr("data-running", true);
@@ -293,69 +293,59 @@ UI.edit.read = function() {
 
 find("button.button.action.confirm-edit").when("click", UI.edit.read);
 
-UI.showConfig();
-
-UI.showLogs = async function(id) {
+UI.showManage = async function(type, id) {
     try {
         let container = find("div.logs-canvas");
-        let list = await Home.servers.logs(id);
+        let list = await Home.servers.logs(type, id);
+
         container.innerHTML = "";
         for (let i in list) {
             UI.Components.logline(container, list[i]);
         }
-        document.body.attr("data-mode", "logs");
+
+        document.body.attr("data-mode", "manage");
     } catch (err) {
         console.err(err);
     }
 };
 
-UI.showManage = function() {
-    
-};
+UI.manageHandler = function(e) {
+    let type = e.target.getr("data-type");
+    let id = e.target.getr("data-id");
+    UI.showManage(type, id);
+}
 
-find("button.button.action.files.return").when("click", () => { 
-    if (UI.files.loc.length == 0) { 
-        UI.showEdit(UI.editing.id); 
-    } else { 
-        UI.files.loc.pop(); 
-        UI.files.show(UI.files.loc) 
-    } 
-});
-
-find("button.button.editor.start").when("click", () => { Home.servers.start(UI.editing.id) });
-find("button.button.editor.stop").when("click", () => { Home.servers.stop(UI.editing.id) });
-find("button.button.editor.restart").when("click", () => { Home.servers.restart(UI.editing.id) });
-
-find("button.button.editor.logs").when("click", () => { UI.showLogs(UI.editing.id) });
-find("button.button.editor.console").when("click", () => { UI.showLogs(UI.editing.id).then(() => { document.body.attr("data-mode", "console"); find("div.runtime-logs").innerHTML = ""; }); });
-
-find("button.button.action.upload.folder").when("click", () => {
-    find("div.splash.folder").attr("data-active", true);
-});
-
-find("button.button.action.logger.runtime.gotime").when("click", async () => {
-    let args = find("input.logger.runtime.console").value.split(" ");
-
-    if (find("div.runtime-logs").getr("data-thinking")) {
-        return;
-    }
-
+UI.runScript = async function(type, id, command) {
     try {
+        if (find("div.runtime-logs").getr("data-thinking")) return;
+
+        let spleet = command.split(" ");
+        if (!Home.script[spleet[0]]) return;
+
         let container = find("div.runtime-logs");
         find("input.logger.runtime.console").value = "";
         container.innerHTML = "";
+
         find("div.runtime-logs").attr("data-thinking", true);
-        let body = await Home.script.npm(UI.editing.id, args);
+
+        let body = await Home.script[spleet[0]](type, id, spleet.slice(1));
+
         find("div.runtime-logs").rmtr("data-thinking");
+
         let list = body.logs;
         console.log(list);
         for (let i in list) {
             UI.Components.logline(container, list[i]);
         }
+
     } catch (err) {
         console.err(err);
     }
-});
+};
+
+find("button.button.editor.start").when("click", () => { Home.servers.start(UI.editing.id) });
+find("button.button.editor.stop").when("click", () => { Home.servers.stop(UI.editing.id) });
+find("button.button.editor.restart").when("click", () => { Home.servers.restart(UI.editing.id) });
 
 find("div.splash").when("click", (e) => {
     if (e.target.classList.contains("splash")) {
@@ -408,3 +398,5 @@ Socket.on("log", (data) => {
         }
     }
 });
+
+UI.showConfig();

@@ -27,24 +27,24 @@
         </div>
 
         <div class="manage">
-            <div class="files-header" style="font-size: 2rem;">
-                <span class="editor telegraph id"></span>&nbsp;<span class="editor telegraph id subtitle"></span>
-            </div><br />
-            <button class="button action logger return">&lt;&nbsp;Back</button><br />
+            <div style="display: grid;">
+                <button class="button action manager return">&lt;&nbsp;Back</button>
+            </div>
             <br />
             <div class="logs-canvas"></div>
 
-            <div style="display: inline-grid; grid-template-columns: 1fr; gap: 1rem">
+            <div style="display: grid; grid-template-columns: repeat(3, max-content); gap: 1rem; text-align: center;">
                 <button class="button editor nur start">Start</button>
                 <button class="button editor run stop">Stop</button>
                 <button class="button editor run restart">Restart</button>
             </div>
 
             <div class="logs-runner">
-                <div style="display: grid; grid-template-columns: max-content max-content max-content; align-items: center; gap: 0.5rem; padding-bottom: 2rem">
+                <div style="display: grid; grid-template-columns: max-content max-content max-content max-content; align-items: center; gap: 0.5rem; padding-bottom: 2rem">
                     <span>RUN COMMAND: </span>
                     <button style="font-family: 'Inconsolata';" class="button action logger runtime npm-ci-production">npm ci --production --no-optional</button>
                     <button style="font-family: 'Inconsolata';" class="button action logger runtime git-pull">git pull</button>
+                    <button style="font-family: 'Inconsolata';" class="button action logger runtime git-clone">git clone &lt;repo&gt; &lt;id&gt;</button>
                 </div>
                 <div class="runtime-logs"></div>
             </div>
