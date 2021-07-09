@@ -133,18 +133,19 @@ let SpawnedServer = function(type, id, process, silent) {
     return this;
 };
 
-let documentsFolder = path.resolve(process.cwd(), "store");
+let rootFolder = path.resolve(__dirname, "..");
+let storeFolder = path.resolve(rootFolder, "store")
 
-if (!fsSync.existsSync(documentsFolder)) { // Create folders and default users
+if (!fsSync.existsSync(storeFolder)) { // Create folders and default users
     try {
-        fs.mkdir(documentsFolder).then(async function() {
-            await fs.writeFile(path.resolve(documentsFolder, "servers.json"), "{}");
+        fs.mkdir(storeFolder).then(async function() {
+            await fs.writeFile(path.resolve(storeFolder, "servers.json"), "{}");
         });
     } catch (_err) {
         
     }
 } else {
-    fs.readFile(path.resolve(documentsFolder, "servers.json"), {encoding: "utf8"}).then((data) => {
+    fs.readFile(path.resolve(storeFolder, "servers.json"), {encoding: "utf8"}).then((data) => {
         Manager.servers = JSON.parse(data);
         if (typeof Manager.autoStart == "function") {
             Manager.autoStart();
@@ -152,21 +153,21 @@ if (!fsSync.existsSync(documentsFolder)) { // Create folders and default users
     });
 }
 
-if (!fsSync.existsSync(path.resolve(process.cwd(), "test"))) {
+if (!fsSync.existsSync(path.resolve(rootFolder, "test"))) {
     try {
-        fs.mkdir(path.resolve(process.cwd(), "test"));
+        fs.mkdir(path.resolve(rootFolder, "test"));
     } catch (_err) { }
 }
 
-if (!fsSync.existsSync(path.resolve(process.cwd(), "production"))) {
+if (!fsSync.existsSync(path.resolve(rootFolder, "production"))) {
     try {
-        fs.mkdir(path.resolve(process.cwd(), "production"));
+        fs.mkdir(path.resolve(rootFolder,"production"));
     } catch (_err) { }
 }
 
 Manager.save = async function() {
     try {
-        await fs.writeFile(path.resolve(documentsFolder, "servers.json"), JSON.stringify(Manager.servers));
+        await fs.writeFile(path.resolve(storeFolder, "servers.json"), JSON.stringify(Manager.servers));
     } catch (err) {
         
     }
@@ -218,7 +219,7 @@ Manager.spawnServer = function(type, id) {
     args.push(Manager.servers[id].runfile);
     args.push("port:" + Manager.servers[id].port);
 
-    options.cwd = path.resolve(documentsFolder, "" + id);
+    options.cwd = path.resolve(rootFolder, type, "" + id);
 
     let process = child_process.spawn("node", args, options);
 
@@ -231,15 +232,15 @@ Manager.autoStart = function() {
         logxtra("Autostart stopped");
         return;
     } else {
-        logxtra("Autostarting " + Object.keys(Manager.servers).length + " server" + ((Object.keys(Manager.servers).length !== 1) ? "s" : ""));
+        logxtra("Autostarting " + Object.keys(Manager.servers).length + " production server" + ((Object.keys(Manager.servers).length !== 1) ? "s" : ""));
         Manager.autoStartOnce = true;
 
         for (let id in Manager.servers) {
             if (Manager.servers[id].runonboot) {
-                Manager.spawnServer(id);
-                logxtra("Starting server " + id);
+                Manager.spawnServer("production", id);
+                logxtra("Starting server \"" + id + "\"");
             } else {
-                logxtra("Didn't start server " + id);
+                logxtra("Didn't start server \"" + id + "\"");
             } 
         }
     }
@@ -248,18 +249,21 @@ Manager.autoStart = function() {
 Manager.newServer = async function(payload) {
     // payload is a server payload lol
 
-    if (payload && payload.id && payload.alias && payload.port) {
+    if (payload && payload.id && payload.port && payload.giturl) {
         let config = {
             id: payload.id,
             port: payload.port,
             runatboot: (payload.runatboot) ? true : false,
-            runfile: (payload.runfile) ? payload.runfile : "app.js"
+            runfile: (payload.runfile) ? payload.runfile : "app.js",
+            giturl: payload.giturl,
+            cloned: { test: false, production: false }
         }
 
         Manager.servers[config.id] = config;
 
         await Manager.save();
-        await fs.mkdir(path.resolve(documentsFolder, config.id));
+        await fs.mkdir(path.resolve(rootFolder, "test", config.id));
+        await fs.mkdir(path.resolve(rootFolder, "production", config.id));
 
         return config;
     } else {
@@ -278,9 +282,9 @@ Manager.updateServer = async function(payload) {
     }
 };
 
-Manager.listFiles = async function(id, loc) {
+Manager.listFiles = async function(type, id, loc) {
     try {
-        let sevn = await fs.readdir(path.resolve(documentsFolder, id, ...loc), { encoding: "utf8", withFileTypes: true });
+        let sevn = await fs.readdir(path.resolve(rootFolder, type, id, ...loc), { encoding: "utf8", withFileTypes: true });
         let output = { id: id, path: loc, files: []};
     
         for (let dirent of sevn) {
@@ -304,12 +308,12 @@ Manager.listFiles = async function(id, loc) {
     }
 };
 
-Manager.storeFile = async function(id, loc, dataBase64) {
+Manager.storeFile = async function(type, id, loc, dataBase64) {
     try {
         if (dataBase64 == "folder") {
-            await fs.mkdir(path.resolve(documentsFolder, id, ...loc));
+            await fs.mkdir(path.resolve(rootFolder, type, id, ...loc));
         } else {
-            await fs.writeFile(path.resolve(documentsFolder, id, ...loc), dataBase64, "base64");
+            await fs.writeFile(path.resolve(rootFolder, type, id, ...loc), dataBase64, "base64");
         }
 
         return await Manager.listFiles(id, loc.slice(0, -1));
@@ -318,13 +322,13 @@ Manager.storeFile = async function(id, loc, dataBase64) {
     }
 };
 
-Manager.removeFile = async function(id, loc) {
+Manager.removeFile = async function(type, id, loc) {
     try {
-        let stat = await fs.stat(path.resolve(documentsFolder, id, ...loc));
+        let stat = await fs.stat(path.resolve(rootFolder, type, id, ...loc));
         if (stat.isDirectory()) {
-            await fs.rmdir(path.resolve(documentsFolder, id, ...loc), {recursive: true});
+            await fs.rmdir(path.resolve(rootFolder, type, id, ...loc), {recursive: true});
         } else if (stat.isFile()) {
-            await fs.unlink(path.resolve(documentsFolder, id, ...loc));
+            await fs.unlink(path.resolve(rootFolder, type, id, ...loc));
         } else {
             throw "ERR|RMF: Fuck.";
         }
@@ -339,7 +343,10 @@ Manager.removeFile = async function(id, loc) {
 Manager.getServer = function(id) {
     if (id) {
         let work = Object.assign({}, Manager.servers[id]);
-        work.running = (Object.keys(Manager.runningServers).includes(id) && Manager.runningServers[id].running);
+        work.running = {
+            test: (Object.keys(Manager.runningServers.test).includes(id) && Manager.runningServers.test[id].running),
+            production: (Object.keys(Manager.runningServers.production).includes(id) && Manager.runningServers.production[id].running)
+        };
         return work;
     } else {
         return null;
@@ -349,14 +356,17 @@ Manager.getServer = function(id) {
 Manager.listServers = function() {
     let work = JSON.parse(JSON.stringify(Manager.servers));
     for (let id in work) {
-        work[id].running = (Object.keys(Manager.runningServers).includes(id) && Manager.runningServers[id].running);
+        work[id].running = {
+            test: (Object.keys(Manager.runningServers.test).includes(id) && Manager.runningServers.test[id].running),
+            production: (Object.keys(Manager.runningServers.production).includes(id) && Manager.runningServers.production[id].running)
+        };
     }
     return work;
 };
 
-Manager.getLogfile = function(id, temp) {
-    if (Manager.runningServers[id]) {
-        return Manager.runningServers[id].log;
+Manager.getLogfile = function(type, id, temp) {
+    if (Manager.runningServers[type][id]) {
+        return Manager.runningServers[type][id].log;
     }
     return [];
 };
@@ -366,9 +376,9 @@ Manager.runNPM = function(type, id, args) {
         if (args.length > 0) {
             let options = {};
         
-            options.cwd = path.resolve(process.cwd(), type, "" + id);
+            options.cwd = path.resolve(rootFolder, type, "" + id);
 
-            let npmLoc = path.resolve(process.cwd(), "node", "npm.cmd");
+            let npmLoc = path.resolve(rootFolder, "node", "npm.cmd");
         
             let process = child_process.spawn(npmLoc, args, options);
 
@@ -395,14 +405,14 @@ Manager.runNPM = function(type, id, args) {
     }); 
 };
 
-Manager.runGit = function(id, args) {
+Manager.runGit = function(type, id, args) {
     return new Promise(async (resolve, reject) => {
         if (args.length > 0) {
             let options = {};
         
-            options.cwd = path.resolve(process.cwd(), type, "" + id);
+            options.cwd = path.resolve(rootFolder, type, "" + id);
 
-            let gitLoc = path.resolve(process.cwd(), "git", "bin", "git.exe");
+            let gitLoc = path.resolve(rootFolder, "git", "bin", "git.exe");
         
             let process = child_process.spawn(gitLoc, args, options);
 
@@ -411,7 +421,7 @@ Manager.runGit = function(id, args) {
             instance.on("stop", (code) => {
                 let logs = instance.log;
 
-                let res = { id: id, logs: logs, root: "npm" };
+                let res = { id: id, logs: logs, root: "git" };
                 Manager.broadcast("script-complete", res);
                 resolve(res);
             });
@@ -419,7 +429,7 @@ Manager.runGit = function(id, args) {
             instance.on("exit", (code) => {
                 let logs = instance.log;
 
-                let res = { id: id, logs: logs, root: "npm" };
+                let res = { id: id, logs: logs, root: "git" };
                 Manager.broadcast("script-complete", res);
                 resolve(res);
             });
@@ -522,7 +532,7 @@ Requests.stopServer = function(_req, res, data) {
 Requests.restartServer = function(_req, res, data) {
     let body = JSON.parse(data.toString("utf8"));
     if (body.id) {
-        Manager.stopServer(body.id).then(() => { 
+        Manager.stopServer(body.type, body.id).then(() => { 
             setTimeout(() => {
                 Manager.spawnServer(body.id);
                 res.writeHead(200, http.STATUS_CODES[200]); 
@@ -538,7 +548,7 @@ Requests.restartServer = function(_req, res, data) {
 Requests.getLogs = function(_req, res, data) {
     let body = JSON.parse(data.toString("utf8"));
     if (body.id) {
-        let logs = Manager.getLogfile(body.id);
+        let logs = Manager.getLogfile(body.type, body.id);
         
         res.writeHead(200, http.STATUS_CODES[200]); 
         res.end(JSON.stringify(logs)); 
@@ -581,7 +591,7 @@ Requests.updateServer = async function(req, res, data) {
 
 Requests.listFiles = async function(req, res, data) {
     let body = JSON.parse(data.toString("utf8"));
-    let resss = await Manager.listFiles(body.id, body.path);
+    let resss = await Manager.listFiles(body.type, body.id, body.path);
 
     if (resss) {
         res.end(JSON.stringify(resss));
@@ -592,7 +602,7 @@ Requests.listFiles = async function(req, res, data) {
 
 Requests.uploadFile = async function(req, res, data) {
     let body = JSON.parse(data.toString("utf8"));
-    let resss = await Manager.storeFile(body.id, body.path, body.dataBase64);
+    let resss = await Manager.storeFile(body.type, body.id, body.path, body.dataBase64);
 
     if (resss) {
         res.end(JSON.stringify(resss));
@@ -603,7 +613,7 @@ Requests.uploadFile = async function(req, res, data) {
 
 Requests.deleteFile = async function(req, res, data) {
     let body = JSON.parse(data.toString("utf8"));
-    let resss = await Manager.removeFile(body.id, body.path);
+    let resss = await Manager.removeFile(body.type, body.id, body.path);
 
     if (resss) {
         res.end(JSON.stringify(resss));
@@ -614,7 +624,18 @@ Requests.deleteFile = async function(req, res, data) {
 
 Requests.runNPM = async function(req, res, data) {
     let body = JSON.parse(data.toString("utf8"));
-    let resss = await Manager.runNPM(body.id, body.args);
+    let resss = await Manager.runNPM(body.type, body.id, body.args);
+
+    if (resss) {
+        res.end(JSON.stringify(resss));
+    } else {
+        r403(res);
+    }
+};
+
+Requests.runGit = async function(req, res, data) {
+    let body = JSON.parse(data.toString("utf8"));
+    let resss = await Manager.runGit(body.type, body.id, body.args);
 
     if (resss) {
         res.end(JSON.stringify(resss));
@@ -690,6 +711,9 @@ let requestHandler = async function(req, res) {
             } else if (method == "runnpm") {
                 type = method;
                 callback = Requests.runNPM;
+            } else if (method == "rungit") {
+                type = method;
+                callback = Requests.runGit;
             } else if (method == "throwerror") {
                 res.end();
                 throw new Error("This is a test error.");

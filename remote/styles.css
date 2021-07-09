@@ -20,13 +20,13 @@ html, body {
 button.button {
     background-color: black;
     color: white;
-    border: 1px solid #1e1e1e;
-    border-radius: 3px;
+    border: 1px solid #555555;
+    border-radius: 1rem;
     filter: drop-shadow(0px 0px 5px black);
 
     transition-property: border, background-color;
     transition-duration: 0.25s;
-    padding: 0.5rem;
+    padding: 1rem;
 }
 
 .subtitle {
@@ -39,11 +39,11 @@ button.button:disabled {
 }
 
 button.button:hover:not(:disabled) {
-    border: 1px solid #555555;
+    border: 1px solid #777777;
 }
 
 button.button:focus:not(:disabled)  {
-    border: 1px solid #888888;
+    border: 1px solid #aaaaaa;
     outline: none;
 }
 
@@ -57,14 +57,14 @@ button.button.toggle[data-checked] {
 
 input[type="text"] {
     display: inline-block;
-    color: inherit;
-    background: none;
-    font-size: inherit;
+    color: white;
+    background: #000000;
+    font-size: 1rem;
     width: 100%;
     
-    border: none;
-    border-bottom: 2px solid #777777;
-    padding: 0.5rem;
+    border: 1px solid #777777;
+    border-radius: 1rem;
+    padding: 1rem;
 
     transition-duration: 0.35s;
     transition-property: border, color;
@@ -77,8 +77,48 @@ input[type="text"][data-error] {
 }
 
 input[type="text"]:focus {
-    border-bottom: 2px solid #ffffff;
+    border-color: #ffffff;
     outline: none;
+}
+
+.switch {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 4rem;
+    height: 2rem;
+    display: inline-block;
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    outline: none;
+    border: none;
+    margin: 0.5rem 0.5rem 0.5rem 0.5rem;
+    cursor: pointer;
+    background-color: #000000;
+    transition: background-color ease 0.3s;
+}
+  
+.switch:before {
+    content: " ";
+    display: block;
+    position: absolute;
+    z-index: 2;
+    width: 1.5rem;
+    height: 1.5rem;
+    background: #fff;
+    left: 0.25rem;
+    top: 0.25rem;
+    border-radius: 50%;
+    transition: all cubic-bezier(0.3, 1.5, 0.7, 1) 0.3s;
+}
+  
+.switch:checked {
+    background-color: #7700cc;
+}
+  
+.switch:checked:before {
+    left: 2.25rem;
 }
 
 div::-webkit-scrollbar {
@@ -98,7 +138,7 @@ div::-webkit-scrollbar-thumb {
 
 
 
-div.config, div.files, div.edit, div.logs {
+div.config, div.edit, div.manage, div.logs {
     width: 90vw;
     min-width: 400px;
     max-width: 1000px;
@@ -123,7 +163,7 @@ body[data-mode="edit"] div.edit {
     display: block;
 }
 
-body[data-mode="files"] div.files {
+body[data-mode="manage"] div.manage {
     display: block;
 }
 
@@ -135,16 +175,21 @@ body[data-mode="console"] div.logs {
     display: block;
 }
 
+button.big-create-button {
+    width: 100%;
+    background: #7700cc;
+}
+
 div.server-line.cont {
     padding: 1rem;
     margin-top: 1rem;
     margin-bottom: 1rem;
     border-radius: 1rem;
-    background-image: linear-gradient(135deg, black, rgb(55, 6, 35));
+    background: #222222;
     border: 1px solid #333333;
 
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     text-align: center; 
     align-items: center;
     gap: 1rem;
@@ -154,22 +199,32 @@ div.server-line.cont:not([data-id]):not(.editor) {
     background: #333333;
 }
 
-div.server-line.cont[data-running] {
-    background-image: linear-gradient(135deg, #1e0033, #db188a);
-}
-
-div.server-line.cont a.server-line.alias {
+div.server-line.cont a.server-line.id {
     pointer-events: none;
     color: white;
     text-decoration: none;
 }
 
-div.server-line.cont[data-running] a.server-line.alias {
+div.server-line.cont[data-running] a.server-line.id {
     pointer-events: all;
     text-decoration: underline;
 }
 
-div.edit[data-running] div.editor.server-line.cont {
+.serverbox-root {
+    background-color: black;
+    background-image: linear-gradient(135deg, black, rgb(55, 6, 35));
+    color: white;
+    border: 1px solid #1e1e1e;
+    border-radius: 1rem;
+    filter: drop-shadow(0px 0px 5px black);
+
+    transition-property: border, background-color;
+    transition-duration: 0.25s;
+    padding: 1rem;
+    cursor: pointer;
+}
+
+.serverbox-root[data-running] {
     background-image: linear-gradient(135deg, #1e0033, #db188a);
 }
 
@@ -361,6 +416,18 @@ div.splash > div.inside {
     div.splash > div.inside {
         width: 40vw;
     }
+}
+
+div.splash.server-editor div.title {
+    display: none;
+}
+
+div.splash.server-editor[data-mode="create"] div.title.create-telegraph {
+    display: block;
+}
+
+div.splash.server-editor[data-mode="edit"] div.title.edit-telegraph {
+    display: block;
 }
 
 button.self-logs-open {

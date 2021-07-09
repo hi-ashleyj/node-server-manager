@@ -9,94 +9,64 @@
     </head>
     <body data-mode="config">
         <div class="config">
-            <div class="addnew">
-                <div class="server-line cont">
-                    <input class="create server-line id" type="text" placeholder="ID">
-                    <input class="create server-line alias" type="text" placeholder="Alias">
-                    <input class="create server-line port" type="text" placeholder="Port">
-                    <button class="button toggle create server-line runonboot" data-checked="true">Run On Boot</button>
-                    <input class="create server-line runfile" type="text" placeholder="File to Run">
-                    <button class="button create server-line create">Create</button>
-                </div>
-            </div>
+            <button class="button big-create-button">&plus; New Server</button>
             <div class="configcanvas"></div>
         </div>
+
         <div class="edit">
-            <div style="font-size: 2rem;">
-                <a target="_blank" rel="nofollow" class="editor telegraph alias"></a>&nbsp;<span class="editor telegraph id subtitle"></span>
-            </div>
-            <br />
             Edit: <br />
             <div class="editor inside server-line cont">
-                <div class="editor id"></div>
-                <input class="editor alias" type="text" placeholder="Alias">
-                <input class="editor port" type="text" placeholder="Port">
-                <button class="button toggle editor runonboot">Run On Boot</button>
-                <input class="editor runfile" type="text" placeholder="File to Run">
-                <button class="button editor update">Update</button>
+                
             </div><br />
             <div class="editor staging">Changes Staged, Reboot Required</div>
             <div style="text-align: center;">
-                <div style="display: inline-grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem">
-                    <button class="button editor nur start">Start</button>
-                    <button class="button editor run stop">Stop</button>
-                    <button class="button editor nur fileman">Manage Files</button>
-                    <button class="button editor run restart">Restart</button>
-                    <button class="button editor nur console">Console</button>
-                    <button class="button editor run logs">View Logs</button>
-                    <button class="button editor nur delete" style="background-color: #990000;">Delete</button>
-                </div>
+                
             </div>
             <br />
             <button class="button editor return">Back</button>
         </div>
-        <div class="files">
+
+        <div class="manage">
             <div class="files-header" style="font-size: 2rem;">
-                <span class="editor telegraph alias"></span>&nbsp;<span class="editor telegraph id subtitle"></span>
-            </div>
-            <br />
-            <div class="loc-trace">
-                <button class="button action files return">&lt;&nbsp;Back</button>
-                <div style="display: inline-block; padding-left: 15px;">
-                    <span class="editor telegraph alias"></span> &gt; <span class="files-trace content"></span>
-                </div>
-            </div>
-            <br />
-            <br />
-            <div class="uploads-cont">
-                <button class="button action upload file">Upload File</button>
-                <button class="button action upload folder">New Folder</button>
-            </div>
-            <br />
-            <br />
-            <div class="files-canvas">
-                
-            </div>
-        </div>
-        <div class="logs">
-            <div class="files-header" style="font-size: 2rem;">
-                <span class="editor telegraph alias"></span>&nbsp;<span class="editor telegraph id subtitle"></span>
+                <span class="editor telegraph id"></span>&nbsp;<span class="editor telegraph id subtitle"></span>
             </div><br />
-            <button class="button action logger return">&lt;&nbsp;Return</button><br />
+            <button class="button action logger return">&lt;&nbsp;Back</button><br />
             <br />
             <div class="logs-canvas"></div>
+
+            <div style="display: inline-grid; grid-template-columns: 1fr; gap: 1rem">
+                <button class="button editor nur start">Start</button>
+                <button class="button editor run stop">Stop</button>
+                <button class="button editor run restart">Restart</button>
+            </div>
+
             <div class="logs-runner">
-                <div style="display: grid; grid-template-columns: max-content 1fr max-content; align-items: center; gap: 0.5rem; padding-bottom: 2rem">
-                    <span style="font-family: 'Inconsolata';">npm</span>
-                    <span><input type="text" class="logger runtime console" style="font-family: 'Inconsolata';" /></span>
-                    <button class="button action logger runtime gotime">&gt; &gt; &gt;</button>
+                <div style="display: grid; grid-template-columns: max-content max-content max-content; align-items: center; gap: 0.5rem; padding-bottom: 2rem">
+                    <span>RUN COMMAND: </span>
+                    <button style="font-family: 'Inconsolata';" class="button action logger runtime npm-ci-production">npm ci --production --no-optional</button>
+                    <button style="font-family: 'Inconsolata';" class="button action logger runtime git-pull">git pull</button>
                 </div>
                 <div class="runtime-logs"></div>
             </div>
         </div>
 
-        <div class="splash folder">
-            <div class="inside folder" style="text-align: right;">
-                <div style="font-size: 2rem; text-align: left;">Create Folder</div>
+        <div class="splash server-editor">
+            <div class="inside server-editor">
+                <div style="font-size: 2rem; text-align: left;" class="create-telegraph title">New Server</div>
+                <div style="font-size: 2rem; text-align: left;" class="edit-telegraph title">Edit Server</div>
                 <br />
-                <input type="text" class="input action create folder" style="width: 100%" placeholder="cool-name"/><br />
+                <div class="edit-grid" style="display: grid; grid-template-columns: max-content 1fr; width: 100%; gap: 0.5rem; align-items: center;">
+                    <div>ID</div><input class="editor id" type="text">
+                    <div>Port</div><input class="editor port" type="text">
+                    <div>Autostart Production Server</div><div style="text-align: right;"><input type="checkbox" class="switch editor runonboot" /></div>
+                    <div>File to Run</div><input class="editor runfile" type="text">
+                    <div>URL to Git Repository</div><input class="editor gitrepo" type="text">
+                </div>
+                
                 <br />
-                <button class="button action create folder">Create</button>
+                <div style="text-align: right;">
+                    <button class="button action confirm-edit">Create</button>
+                </div>
             </div>
         </div>
 
