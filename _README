@@ -10,15 +10,44 @@
 4. Copy a portable version of git to /git
 5. Copy a portable version of node to /node
 6. Run /app/install-packages.cmd (this should install all required packages for app to run)
-7. Run /app/install-service.cmd (this should add a windows service for NSM)
+7. Run /app/install-service.cmd as administrator - it will still run without, but will ask for permissions about six seperate times
 
- -- CONFIGURING USERS -- 
+ -- USER SETUP -- 
 
-1. Login with the default username/password of admin:admin
-2. Click on the user icon in the bottom right hand corner
+1. Login with the default username:password of admin:administrator
+2. Click on the user icon in the bottom left
 3. Use the prompts to create new users and assign them admin permissions
 4. Sign out and sign in again with a different admin account
 5. Remove the default admin account
+
+ -- CREATING USERS --
+
+Note: this requires being signed in with "Admin" permissions
+1. Click the users icon in the bottom left
+2. Choose the "Manage Users" option
+3. Choose New User at the top
+4. Give them a username (must be unique)
+6. Choose create
+7. The user account will be created with the default password "password". Instruct the user to login and change their password - reminder that the password is transmitted pre-hashed so it is private (mostly), but not transmitted over SSL, so a unique password should be used.
+
+ -- EDITING USERS -- 
+
+Note: this requires being signed in with "Admin" permissions
+1. Click the users icon in the bottom left
+2. Choose the "Manage Users" option
+
+ - TO CHANGE THE PERMISSIONS LEVEL OF A USER
+    3. Click the permissions dropdown for the user and choose their new permission level.
+    4. The Delete button will have changed to a save button. Click it to save the new data
+
+ - TO RESET THE PASSWORD FOR A USER
+    3. Click the reset password button for the user.
+    4. Click confirm
+    5. The user will be logged out. Instruct them to sign back in again using the default password "password", and then change it to something better.
+
+ - TO DELETE THE USER
+    3. Click the delete button for the user
+    4. Click confirm
 
  -- ADDING SERVERS -- 
 
@@ -29,4 +58,14 @@ Note: this requires being signed in with "Configure" permissions
 4. Choose whether this server is "always on" (or will run on boot) - this setting only affects the production instance
 5. Choose create
 
+ -- CONFIGURING SERVERS --
 
+Note: this requires being signed in with "Configure" permissions
+1. Select the add 
+
+
+ -- UNINSTALLING NSM --
+
+1. Visit the management console and stop all servers
+2. Run /app/uninstall-service.cmd as administrator - it will stop and uninstall the service.
+3. Nuke all the files (or don't, up to you)

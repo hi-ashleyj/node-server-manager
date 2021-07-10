@@ -2,7 +2,7 @@
 
 <html>
     <head>
-        <title>RPI - Web Server Manager</title>
+        <title>Node Server Manager</title>
         <link rel="stylesheet" href="fonts.css" />
         <link rel="stylesheet" href="styles.css" />
         <meta name="viewport" content="width=500, initial-scale=1">
@@ -34,6 +34,9 @@
                 </div>
                 <div class="runtime-logs"></div>
             </div>
+            <div class="anti-logs-runner" style="text-align: center;">
+                STOP SERVER TO RUN COMMANDS
+            </div>
         </div>
 
         <div class="splash server-editor">
@@ -60,6 +63,41 @@
             <div class="inside">
                 <div class="logs-broken">A critical error has occured. Please provide the logs below to the developers, then restart NSM.</div>
                 <div class="logs-canvas-self"></div>
+            </div>
+        </div>
+
+        <div class="splash users" data-page="login">
+            <div class="inside">
+                <div class="users-page login">
+                    <div style="font-size: 2rem;">Login</div>
+                    <br />
+                    <div class="user-login-error"></div>
+                    <div style="display: grid; grid-template-columns: max-content 1fr; align-items: center; gap: 1rem">
+                        <div>Username: </div><input type="text" class="input action users-login-username" />
+                        <div>Password: </div><input type="password" class="input action users-login-username" />
+                    </div>
+                    <br />
+                    <div style="text-align: center;">
+                        <button class="button action user-login-go">Login</button>
+                    </div>
+                </div>
+                <div class="users-page basic"></div>
+                <div class="users-page password"></div>
+                <div class="users-page manage"></div>
+                <div class="users-page create"></div>
+            </div>
+        </div>
+
+        <div class="splash confirm-dialog">
+            <div class="inside">
+                <div style="font-size: 2rem;">Confirm Action</div>
+                <br />
+                <div class="confirm-dialog-hint">Are you sure you wish to eat chicken?</div>
+                <br />
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr);">
+                    <button class="button action confirm-dialog-no">Cancel</button>
+                    <button class="button action confirm-dialog-yes">Confirm</button>
+                </div>
             </div>
         </div>
 

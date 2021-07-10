@@ -55,7 +55,7 @@ button.button.toggle[data-checked] {
     background: #7700cc;
 }
 
-input[type="text"] {
+input[type="text"], input[type="password"] {
     display: inline-block;
     color: white;
     background: #000000;
@@ -71,17 +71,17 @@ input[type="text"] {
     will-change: border, color;
 }
 
-input[type="text"][data-error] {
+input[type="text"][data-error], input[type="password"][data-error] {
     border-bottom: 2px solid #ff0000;
     color: red;
 }
 
-input[type="text"]:focus {
+input[type="text"]:focus, input[type="password"]:focus {
     border-color: #ffffff;
     outline: none;
 }
 
-input[type="text"]:disabled {
+input[type="text"]:disabled, input[type="password"]:disabled {
     color: #999999;
     cursor: not-allowed;
 }
