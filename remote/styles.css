@@ -241,6 +241,14 @@ div.manage:not([data-running]) button.button.editor.run {
     display: none;
 }
 
+div.manage[data-running] div.logs-runner {
+    display: none;
+}
+
+div.manage:not([data-running]) div.anti-logs-runner {
+    display: none;
+}
+
 a.manage-telegraph-id {
     pointer-events: none;
     text-decoration: none;
