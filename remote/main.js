@@ -125,6 +125,28 @@ Home.self.logs = async function() {
     });
 };
 
+
+let Auth = function() {
+
+};
+
+
+
+
+Auth.show = function(page) {
+    find("div.splash.users").attr("data-active", true);
+    if (page) find("div.splash.users").attr("data-page", page);
+    if (find("div.splash.users").getr("data-page", page) == "login") find("input.input.action.users-login-username").focus();
+};
+
+find("button.button.user-manage-open").when("click", () => {
+    Auth.show();
+});
+
+find("input.input.action.users-login-username").when("keydown", (e) => {
+    if (e.key.toLowerCase() == "enter") find("button.button.action.user-login-go").click();
+});
+
 let UI = {};
 UI.events = [];
 UI.editing;
@@ -383,6 +405,10 @@ UI.script.gitClone = function() {
 find("button.button.editor.start").when("click", () => { Home.servers.start(UI.managing.type, UI.managing.id) });
 find("button.button.editor.stop").when("click", () => { Home.servers.stop(UI.managing.type, UI.managing.id) });
 find("button.button.editor.restart").when("click", () => { Home.servers.restart(UI.managing.type, UI.managing.id) });
+
+find("button.button.action.logger.runtime.npm-ci-production").when("click", () => { UI.script.npmCIProduction() });
+find("button.button.action.logger.runtime.git-pull").when("click", () => { UI.script.gitPull() });
+find("button.button.action.logger.runtime.git-clone").when("click", () => { UI.script.gitClone() });
 
 find("div.splash").when("click", (e) => {
     if (e.target.classList.contains("splash")) {
