@@ -25,6 +25,13 @@ Auth.save = function() {
     }
 };
 
+Auth.getTokenFromHeaders = function(headers) {
+    if (!headers.authorization) return false;
+    let spleet = headers.authorization.split(" ");
+    if (spleet[0].toLowerCase() != "token") return false;
+    return spleet[1];
+};
+
 Auth.verify = function(token) {
     if (!Auth.tokens[token]) return false;
     let nowish = (new Date()).valueOf();
@@ -39,10 +46,19 @@ Auth.verify = function(token) {
     return Auth.tokens[token].username;
 };
 
+Auth.verifyHeaders = function(headers, accessNeeded) {
+    return Auth.verify(Auth.getTokenFromHeaders(headers), accessNeeded);
+};
+
 Auth.checkAccess = function(token, accessNeeded) {
     let username = Auth.verify(token);
     if (!username) return false;
+    if (!Auth.store[username]) return false;
     return (Auth.store[username].access >= accessNeeded);
+};
+
+Auth.checkHeaders = function(headers, accessNeeded) {
+    return Auth.checkAccess(Auth.getTokenFromHeaders(headers), accessNeeded);
 };
 
 Auth.issueToken = function(username) {
