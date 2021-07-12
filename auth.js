@@ -140,6 +140,8 @@ Auth.changePassword = function(username, old_password, new_password, repeat_pass
     Auth.store[username].salt = sha256(hugeNumber() + hugeNumber() + hugeNumber());
     Auth.store[username].hash = sha256(sha256(new_password) + Auth.store[username].salt);
 
+    Auth.revokeAllTokens(username);
+
     return null;
 };
 
@@ -149,6 +151,8 @@ Auth.resetPassword = function(username) {
     Auth.store[username].salt = sha256(hugeNumber() + hugeNumber() + hugeNumber());
     Auth.store[username].hash = sha256(sha256(sha256("password")) + Auth.store[username].salt);
 
+    Auth.revokeAllTokens(username);
+    
     return null;
 };
 

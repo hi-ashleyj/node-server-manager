@@ -240,7 +240,7 @@ Manager.autoStart = function() {
         logxtra("Autostart stopped");
         return;
     } else {
-        logxtra("Autostarting " + Object.keys(Manager.servers).length + " production server" + ((Object.keys(Manager.servers).length !== 1) ? "s" : ""));
+        logxtra("Found " + Object.keys(Manager.servers).length + " production server" + ((Object.keys(Manager.servers).length !== 1) ? "s" : ""));
         Manager.autoStartOnce = true;
 
         for (let id in Manager.servers) {
@@ -543,6 +543,95 @@ Requests.path = function(req, res) {
             res.end();
         }
     }
+};
+
+Requests.Users = {};
+
+Requests.Users.login = function(_req, res, data) {
+    let { username, password } = JSON.parse(data.toString());
+    let response = Auth.login(username, password);
+
+    res.end(JSON.stringify(response));
+};
+
+Requests.Users.logout = function(req, res, data) {
+    let token = Auth.getTokenFromHeaders(req.headers);
+    Auth.revokeToken(token);
+
+    res.writeHead(204, http.STATUS_CODES[204]);
+    res.end();
+};
+
+Requests.Users.verify = function(req, res, data) {
+    let username = Auth.verifyHeaders(req.headers);
+    if (username) {
+        res.end(JSON.stringify({ username }));
+        return;
+    }
+
+    res.writeHead(404, http.STATUS_CODES[404]);
+    res.end();
+};
+
+Requests.Users.create = function(req, res, data) {
+    if (!Auth.checkHeaders(req.headers, 20)) { r403(res); return; }
+    let payload = JSON.parse(data.toString());
+
+};
+
+Requests.Users.changePassword = function(req, res, _data) {
+    let username = Auth.verifyHeaders(req.headers);
+    let { old_password, new_password, repeat_password } = JSON.parse(data.toString());
+    let error = Auth.changePassword(username, old_password, new_password, repeat_password);
+
+    if (error) {
+        res.end(JSON.stringify({ error }));
+    } else {
+        res.end(JSON.stringify({ error: null }));
+    }
+};
+
+Requests.Users.resetPassword = function(_req, res, data) {
+    let { access, username } = JSON.parse(data.toString());
+    
+    if (!Auth.checkHeaders(req.headers, 20)) { r403(res); return; }
+
+    Auth.edit(username, access);
+    res.end();
+};
+
+Requests.Users.edit = function(_req, res, data) {
+    let payload = JSON.parse(data.toString());
+    
+};
+
+Requests.Users.delete = function(_req, res, data) {
+    let { username } = JSON.parse(data.toString());
+    
+    if (!Auth.checkHeaders(req.headers, 20)) { r403(res); return; }
+
+    Auth.delete(username);
+    res.end();
+};
+
+Requests.Users.get = function(req, res, data) {
+    let payload = JSON.parse(data.toString());
+
+    if (Auth.checkHeaders(req.headers, 20) || Auth.verifyHeaders(req.headers) === payload.username) {
+        res.end(JSON.stringify(Auth.get(payload.username)));
+        return;
+    }
+    
+    r403(res);
+};
+
+Requests.Users.list = function(req, res, _data) {
+    if (Auth.checkHeaders(req.headers, 20)) {
+        res.end(JSON.stringify(Auth.list));
+        return;
+    }
+    
+    r403(res);
 };
 
 Requests.startServer = function(_req, res, data) {
