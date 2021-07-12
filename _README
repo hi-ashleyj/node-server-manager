@@ -61,8 +61,35 @@ Note: this requires being signed in with "Configure" permissions
  -- CONFIGURING SERVERS --
 
 Note: this requires being signed in with "Configure" permissions
-1. Select the add 
+1. Select the edit button for the corresponding server
+2. Adjust the settings
+3. Click save
+4. If either of the test or production environments are running, you should restart them for changes (such as port number) to take effect
 
+ -- START / STOP / RESTART SERVERS --
+
+Note: this requires being signed in with "Manage" permissions
+1. Select either the test or production environments for the server
+
+ - IF THE SERVER IS RUNNING
+   2. The Stop and Restart buttons will be displayed in the top right. Choose whichever option is applicable
+
+ - IF THE SERVER IS STOPPED
+   2. The Start button will be displayed. Click it to start the server.
+
+ -- MIGRATING / UPDATING SERVERS --
+
+Note: this requires being signed in with "Configure" permissions
+1. Select either the test or production environments for the server
+2. If the environment is running, stop it in order to view the list of commands
+
+ - LOADING SOURCE CODE (FIRST TIME)
+   3. Choose `git clone` to pull the source code down from the configured repository
+   4. Choose `npm ci --production --no-optional` to install packages and dependencies
+
+ - UPDATING SOURCE CODE (SUBSEQUENT TIMES)
+   3. Choose `git pull` to pull changes down from the repository. Note: after cloning, changing the repository on the web console does not update the repository remote
+   4. If packages have changed, run `npm ci --production --no-optional` to reinstall packages and dependencies
 
  -- UNINSTALLING NSM --
 
