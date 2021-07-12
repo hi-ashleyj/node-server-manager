@@ -369,7 +369,7 @@ div.runtime-logs[data-thinking] {
 div.logs-line.rooter {
     display: grid;
     grid-template-columns: max-content 1fr;
-    align-items: center;
+    align-items: top;
     font-family: 'Inconsolata', monospace;
     color: white;
 }
@@ -455,12 +455,19 @@ div.splash.server-editor[data-mode="edit"] button.button.action.confirm-edit::af
     content: "Save"
 }
 
-button.self-logs-open {
+div.floating-buttons {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
     position: absolute;
+    left: 1rem;
     bottom: 1rem;
+    z-index: 2;
+}
+
+button.self-logs-open {
     padding: 1.5rem;
     border-radius: 50%;
-    left: 1rem;
     height: 1rem;
     width: 1rem;
     border: none !important;
@@ -468,7 +475,18 @@ button.self-logs-open {
     background-size: 50% 50%;
     background-repeat: no-repeat;
     background-position: center center;
-    z-index: 2;
+}
+
+button.user-manage-open {
+    padding: 1.5rem;
+    border-radius: 50%;
+    height: 1rem;
+    width: 1rem;
+    border: none !important;
+    background-image: url("/svg/user.svg");
+    background-size: 50% 50%;
+    background-repeat: no-repeat;
+    background-position: center center;
 }
 
 div.logs-broken {

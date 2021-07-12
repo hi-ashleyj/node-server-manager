@@ -465,12 +465,12 @@ Manager.misbehaved = function(server) {
         }
 
         if (Manager.restartCounters[id].length < 3) {
-            window.setTimeout(() => { 
+            setTimeout(() => { 
                 Manager.spawnServer(type, id);
             }, 1000);
         }
 
-        fs.writeFile(path.resolve(storeFolder, `log-${type}-${id}-${(new Date()).toISOString().replace(":", "-")}.txt`), `${logs.map((val) => { return val.type.toUpperCase() + " | " + val.data.split("\n").join("\n      ") }).join("\n")}`);
+        fs.writeFile(path.resolve(storeFolder, `log-${type}-${id}-${(new Date()).toISOString().split(":").join("-")}.txt`), `${logs.map((val) => { return val.type.toUpperCase() + " | " + val.data.split("\n").join("\n      ") }).join("\n")}`);
     }
 };
 
