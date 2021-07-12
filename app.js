@@ -6,7 +6,6 @@ let url = require("url");
 let http = require("http");
 let child_process = require("child_process");
 let ws = require("ws");
-const { parse } = require("path");
 let ownLogs = [];
 let criticalException = false;
 
@@ -141,7 +140,7 @@ let SpawnedServer = function(type, id, process, silent) {
 };
 
 let rootFolder = path.resolve(__dirname, "..");
-let storeFolder = path.resolve(rootFolder, "store")
+let storeFolder = path.resolve(rootFolder, "store");
 
 if (!fsSync.existsSync(storeFolder)) { // Create folders and default users
     try {
@@ -171,6 +170,8 @@ if (!fsSync.existsSync(path.resolve(rootFolder, "production"))) {
         fs.mkdir(path.resolve(rootFolder,"production"));
     } catch (_err) { }
 }
+
+let Auth = require("./auth.js")(storeFolder);
 
 Manager.save = async function() {
     try {
