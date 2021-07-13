@@ -19,6 +19,16 @@ let logxtra = function(...line) {
     console.log(...line);
 };
 
+let logerror = function(...line) {
+    for (let lx of line) {
+        ownLogs.push({type: "err", data: lx});
+    }
+    while (ownLogs.length > 100) {
+        ownLogs.shift();
+    }
+    console.error(...line);
+};
+
 let r403 = function(res) {
     res.writeHead(403, http.STATUS_CODES[403]);
     res.end();
@@ -508,12 +518,12 @@ Requests.path = function(req, res) {
     
             stream.on("error", () => {
                 res.statusCode = 404;
-                logxtra("ERR|UNK: HSRV 404");
+                logxtra(`app.js/path: Wrote error 404 in response to ${req.url}`);
                 res.end("Not Found");
             });
         } catch {
             res.statusCode = 404;
-            logxtra("ERR|UNK: HSRV 404");
+            logxtra(`app.js/path: Wrote error 404 in response to ${req.url}`);
             res.end("Not Found");
         }
         
@@ -539,7 +549,7 @@ Requests.path = function(req, res) {
             res.writeHead(307, http.STATUS_CODES[307]);
             res.end();
         } else { // If it isn't
-            res.writeHead(404, http.STATUS_CODES[404]);
+            logxtra(`app.js/path: Wrote error 404 in response to ${req.url}`);
             res.end();
         }
     }
@@ -788,7 +798,7 @@ Requests.selfLogs = function(_req, res, _data) {
 let requestHandler = async function(req, res) {
     let parseIt = url.parse(req.url, true);
 
-    let type = "400";
+    let type = 400;
     let callback;
 
     if (req.method == "GET" && !parseIt.search) {
@@ -796,88 +806,67 @@ let requestHandler = async function(req, res) {
         Requests.path(req, res);
     } else if (parseIt.query !== null && typeof parseIt.query == "object" && Object.keys(parseIt.query).length > 0) {
         // This is a server method
-        type = "501";
         let method = parseIt.query.method;
+        type = method;
 
         if (req.method == "POST") {
             // Always use post for server functions
-            if (method == "ownlogs") {
-                type = method;
-                callback = Requests.selfLogs;
-            } else if (criticalException) {
-                type = "except";
-                callback = () => {};
-                res.writeHead(418, http.STATUS_CODES[418]);
-                res.end(JSON.stringify({ error: "ERR|CRT", message: "Main Process encountered a critical exception", logs: ownLogs }));
-            } else if (method == "newserver") {
-                type = method;
-                callback = Requests.newServer;
-            } else if (method == "getserver") {
-                type = method;
-                callback = Requests.getServer;
-            } else if (method == "list") {
-                type = method;
-                callback = Requests.listServers;
-            } else if (method == "new") {
-                type = method;
-                callback = Requests.newServer;
-            } else if (method == "update") {
-                type = method;
-                callback = Requests.updateServer;
-            } else if (method == "listfiles") {
-                type = method;
-                callback = Requests.listFiles;
-            } else if (method == "uploadfile") {
-                type = method;
-                callback = Requests.uploadFile;
-            } else if (method == "deletefile") {
-                type = method;
-                callback = Requests.deleteFile;
-            } else if (method == "start") {
-                type = method;
-                callback = Requests.startServer;
-            } else if (method == "stop") {
-                type = method;
-                callback = Requests.stopServer;
-            } else if (method == "restart") {
-                type = method;
-                callback = Requests.restartServer;
-            } else if (method == "serverlog") {
-                type = method;
-                callback = Requests.getLogs;
-            } else if (method == "runnpm") {
-                type = method;
-                callback = Requests.runNPM;
-            } else if (method == "rungit") {
-                type = method;
-                callback = Requests.runGit;
-            } else if (method == "throwerror") {
-                res.end();
-                throw new Error("This is a test error.");
-            } 
+            if (criticalException) {
+                if (method == "ownlogs") {
+                    callback = Requests.selfLogs;
+                } else {
+                    type = 418;
+                    callback = (_req, res, _data) => { res.end(JSON.stringify({ error: "ERR|CRT", message: "Main Process encountered a critical exception", logs: ownLogs })) };
+                }
+            } else {
+                switch (method) {
+                    case ("ownlogs"): callback = Requests.selfLogs; break;
+                    case ("newserver"): callback = Requests.newServer; break;
+                    case ("getserver"): callback = Requests.getServer; break;
+                    case ("list"): callback = Requests.listServers; break;
+                    case ("new"): callback = Requests.newServer; break;
+                    case ("update"): callback = Requests.updateServer; break;
+                    case ("listfiles"): callback = Requests.listFiles; break;
+                    case ("uploadfile"): callback = Requests.uploadFile; break;
+                    case ("deletefile"): callback = Requests.deleteFile; break;
+                    case ("start"): callback = Requests.startServer; break;
+                    case ("stop"): callback = Requests.stopServer; break;
+                    case ("restart"): callback = Requests.restartServer; break;
+                    case ("serverlog"): callback = Requests.getLogs; break;
+                    case ("runnpm"): callback = Requests.runNPM; break;
+                    case ("rungit"): callback = Requests.runGit; break;
+                    case ("throwerror"): callback = (_req, res) => { res.end(); throw new Error("This is a test error.") }; break;
+                    case ("runnpm"): callback = Requests.runNPM; break;
+                    case ("user-create"): callback = Requests.Users.create; break;
+                    case ("user-get"): callback = Requests.Users.get; break;
+                    case ("user-list"): callback = Requests.Users.list; break;
+                    case ("user-edit"): callback = Requests.Users.edit; break;
+                    case ("user-delete"): callback = Requests.Users.delete; break;
+                    case ("user-login"): callback = Requests.Users.login; break;
+                    case ("user-logout"): callback = Requests.Users.logout; break;
+                    case ("user-password-change"): callback = Requests.Users.changePassword; break;
+                    case ("user-password-reset"): callback = Requests.Users.resetPassword; break;
+                    case ("user-verify"): callback = Requests.Users.verify; break;
+                    default: type = 400; 
+                }
+            }
         }
-
-        if (type !== "501") {
-            let buffer = Buffer.from([]);
-            req.on("data", (chunk) => {
-                buffer = Buffer.concat([buffer, chunk]);
-            });
-            req.on("end", (e) => {
-                callback(req, res, buffer);
-            });
-        }
-    } 
-    
-    if (type == "400") {
-        res.writeHead(400, http.STATUS_CODES[400]);
-        logxtra("ERR|UNK: MALFORMED");
-        res.end();
     }
+    
+    if (type == "page")  return;
 
-    if (type == "501") {
-        res.writeHead(501, http.STATUS_CODES[501]);
-        logxtra("ERR|UNK: IDK REQ");
+    if (typeof type == "number") {
+        res.writeHead(type, http.STATUS_CODES[type]);
         res.end();
+        logerror(`app.js/requestHandler: Wrote error ${type} in response to ${req.url}`);
+    } else {
+        let buffer = Buffer.from([]);
+        req.on("data", (chunk) => {
+            buffer = Buffer.concat([buffer, chunk]);
+        });
+        req.on("end", (e) => {
+            callback(req, res, buffer);
+        });
     }
 };
 

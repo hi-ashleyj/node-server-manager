@@ -37,7 +37,10 @@ Comms.post = function(method, body) {
         request.open("POST", Comms.connection + "?method=" + method);
         request.addEventListener("load", () => {
             let body = JSON.parse((request.responseText.length == 0) ? "{}" : request.responseText);
-            if (body.error) {
+            if (request.status == 403) {
+                Comms.error403();
+                resolve();
+            } if (request.status == 418) {
                 Comms.fire("broken");
                 reject(418);
             } else {

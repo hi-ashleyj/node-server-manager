@@ -1,8 +1,22 @@
+let Users = {};
+Users.cache = null;
+
+Users.handleStartup = function() {
+    
+};
+
+Users.handle403 = function() {
+
+};
+
+Comms.error403 = Users.handle403;
+
 let Home = {};
 Home.servers = {};
 Home.files = {};
 Home.self = {};
 Home.script = {};
+Home.users = {};
 
 Home.servers.list = async function() {
     return new Promise(async (resolve, reject) => {
