@@ -4,6 +4,8 @@ Comms.events = [];
 Comms.on = function(type, call) {
     Comms.events.push({ type, call });
 };
+Comms.error403;
+Comms.token;
 
 Comms.fire = function(type, data) {
     for (let i in Comms.events) {
@@ -23,6 +25,9 @@ Comms.get = function(method, body) {
         request.addEventListener("error", () => {
             reject(request.status);
         });
+        if (Comms.token) {
+            request.setRequestHeader("Authorization", `Token ${Comms.token}`);
+        }
         if (body) {
             request.send(body);
         } else {
@@ -50,6 +55,9 @@ Comms.post = function(method, body) {
         request.addEventListener("error", () => {
             reject(request.status);
         });
+        if (Comms.token) {
+            request.setRequestHeader("Authorization", `Token ${Comms.token}`);
+        }
         if (body) {
             request.send(body);
         } else {

@@ -1,12 +1,19 @@
 let Users = {};
 Users.cache = null;
 
-Users.handleStartup = function() {
-    
+Users.setUserState = function(permissionLevel) {
+    document.body.rmtr("data-perm-manage").rmtr("data-perm-configure", true).rmtr("data-perm-admin", true);
+    if (typeof permissionLevel != "number") return;
+
+    if (permissionLevel >= 0) document.body.attr("data-perm-manage", true);
+    if (permissionLevel >= 10) document.body.attr("data-perm-configure", true);
+    if (permissionLevel >= 20) document.body.attr("data-perm-admin", true);
 };
 
 Users.handle403 = function() {
-
+    Users.setUserState();
+    find("div.splash.users").attr("data-active", true).attr("data-page", "login");
+    window.localStorage.removeItem("nsm-login-token");
 };
 
 Comms.error403 = Users.handle403;
@@ -18,7 +25,7 @@ Home.self = {};
 Home.script = {};
 Home.users = {};
 
-Home.servers.list = async function() {
+Home.servers.list = function() {
     return new Promise(async (resolve, reject) => {
         try {
             let servers = JSON.parse(await Comms.post("list", {}));
@@ -29,7 +36,7 @@ Home.servers.list = async function() {
     });
 };
 
-Home.servers.get = async function(id) {
+Home.servers.get = function(id) {
     return new Promise(async (resolve, reject) => {
         try {
             let servers = JSON.parse(await Comms.post("getserver", JSON.stringify({id: id})));
@@ -40,7 +47,7 @@ Home.servers.get = async function(id) {
     });
 };
 
-Home.servers.update = async function(payload) {
+Home.servers.update = function(payload) {
     return new Promise(async (resolve, reject) => {
         try {
             let servers = JSON.parse(await Comms.post("update", JSON.stringify(payload)));
@@ -51,7 +58,7 @@ Home.servers.update = async function(payload) {
     });
 };
 
-Home.servers.new = async function(payload) {
+Home.servers.new = function(payload) {
     return new Promise(async (resolve, reject) => {
         try {
             let servers = JSON.parse(await Comms.post("new", JSON.stringify(payload)));
@@ -62,7 +69,7 @@ Home.servers.new = async function(payload) {
     });
 };
 
-Home.servers.start = async function(type, id) {
+Home.servers.start = function(type, id) {
     return new Promise(async (resolve, reject) => {
         try {
             await Comms.post("start", JSON.stringify({ type, id }));
@@ -73,7 +80,7 @@ Home.servers.start = async function(type, id) {
     });
 };
 
-Home.servers.stop = async function(type, id) {
+Home.servers.stop = function(type, id) {
     return new Promise(async (resolve, reject) => {
         try {
             await Comms.post("stop", JSON.stringify({ type, id }));
@@ -84,7 +91,7 @@ Home.servers.stop = async function(type, id) {
     });
 };
 
-Home.servers.restart = async function(type, id) {
+Home.servers.restart = function(type, id) {
     return new Promise(async (resolve, reject) => {
         try {
             await Comms.post("restart", JSON.stringify({ type, id }));
@@ -95,7 +102,7 @@ Home.servers.restart = async function(type, id) {
     });
 }
 
-Home.servers.logs = async function(type, id) {
+Home.servers.logs = function(type, id) {
     return new Promise(async (resolve, reject) => {
         try {
             let logs = JSON.parse(await Comms.post("serverlog", JSON.stringify({ type, id })));
@@ -106,7 +113,7 @@ Home.servers.logs = async function(type, id) {
     });
 };
 
-Home.script.npm = async function(type, id, args) {
+Home.script.npm = function(type, id, args) {
     return new Promise(async (resolve, reject) => {
         try {
             let logs = JSON.parse(await Comms.post("runnpm", JSON.stringify({ type, id, args: args })));
@@ -117,7 +124,7 @@ Home.script.npm = async function(type, id, args) {
     });
 };
 
-Home.script.git = async function(type, id, args) {
+Home.script.git = function(type, id, args) {
     return new Promise(async (resolve, reject) => {
         try {
             let logs = JSON.parse(await Comms.post("rungit", JSON.stringify({ type, id, args: args })));
@@ -128,7 +135,7 @@ Home.script.git = async function(type, id, args) {
     });
 };
 
-Home.self.logs = async function() {
+Home.self.logs = function() {
     return new Promise(async (resolve, reject) => {
         try {
             let logs = JSON.parse(await Comms.post("ownlogs", ""));
@@ -139,11 +146,126 @@ Home.self.logs = async function() {
     });
 };
 
+Home.users.login = function(username, password) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let result = JSON.parse(await Comms.post("user-login", JSON.stringify({ username, password: window.sha256(password) })));
+            resolve(result);
+        } catch (err) {
+            resolve({});
+        }
+    });
+};
 
-let Auth = function() {
+Home.users.logout = function() {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let result = JSON.parse(await Comms.post("user-logout", ""));
+            resolve(result);
+        } catch (err) {
+            resolve({});
+        }
+    });
+};
+
+Home.users.verify = function() {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let result = JSON.parse(await Comms.post("user-verify", ""));
+            resolve(result);
+        } catch (err) {
+            resolve({});
+        }
+    });
+};
+
+Home.users.create = function(username, access) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let result = JSON.parse(await Comms.post("user-create", JSON.stringify({ username, access })));
+            resolve(result);
+        } catch (err) {
+            resolve({});
+        }
+    });
+};
+
+Home.users.changePassword = function(old_password, new_password, repeat_password) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let result = JSON.parse(await Comms.post("user-password-change", JSON.stringify({ old_password, new_password, repeat_password })));
+            resolve(result);
+        } catch (err) {
+            resolve({});
+        }
+    });
 
 };
 
+Home.users.resetPassword = function(username) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let result = JSON.parse(await Comms.post("user-password-reset", JSON.stringify({ username })));
+            resolve(result);
+        } catch (err) {
+            resolve({});
+        }
+    });
+};
+
+Home.users.edit = function(username, access) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let result = JSON.parse(await Comms.post("user-edit", JSON.stringify({ username, access })));
+            resolve(result);
+        } catch (err) {
+            resolve({});
+        }
+    });
+};
+
+Home.users.delete = function() {
+    return new Promise(async (resolve, reject) => { resolve() });
+};
+
+
+Home.users.get = async function(username) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let result = JSON.parse(await Comms.post("user-get", JSON.stringify({ username })));
+            resolve(result);
+        } catch (err) {
+            resolve({});
+        }
+    });
+};
+
+Home.users.list = async function() {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let result = JSON.parse(await Comms.post("user-get", ""));
+            resolve(result);
+        } catch (err) {
+            resolve({});
+        }
+    });
+};
+
+Users.handleStartup = async function() {
+    let token = window.localStorage.getItem("nsm-login-token");
+    if (token) {
+        Comms.token = token;
+        let { username } = await Home.users.verify();
+
+        if (username) {
+            let { access } = await Home.users.get("@");
+            Users.setUserState(access);
+        } else {
+            Comms.token = null;
+            Users.setUserState();
+        }
+    }
+};
 
 
 

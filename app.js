@@ -572,7 +572,7 @@ Requests.Users.logout = function(req, res, data) {
     res.end();
 };
 
-Requests.Users.verify = function(req, res, data) {
+Requests.Users.verify = function(req, res, _data) {
     let username = Auth.verifyHeaders(req.headers);
     if (username) {
         res.end(JSON.stringify({ username }));
