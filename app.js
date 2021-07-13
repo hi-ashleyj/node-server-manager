@@ -633,8 +633,12 @@ Requests.Users.delete = function(req, res, data) {
 Requests.Users.get = function(req, res, data) {
     let payload = JSON.parse(data.toString());
 
-    if (Auth.checkHeaders(req.headers, 20) || Auth.verifyHeaders(req.headers) === payload.username) {
-        res.end(JSON.stringify(Auth.get(payload.username)));
+    let askingUser = Auth.verifyHeaders(req.headers);
+
+    if (!askingUser) { r403(res); return; }
+
+    if (payload.username == "@" || Auth.checkHeaders(req.headers, 20) || (askingUser == payload.username)) {
+        res.end(JSON.stringify(Auth.get((payload.username == "@") ? askingUser : payload.username)));
         return;
     }
     
