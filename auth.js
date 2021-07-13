@@ -128,6 +128,7 @@ Auth.create = function(username, access) {
     }
 
     Auth.store[username] = uobj;
+    Auth.save();
     return null;
 };
 
@@ -141,6 +142,7 @@ Auth.changePassword = function(username, old_password, new_password, repeat_pass
     Auth.store[username].hash = sha256(sha256(new_password) + Auth.store[username].salt);
 
     Auth.revokeAllTokens(username);
+    Auth.save();
 
     return null;
 };
@@ -152,6 +154,7 @@ Auth.resetPassword = function(username) {
     Auth.store[username].hash = sha256(sha256(sha256("password")) + Auth.store[username].salt);
 
     Auth.revokeAllTokens(username);
+    Auth.save();
     
     return null;
 };
@@ -160,6 +163,7 @@ Auth.edit = function(username, access) {
     if (!Auth.store[username]) return "User does not exist";
     
     Auth.store[username].access = access;
+    Auth.save();
     return null;
 };
 
@@ -167,6 +171,7 @@ Auth.delete = function(username) {
     // TODO - ENSURE AT LEAST ONE ADMIN ACCOUNT EXISTS
     Auth.store[username] = undefined;
     delete Auth.store[username];
+    Auth.save();
     return null;
 };
 
@@ -181,7 +186,7 @@ Auth.get = function(uname) {
 Auth.list = function() {
     let answer = {};
 
-    for (let i in answer) {
+    for (let i in Auth.store) {
         let { username, access } = Auth.store[i];
         answer[i] = { username, access }
     }
