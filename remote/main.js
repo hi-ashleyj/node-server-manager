@@ -10,14 +10,6 @@ Users.setUserState = function(permissionLevel) {
     if (permissionLevel >= 20) document.body.attr("data-perm-admin", true);
 };
 
-Users.handle403 = function() {
-    Users.setUserState();
-    find("div.splash.users").attr("data-active", true).attr("data-page", "login");
-    window.localStorage.removeItem("nsm-login-token");
-};
-
-Comms.error403 = Users.handle403;
-
 let Home = {};
 Home.servers = {};
 Home.files = {};
@@ -193,7 +185,11 @@ Home.users.create = function(username, access) {
 Home.users.changePassword = function(old_password, new_password, repeat_password) {
     return new Promise(async (resolve, reject) => {
         try {
-            let result = JSON.parse(await Comms.post("user-password-change", JSON.stringify({ old_password, new_password, repeat_password })));
+            let result = JSON.parse(await Comms.post("user-password-change", JSON.stringify({ 
+                old_password: window.sha256(old_password),
+                new_password: window.sha256(new_password),
+                repeat_password: window.sha256(repeat_password),                 
+            })));
             resolve(result);
         } catch (err) {
             resolve({});
@@ -251,6 +247,61 @@ Home.users.list = async function() {
     });
 };
 
+Users.handle403 = async function() {
+    if (Users.cache) {
+        let { username } = await Home.users.verify();
+        if (username) {
+            find("div.splash.insufficient-perms").attr("data-active", true);
+            return;
+        }
+    } 
+
+    Users.setUserState();
+    find("div.splash.users").attr("data-active", true).attr("data-page", "login");
+    window.localStorage.removeItem("nsm-login-token");
+};
+
+Comms.error403 = Users.handle403;
+
+Users.testAccess = function(permsLevel) {
+    if (Users.cache) {
+        if (Users.cache.access && typeof Users.cache.access == "number") {
+            if (Users.cache.access >= permsLevel) {
+                return true;
+            }
+            find("div.splash.insufficient-perms").attr("data-active", true);
+            return false;
+        }
+    }
+
+    find("div.splash.users").attr("data-active", true).attr("data-page", "login");
+
+    return false;
+};
+
+Users.logoutSuccess = async function() {
+    Users.cache = null;
+    window.localStorage.removeItem("nsm-login-token");
+    Users.setUserState();
+    
+    find("div.splash.users .users-page.login input.input.action").chng("value", "");
+    find("div.splash.users").attr("data-page", "login");
+};
+
+Users.loginSuccess = async function(token) {
+    Users.cache = await Home.users.get("@");
+    Users.setUserState(Users.cache.access);
+    window.localStorage.setItem("nsm-login-token", token);
+
+    find("div.user-details-username").chng("innerText", "User: " + Users.cache.username);
+    let accessLevelText = "Manage";
+    if (Users.cache.access >= 10) accessLevelText = "Configure";
+    if (Users.cache.access >= 20) accessLevelText = "Admin";
+    find("span.user-details-access").chng("innerText", accessLevelText);
+
+    find("div.splash.users").attr("data-page", "basic");
+};
+
 Users.handleStartup = async function() {
     let token = window.localStorage.getItem("nsm-login-token");
     if (token) {
@@ -258,8 +309,7 @@ Users.handleStartup = async function() {
         let { username } = await Home.users.verify();
 
         if (username) {
-            let { access } = await Home.users.get("@");
-            Users.setUserState(access);
+            Users.loginSuccess(token);
         } else {
             Comms.token = null;
             Users.setUserState();
@@ -267,21 +317,77 @@ Users.handleStartup = async function() {
     }
 };
 
+Users.handleStartup();
 
+let Auth = {};
+
+Auth.login = async function() {
+    document.activeElement.blur();
+    find("div.user-login-error").chng("innerText", "");
+    let username = find("input.input.action.users-login-username").value;
+    let password = find("input.input.action.users-login-password").value;
+    let { error, token } = await Home.users.login(username, password);
+
+    if (error) {
+        find("div.user-login-error").chng("innerText", error);
+    } else {
+        Comms.token = token;
+        Users.loginSuccess(token);
+    }
+};
+
+Auth.logout = async function() {
+    document.activeElement.blur();
+    let result = await Home.users.logout();
+
+    Users.logoutSuccess();
+};
+
+Auth.changePassword = async function() {
+    document.activeElement.blur();
+
+    find("div.user-password-error").chng("innerText", "");
+    let old_password = find("input.input.action.users-change-password-old").value;
+    let new_password = find("input.input.action.users-change-password-new").value;
+    let repeat_password = find("input.input.action.users-change-password-repeat").value;
+    let { error } = await Home.users.changePassword(old_password, new_password, repeat_password);
+
+    if (error) {
+        find("div.user-password-error").chng("innerText", error);
+    } else {
+        Users.logoutSuccess();
+        find("div.user-login-error").chng("innerText", "Your password has been changed. Please log in again.");
+    }
+};
 
 Auth.show = function(page) {
     find("div.splash.users").attr("data-active", true);
     if (page) find("div.splash.users").attr("data-page", page);
     if (find("div.splash.users").getr("data-page", page) == "login") find("input.input.action.users-login-username").focus();
+    find("div.splash.users .users-page.login input.input.action").chng("value", "");
 };
 
 find("button.button.user-manage-open").when("click", () => {
     Auth.show();
 });
 
-find("input.input.action.users-login-username").when("keydown", (e) => {
+find("input.input.action.users-login-password").when("keydown", (e) => {
     if (e.key.toLowerCase() == "enter") find("button.button.action.user-login-go").click();
 });
+
+find("button.button.action.user-login-go").when("click", Auth.login);
+find("button.button.action.user-logout-go").when("click", Auth.logout);
+
+find("button.button.action.user-password-page-go").when("click", () => {
+    find("div.splash.users .users-page.password input.input.action").chng("value", "");
+    find("div.splash.users").attr("data-page", "password");
+});
+
+find("button.button.action.user-change-password-cancel").when("click", () => {
+    find("div.splash.users").attr("data-page", "basic");
+});
+
+find("button.button.action.user-change-password-go").when("click", Auth.changePassword);
 
 let UI = {};
 UI.events = [];
@@ -341,7 +447,10 @@ UI.Components.serverLine = function(payload) {
     if (payload.running.production) {
         productionBox.attr("data-running", true);
     }
-    editEL.when("click", () => {UI.showEdit(payload.id)});
+    editEL.when("click", () => {
+        if (!Users.testAccess(10)) return;
+        UI.showEdit(payload.id);
+    });
 
     root.append(aliasEL, portEL, testBox, productionBox, editEL);
 
@@ -361,6 +470,7 @@ UI.Components.logline = function(container, line) {
 };
 
 UI.showCreate = async function() {
+    if (!Users.testAccess(10)) { return; }
     try {
         UI.editing = {};
         find("input.editor.id").chng("value", "").chng("disabled", false);
@@ -436,6 +546,7 @@ UI.edit.createServer = async function(payload) {
 };
 
 UI.edit.read = function() {
+    if (!Users.testAccess(10)) { return; }
     let mode = find("div.splash.server-editor").getr("data-mode")
     let id = find("input.editor.id").value;
     let port = parseInt(find("input.editor.port").value);
@@ -538,13 +649,13 @@ UI.script.gitClone = function() {
     UI.runScript(type, id, `git clone ${repo} ${id}`);
 };
 
-find("button.button.editor.start").when("click", () => { Home.servers.start(UI.managing.type, UI.managing.id) });
-find("button.button.editor.stop").when("click", () => { Home.servers.stop(UI.managing.type, UI.managing.id) });
-find("button.button.editor.restart").when("click", () => { Home.servers.restart(UI.managing.type, UI.managing.id) });
+find("button.button.editor.start").when("click", () => { if (!Users.testAccess(1)) { return; } Home.servers.start(UI.managing.type, UI.managing.id) });
+find("button.button.editor.stop").when("click", () => { if (!Users.testAccess(1)) { return; } Home.servers.stop(UI.managing.type, UI.managing.id) });
+find("button.button.editor.restart").when("click", () => { if (!Users.testAccess(1)) { return; } Home.servers.restart(UI.managing.type, UI.managing.id) });
 
-find("button.button.action.logger.runtime.npm-ci-production").when("click", () => { UI.script.npmCIProduction() });
-find("button.button.action.logger.runtime.git-pull").when("click", () => { UI.script.gitPull() });
-find("button.button.action.logger.runtime.git-clone").when("click", () => { UI.script.gitClone() });
+find("button.button.action.logger.runtime.npm-ci-production").when("click", () => { if (!Users.testAccess(10)) { return; } UI.script.npmCIProduction() });
+find("button.button.action.logger.runtime.git-pull").when("click", () => { if (!Users.testAccess(10)) { return; } UI.script.gitPull() });
+find("button.button.action.logger.runtime.git-clone").when("click", () => { if (!Users.testAccess(10)) { return; } UI.script.gitClone() });
 
 find("div.splash").when("click", (e) => {
     if (e.target.classList.contains("splash")) {

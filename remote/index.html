@@ -90,8 +90,32 @@
                         <button class="button action user-login-go">Login</button>
                     </div>
                 </div>
-                <div class="users-page basic"></div>
-                <div class="users-page password"></div>
+                <div class="users-page basic">
+                    <div class="user-details-username" style="font-size: 2rem"></div>
+                    <br />
+                    You have <span class="user-details-access"></span> permissions.<br />
+                    <br />
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 1rem;">
+                        <button class="button action user-management-go requires-perm-admin">Manage Users</button>
+                        <button class="button action user-password-page-go">Change Password</button>
+                        <button class="button action user-logout-go">Logout</button>
+                    </div>
+                </div>
+                <div class="users-page password">
+                    <div style="font-size: 2rem">Change Password</div>
+                    <br />
+                    <div class="user-password-error"></div>
+                    <div style="display: grid; grid-template-columns: max-content 1fr; align-items: center; gap: 1rem">
+                        <div>Old Password: </div><input type="password" class="input action users-change-password-old" />
+                        <div>New Password: </div><input type="password" class="input action users-change-password-new" />
+                        <div>Repeat New Password: </div><input type="password" class="input action users-change-password-repeat" />
+                    </div>
+                    <br />
+                    <div style="text-align: center;">
+                        <button class="button action user-change-password-cancel">Cancel</button>
+                        <button class="button action user-change-password-go">Submit</button>
+                    </div>
+                </div>
                 <div class="users-page manage"></div>
                 <div class="users-page create"></div>
             </div>
@@ -106,6 +130,18 @@
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr);">
                     <button class="button action confirm-dialog-no">Cancel</button>
                     <button class="button action confirm-dialog-yes">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="splash insufficient-perms">
+            <div class="inside" style="pointer-events: none; position: relative;">
+                <div style="font-size: 2rem;">Insufficient Permissions</div>
+                <br />
+                <div class="">You do not have enough permissions to be able to do that action.</div>
+                <br />
+                <div style="font-style: italic; text-align: center; opacity: 0.7; position: absolute; bottom: 0px; padding: inherit; width: 100%">
+                    Click anywhere to continue
                 </div>
             </div>
         </div>

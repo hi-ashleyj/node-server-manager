@@ -124,7 +124,7 @@ Auth.create = function(username, access) {
         username,
         access,
         salt,
-        hash: sha256(sha256(sha256("password") + salt))
+        hash: sha256(sha256(sha256("password")) + salt)
     }
 
     Auth.store[username] = uobj;

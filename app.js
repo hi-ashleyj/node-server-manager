@@ -564,7 +564,7 @@ Requests.Users.login = function(_req, res, data) {
     res.end(JSON.stringify(response));
 };
 
-Requests.Users.logout = function(req, res, data) {
+Requests.Users.logout = function(req, res, _data) {
     let token = Auth.getTokenFromHeaders(req.headers);
     Auth.revokeToken(token);
 
@@ -590,7 +590,7 @@ Requests.Users.create = function(req, res, data) {
     res.end(JSON.stringify({ error }));
 };
 
-Requests.Users.changePassword = function(req, res, _data) {
+Requests.Users.changePassword = function(req, res, data) {
     let username = Auth.verifyHeaders(req.headers);
     let { old_password, new_password, repeat_password } = JSON.parse(data.toString());
     let error = Auth.changePassword(username, old_password, new_password, repeat_password);
@@ -684,7 +684,7 @@ Requests.restartServer = function(_req, res, data) {
     if (body.id) {
         Manager.stopServer(body.type, body.id).then(() => { 
             setTimeout(() => {
-                Manager.spawnServer(body.id);
+                Manager.spawnServer(body.type, body.id);
                 res.writeHead(200, http.STATUS_CODES[200]); 
                 res.end(); 
             }, 750);

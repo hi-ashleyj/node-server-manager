@@ -503,4 +503,37 @@ div.logs-runner {
     padding-top: 1rem;
 }
 
+div.splash.users div.users-page {
+    display: none;
+}
 
+div.splash.users[data-page="login"] div.users-page.login {
+    display: block;
+}
+
+div.splash.users[data-page="basic"] div.users-page.basic {
+    display: block;
+}
+
+div.splash.users[data-page="password"] div.users-page.password {
+    display: block;
+}
+
+div.splash.users[data-page="create"] div.users-page.create {
+    display: block;
+}
+
+div.splash.users[data-page="manage"] div.users-page.manage {
+    display: block;
+}
+
+div.user-login-error:not(:empty), div.user-password-error:not(:empty) {
+    color: #aa0000;
+    font-style: italic;
+    padding-bottom: 1rem;
+}
+
+
+body:not([data-perm-admin]) .requires-perm-admin {
+    display: none;
+}
