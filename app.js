@@ -646,7 +646,7 @@ Requests.Users.get = function(req, res, data) {
 
 Requests.Users.list = function(req, res, _data) {
     if (Auth.checkHeaders(req.headers, 20)) {
-        res.end(JSON.stringify(Auth.list));
+        res.end(JSON.stringify(Auth.list()));
         return;
     }
     
