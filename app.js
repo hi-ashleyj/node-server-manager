@@ -575,8 +575,10 @@ Requests.Users.verify = function(req, res, data) {
 
 Requests.Users.create = function(req, res, data) {
     if (!Auth.checkHeaders(req.headers, 20)) { r403(res); return; }
-    let payload = JSON.parse(data.toString());
+    let { username, access } = JSON.parse(data.toString());
 
+    let error = Auth.create(username, access);
+    res.end(JSON.stringify({ error }));
 };
 
 Requests.Users.changePassword = function(req, res, _data) {
@@ -591,7 +593,16 @@ Requests.Users.changePassword = function(req, res, _data) {
     }
 };
 
-Requests.Users.resetPassword = function(_req, res, data) {
+Requests.Users.resetPassword = function(req, res, data) {
+    let { username } = JSON.parse(data.toString());
+    
+    if (!Auth.checkHeaders(req.headers, 20)) { r403(res); return; }
+
+    Auth.resetPassword(username);
+    res.end();
+};
+
+Requests.Users.edit = function(req, res, data) {
     let { access, username } = JSON.parse(data.toString());
     
     if (!Auth.checkHeaders(req.headers, 20)) { r403(res); return; }
@@ -600,12 +611,7 @@ Requests.Users.resetPassword = function(_req, res, data) {
     res.end();
 };
 
-Requests.Users.edit = function(_req, res, data) {
-    let payload = JSON.parse(data.toString());
-    
-};
-
-Requests.Users.delete = function(_req, res, data) {
+Requests.Users.delete = function(req, res, data) {
     let { username } = JSON.parse(data.toString());
     
     if (!Auth.checkHeaders(req.headers, 20)) { r403(res); return; }
