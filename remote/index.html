@@ -96,7 +96,7 @@
                     You have <span class="user-details-access"></span> permissions.<br />
                     <br />
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 1rem;">
-                        <button class="button action user-management-go requires-perm-admin">Manage Users</button>
+                        <button class="button action user-management-show requires-perm-admin">Manage Users</button>
                         <button class="button action user-password-page-go">Change Password</button>
                         <button class="button action user-logout-go">Logout</button>
                     </div>
@@ -116,7 +116,16 @@
                         <button class="button action user-change-password-go">Submit</button>
                     </div>
                 </div>
-                <div class="users-page manage"></div>
+                <div class="users-page management" style="grid-template-rows: max-content 1fr max-content; width: 100%; gap: 1rem; height: 70vh">
+                    <div style="font-size: 2rem">Manage Users</div>
+                    <div class="users-canvas">
+
+                    </div>
+                    <div style="text-align: center;">
+                        <button class="button action user-management-cancel">Back</button>
+                        <button class="button action user-management-go">Save</button>
+                    </div>
+                </div>
                 <div class="users-page create"></div>
             </div>
         </div>

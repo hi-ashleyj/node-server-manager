@@ -55,6 +55,36 @@ button.button.toggle[data-checked] {
     background: #7700cc;
 }
 
+select.select {
+    background-color: black;
+    color: white;
+    border: 1px solid #555555;
+    border-radius: 1rem;
+    filter: drop-shadow(0px 0px 5px black);
+
+    transition-property: border, background-color;
+    transition-duration: 0.25s;
+    padding: 1rem;
+}
+
+select.select:disabled {
+    border: 1px solid #333333;
+}
+
+select.select:hover:not(:disabled) {
+    border: 1px solid #777777;
+}
+
+select.select:focus:not(:disabled)  {
+    border: 1px solid #aaaaaa;
+    outline: none;
+}
+
+select.select:active:not(:disabled) {
+    background: white;
+}
+
+
 input[type="text"], input[type="password"] {
     display: inline-block;
     color: white;
@@ -523,8 +553,8 @@ div.splash.users[data-page="create"] div.users-page.create {
     display: block;
 }
 
-div.splash.users[data-page="manage"] div.users-page.manage {
-    display: block;
+div.splash.users[data-page="management"] div.users-page.management {
+    display: grid;
 }
 
 div.user-login-error:not(:empty), div.user-password-error:not(:empty) {
@@ -536,4 +566,41 @@ div.user-login-error:not(:empty), div.user-password-error:not(:empty) {
 
 body:not([data-perm-admin]) .requires-perm-admin {
     display: none;
+}
+
+div.users-canvas {
+    overflow-y: auto;
+}
+
+div.users-manage-line-root {
+    display: grid;
+    grid-template-columns: 1fr 1fr max-content max-content;
+    padding: 1rem;
+    gap: 1rem;
+    background-color: black;
+    border-radius: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+button.button.action.users-manage-chunk-reset-password {
+    background-image: url("/svg/reset.svg");
+    background-size: 2rem;
+    background-position: 0.5rem 50%;
+    background-repeat: no-repeat;
+    padding-left: 3rem;
+}
+
+button.button.action.users-manage-chunk-reset-password::after {
+    content: "Reset Password";
+    vertical-align: middle;
+}
+
+button.button.action.users-manage-chunk-delete-account {
+    background-image: url("/svg/delete.svg");
+    background-size: 2rem;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 3rem;
+    min-width: 3rem;
 }

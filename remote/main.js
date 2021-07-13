@@ -239,7 +239,7 @@ Home.users.get = async function(username) {
 Home.users.list = async function() {
     return new Promise(async (resolve, reject) => {
         try {
-            let result = JSON.parse(await Comms.post("user-get", ""));
+            let result = JSON.parse(await Comms.post("user-list", ""));
             resolve(result);
         } catch (err) {
             resolve({});
@@ -262,6 +262,53 @@ Users.handle403 = async function() {
 };
 
 Comms.error403 = Users.handle403;
+
+Users.autopopulate = function(selectEL, access) {
+    let data = { 
+        1: "Manage",
+        10: "Configure",
+        20: "Admin"
+    }
+
+    for (let i in data) {
+        let option = document.createElement("option").chng("innerText", data[i]).attr("data-access-level", i);
+        if (access == i) option.chng("selected", true);
+        selectEL.append(option);
+    }
+
+    return selectEL;
+};
+
+Users.userLine = function(username, access) {
+    let root = document.createElement("div").chng("className", "users-manage-line-root").attr("data-username", username);
+
+    let usernameEL = document.createElement("div").chng("className", "users-manage-chunk-username").chng("innerText", username);
+    let accessSELECT = Users.autopopulate(document.createElement("select").chng("className", "select action users-manage-chunk-access"), access);
+    let resetButton = document.createElement("button").chng("className", "button action users-manage-chunk-reset-password").attr("data-username", username);
+    let deleteButton = document.createElement("button").chng("className", "button action users-manage-chunk-delete-account").attr("data-username", username);
+
+    root.append(usernameEL, accessSELECT, resetButton, deleteButton);
+    return root;
+};
+
+Users.populateUsersCanvas = function(list) {
+    let canvas = find("div.users-canvas")
+    canvas.innerHTML = "";
+
+    for (let i in list) {
+        let { username, access } = list[i];
+        canvas.append(Users.userLine(username, access));
+    }
+};
+
+Users.showManage = async function() {
+    let list = await Home.users.list();
+    if (list && Object.keys(list).length > 0) {
+        Users.populateUsersCanvas(list);
+
+        find("div.splash.users").attr("data-page", "management");
+    }
+};
 
 Users.testAccess = function(permsLevel) {
     if (Users.cache) {
@@ -383,7 +430,16 @@ find("button.button.action.user-password-page-go").when("click", () => {
     find("div.splash.users").attr("data-page", "password");
 });
 
+find("button.button.action.user-management-show").when("click", () => {
+    if (!Users.testAccess(20)) { return; }
+    Users.showManage();
+});
+
 find("button.button.action.user-change-password-cancel").when("click", () => {
+    find("div.splash.users").attr("data-page", "basic");
+});
+
+find("button.button.action.user-management-cancel").when("click", () => {
     find("div.splash.users").attr("data-page", "basic");
 });
 
