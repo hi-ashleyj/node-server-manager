@@ -579,8 +579,7 @@ Requests.Users.verify = function(req, res, data) {
         return;
     }
 
-    res.writeHead(404, http.STATUS_CODES[404]);
-    res.end();
+    res.end("{}");
 };
 
 Requests.Users.create = function(req, res, data) {
