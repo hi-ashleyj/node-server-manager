@@ -900,7 +900,7 @@ find("button.button.action.logger.runtime.git-pull").when("click", () => { if (!
 find("button.button.action.logger.runtime.git-clone").when("click", () => { if (!Users.testAccess(10)) { return; } UI.script.gitClone() });
 
 find("div.splash").when("click", (e) => {
-    if (e.target.classList.contains("splash")) {
+    if (e.target.classList.contains("splash") && !UI.broken) {
         e.target.rmtr("data-active");
     }
 });

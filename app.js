@@ -654,6 +654,7 @@ Requests.Users.list = function(req, res, _data) {
 };
 
 Requests.startServer = function(_req, res, data) {
+    if (!Auth.checkHeaders(req.headers, 1)) { r403(res); return; }
     let body = JSON.parse(data.toString("utf8"));
     if (body.id) {
         Manager.spawnServer(body.type, body.id);
@@ -667,6 +668,7 @@ Requests.startServer = function(_req, res, data) {
 };
 
 Requests.stopServer = function(_req, res, data) {
+    if (!Auth.checkHeaders(req.headers, 1)) { r403(res); return; }
     let body = JSON.parse(data.toString("utf8"));
     if (body.id) {
         Manager.stopServer(body.type, body.id).then(() => { 
@@ -680,6 +682,7 @@ Requests.stopServer = function(_req, res, data) {
 };
 
 Requests.restartServer = function(_req, res, data) {
+    if (!Auth.checkHeaders(req.headers, 1)) { r403(res); return; }
     let body = JSON.parse(data.toString("utf8"));
     if (body.id) {
         Manager.stopServer(body.type, body.id).then(() => { 
@@ -718,6 +721,7 @@ Requests.getServer = function(_req, res, data) {
 }
 
 Requests.newServer = function(_req, res, data) {
+    if (!Auth.checkHeaders(req.headers, 10)) { r403(res); return; }
     let body = JSON.parse(data.toString("utf8"));
     let resss = Manager.newServer(body);
 
@@ -729,6 +733,7 @@ Requests.newServer = function(_req, res, data) {
 }
 
 Requests.updateServer = async function(req, res, data) {
+    if (!Auth.checkHeaders(req.headers, 10)) { r403(res); return; }
     let body = JSON.parse(data.toString("utf8"));
     let resss = await Manager.updateServer(body);
 
@@ -740,6 +745,7 @@ Requests.updateServer = async function(req, res, data) {
 };
 
 Requests.listFiles = async function(req, res, data) {
+    if (!Auth.checkHeaders(req.headers, 30)) { r403(res); return; }
     let body = JSON.parse(data.toString("utf8"));
     let resss = await Manager.listFiles(body.type, body.id, body.path);
 
@@ -751,6 +757,7 @@ Requests.listFiles = async function(req, res, data) {
 };
 
 Requests.uploadFile = async function(req, res, data) {
+    if (!Auth.checkHeaders(req.headers, 30)) { r403(res); return; }
     let body = JSON.parse(data.toString("utf8"));
     let resss = await Manager.storeFile(body.type, body.id, body.path, body.dataBase64);
 
@@ -762,6 +769,7 @@ Requests.uploadFile = async function(req, res, data) {
 };
 
 Requests.deleteFile = async function(req, res, data) {
+    if (!Auth.checkHeaders(req.headers, 30)) { r403(res); return; }
     let body = JSON.parse(data.toString("utf8"));
     let resss = await Manager.removeFile(body.type, body.id, body.path);
 
@@ -773,6 +781,7 @@ Requests.deleteFile = async function(req, res, data) {
 };
 
 Requests.runNPM = async function(req, res, data) {
+    if (!Auth.checkHeaders(req.headers, 10)) { r403(res); return; }
     let body = JSON.parse(data.toString("utf8"));
     let resss = await Manager.runNPM(body.type, body.id, body.args);
 
@@ -784,6 +793,7 @@ Requests.runNPM = async function(req, res, data) {
 };
 
 Requests.runGit = async function(req, res, data) {
+    if (!Auth.checkHeaders(req.headers, 10)) { r403(res); return; }
     let body = JSON.parse(data.toString("utf8"));
     let resss = await Manager.runGit(body.type, body.id, body.args);
 
@@ -839,7 +849,6 @@ let requestHandler = async function(req, res) {
                     case ("runnpm"): callback = Requests.runNPM; break;
                     case ("rungit"): callback = Requests.runGit; break;
                     case ("throwerror"): callback = (_req, res) => { res.end(); throw new Error("This is a test error.") }; break;
-                    case ("runnpm"): callback = Requests.runNPM; break;
                     case ("user-create"): callback = Requests.Users.create; break;
                     case ("user-get"): callback = Requests.Users.get; break;
                     case ("user-list"): callback = Requests.Users.list; break;

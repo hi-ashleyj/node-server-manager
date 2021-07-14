@@ -441,6 +441,13 @@ div.splash[data-active] {
     z-index: 10;
 }
 
+div.splash.self-log[data-active] {
+    opacity: 1;
+    pointer-events: all;
+    user-select: initial;
+    z-index: 20;
+}
+
 div.splash > div.inside {
     background: #222222;
     min-width: 200px;
