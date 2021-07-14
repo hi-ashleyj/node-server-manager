@@ -20,13 +20,23 @@
 4. Sign out and sign in again with a different admin account
 5. Remove the default admin account
 
+ -- PERMISSION LEVELS -- 
+
+These are ordered by elevation, where permissions higher in the list also have permissions from those lower in the list 
+In addition, any methods that require authentication in this guide are marked before their numbered steps.
+ADMIN - Admin Permissions allow the user to create users, edit users, and delete users, as well as reset passwords to default values.
+CONFIGURE - Configure Permissions allow the user to create new servers, edit existing servers, and run "script" jobs such as installing packages and git pull/clone.
+MANAGE - Manage Permissions allow the user to start and stop all servers.
+UNAUTHENTICATED - Unauthenticated users can view servers, their ports, whether they are running, server logs, and NSM logs.
+
  -- CREATING USERS --
 
 Note: this requires being signed in with "Admin" permissions
 1. Click the users icon in the bottom left
 2. Choose the "Manage Users" option
 3. Choose New User at the top
-4. Give them a username (must be unique)
+4. Give them a username. Usernames must be unique, start with a lowercase letter, and contain only lowercase letters, numbers, or - (hyphen) characters.
+5. Select the permission level that the user will have
 6. Choose create
 7. The user account will be created with the default password "password". Instruct the user to login and change their password - reminder that the password is transmitted pre-hashed so it is private (mostly), but not transmitted over SSL, so a unique password should be used.
 
@@ -37,17 +47,19 @@ Note: this requires being signed in with "Admin" permissions
 2. Choose the "Manage Users" option
 
  - TO CHANGE THE PERMISSIONS LEVEL OF A USER
-    3. Click the permissions dropdown for the user and choose their new permission level.
-    4. The Delete button will have changed to a save button. Click it to save the new data
+    3. Click the "Change" button for the user
+    4. Choose their new permission level.
+    5. Click "Confirm" to save the data, or cancel to return. (NOTE: At least one admin account must exist at all times)
 
  - TO RESET THE PASSWORD FOR A USER
     3. Click the reset password button for the user.
     4. Click confirm
-    5. The user will be logged out. Instruct them to sign back in again using the default password "password", and then change it to something better.
+    5. The user will be logged out. Instruct them to sign back in again using the default password "password", and then change it to something secure.
 
  - TO DELETE THE USER
     3. Click the delete button for the user
     4. Click confirm
+    5. The user will be deleted and therefore logged out. (NOTE: At least one admin account must exist at all times)
 
  -- ADDING SERVERS -- 
 

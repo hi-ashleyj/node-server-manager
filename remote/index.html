@@ -72,6 +72,9 @@
             <div class="inside">
                 <div class="logs-broken">A critical error has occured. Please provide the logs below to the developers, then restart NSM.</div>
                 <div class="logs-canvas-self"></div>
+                <div style="text-align: right; padding-top: 1rem; color: #aaaaaa; font-style: italic;">
+                    node-server-manager@0.9.0
+                </div>
             </div>
         </div>
 
@@ -121,24 +124,90 @@
                     <div class="users-canvas">
 
                     </div>
-                    <div style="text-align: center;">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem">
                         <button class="button action user-management-cancel">Back</button>
-                        <button class="button action user-management-go">Save</button>
+                        <button class="button action user-management-create">Create New User</button>
                     </div>
                 </div>
-                <div class="users-page create"></div>
             </div>
         </div>
 
-        <div class="splash confirm-dialog">
+        <div class="splash create-user radio-lines-styles">
             <div class="inside">
-                <div style="font-size: 2rem;">Confirm Action</div>
+                <div style="font-size: 2rem;">Create Users</div>
                 <br />
-                <div class="confirm-dialog-hint">Are you sure you wish to eat chicken?</div>
+                <div class="user-create-error"></div>
+                <div style="display: grid; grid-template-columns: max-content 1fr; align-items: center; gap: 1rem">
+                    <div>Username: </div><input type="text" class="input action create-user-username" />
+                </div>
                 <br />
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr);">
-                    <button class="button action confirm-dialog-no">Cancel</button>
-                    <button class="button action confirm-dialog-yes">Confirm</button>
+                <label><span>Admin</span><input type="radio" name="create-user-radio" value="20" /></label>
+                <label><span>Configure</span><input type="radio" name="create-user-radio" value="10" /></label>
+                <label><span>Manage</span><input type="radio" name="create-user-radio" value="1" /></label>
+                <div class="confirm-dialog-details" style="font-style: italic;">
+                    Please inform the user to login and change their password as soon as possible.<br />
+                    <span class="danger">Leaving accounts with elevated permissions using default passwords for extended periods of time is a security risk</span>
+                </div>
+                <br />
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem">
+                    <button class="button action confirm-create-user-no">Cancel</button>
+                    <button class="button action confirm-create-user-yes">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="splash change-access radio-lines-styles">
+            <div class="inside">
+                <div style="font-size: 2rem;">Change Access</div>
+                <br />
+                <div class="confirm-dialog-hint">Change access for user <span class="change-access-username" style="font-family: 'Inconsolata', monospace;"></span></div>
+                <br />
+                <label><span>Admin</span><input type="radio" name="change-access-level-radio" value="20" /></label>
+                <label><span>Configure</span><input type="radio" name="change-access-level-radio" value="10" /></label>
+                <label><span>Manage</span><input type="radio" name="change-access-level-radio" value="1" /></label>
+                <div class="confirm-dialog-details" style="font-style: italic;">
+                    The effected user may need to log out and back in again to acess elevated privileges. Downgraded privileges will be effective immediately.
+                </div>
+                <br />
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem">
+                    <button class="button action confirm-change-access-no">Cancel</button>
+                    <button class="button action confirm-change-access-yes">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="splash reset-password">
+            <div class="inside">
+                <div style="font-size: 2rem;">Reset Password</div>
+                <br />
+                <div class="confirm-dialog-hint">Are you sure you wish to reset <span class="reset-password-username" style="font-family: 'Inconsolata', monospace;"></span>'s password?</div>
+                <br />
+                <div class="confirm-dialog-details" style="font-style: italic;">
+                    The user's password will be reset to the default value of "password", and they will be signed out of all active sessions.<br />
+                    <span class="danger">This action will happen immediately, and cannot be reversed.</span>
+                </div>
+                <br />
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem">
+                    <button class="button action confirm-reset-password-no">Cancel</button>
+                    <button class="button action confirm-reset-password-yes">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="splash delete-account">
+            <div class="inside">
+                <div style="font-size: 2rem;">Delete Account</div>
+                <br />
+                <div class="confirm-dialog-hint">Are you sure you wish to delete <span class="delete-account-username" style="font-family: 'Inconsolata', monospace;"></span>'s account?</div>
+                <br />
+                <div class="confirm-dialog-details" style="font-style: italic;">
+                    They will be signed out of all active sessions, and their account will be permanently deleted.<br />
+                    <span class="danger">This action will happen immediately, and cannot be reversed.</span>
+                </div>
+                <br />
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem">
+                    <button class="button action confirm-delete-account-no">Cancel</button>
+                    <button class="button action confirm-delete-account-yes">Confirm</button>
                 </div>
             </div>
         </div>

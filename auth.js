@@ -119,6 +119,8 @@ Auth.logout = function(token) {
 
 Auth.create = function(username, access) {
     if (Auth.store[username]) return "Username already exists";
+    if ((new RegExp("([^a-z0-9-])+")).test(username)) return "Invalid Username: must only contain lowercase letters, numbers, or -";
+    if (!("abcdefghijklmnopqrstuvwxyz".split("").includes(username[0]))) return "Invalid Username: must start with a lowercase letter";
     let salt = sha256(hugeNumber() + hugeNumber() + hugeNumber());
     let uobj = {
         username,
@@ -161,6 +163,7 @@ Auth.resetPassword = function(username) {
 
 Auth.edit = function(username, access) {
     if (!Auth.store[username]) return "User does not exist";
+    if (Auth.store[username].access == 20 && Object.keys(Auth.store).filter((val) => Auth.store[val].access == 20) <= 1) return "Cannot change permissions: at least one admin user must remain active";
     
     Auth.store[username].access = access;
     Auth.save();
@@ -168,7 +171,7 @@ Auth.edit = function(username, access) {
 };
 
 Auth.delete = function(username) {
-    // TODO - ENSURE AT LEAST ONE ADMIN ACCOUNT EXISTS
+    if (Auth.store[username].access == 20 && Object.keys(Auth.store).filter((val) => Auth.store[val].access == 20) <= 1) return "Cannot remove account: at least one admin user must remain active";
     Auth.store[username] = undefined;
     delete Auth.store[username];
     Auth.save();

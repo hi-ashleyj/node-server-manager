@@ -1,5 +1,52 @@
+let radioInputRepeat = function(el) {
+    if (el.parentElement.tagName.toLowerCase() == "label") {
+        if (el.checked) {
+            el.parentElement.attr("data-checked", true);
+        } else {
+            el.parentElement.rmtr("data-checked");
+        }
+    }
+};
+
+let radioInputHandler = function(e) {
+    let name = e.target.name;
+    let targets = document.querySelectorAll(`input[type="radio"][name="${name}"]`);
+    for (let i = 0; i < targets.length; i ++) {
+        radioInputRepeat(targets[i]);
+    }
+};
+
+find("div.radio-lines-styles input[type=\"radio\"]").when("change", radioInputHandler).when("input", radioInputHandler);
+let getRadio = function(name) {
+    let matchingRadios = document.querySelectorAll(`input[type="radio"][name="${name}"]`);
+    let value = null;
+    for (let i = 0; i < matchingRadios.length; i++) {
+        if (matchingRadios[i].checked) {
+            value = matchingRadios[i].value;
+            break;
+        }
+    }
+    return value;
+};
+
+let setRadio = function(name, value) {
+    let matchingRadios = document.querySelectorAll(`input[type="radio"][name="${name}"]`);
+    for (let i = 0; i < matchingRadios.length; i++) {
+        if (matchingRadios[i].value == value) {
+            matchingRadios[i].checked = true;
+        }
+    }
+    for (let i = 0; i < matchingRadios.length; i++) { matchingRadios[i].dispatchEvent(new InputEvent("change"))}
+};
+
+let Auth = {};
 let Users = {};
 Users.cache = null;
+Users.PERMISSION_LEVELS = { 
+    1: "Manage",
+    10: "Configure",
+    20: "Admin"
+}
 
 Users.setUserState = function(permissionLevel) {
     document.body.rmtr("data-perm-manage").rmtr("data-perm-configure", true).rmtr("data-perm-admin", true);
@@ -220,8 +267,15 @@ Home.users.edit = function(username, access) {
     });
 };
 
-Home.users.delete = function() {
-    return new Promise(async (resolve, reject) => { resolve() });
+Home.users.delete = function(username) {
+    return new Promise(async (resolve, reject) => { 
+        try {
+            let result = JSON.parse(await Comms.post("user-delete", JSON.stringify({ username })));
+            resolve(result);
+        } catch (err) {
+            resolve({});
+        }
+    });
 };
 
 
@@ -264,14 +318,8 @@ Users.handle403 = async function() {
 Comms.error403 = Users.handle403;
 
 Users.autopopulate = function(selectEL, access) {
-    let data = { 
-        1: "Manage",
-        10: "Configure",
-        20: "Admin"
-    }
-
-    for (let i in data) {
-        let option = document.createElement("option").chng("innerText", data[i]).attr("data-access-level", i);
+    for (let i in Users.PERMISSION_LEVELS) {
+        let option = document.createElement("option").chng("innerText", Users.PERMISSION_LEVELS[i]).attr("data-access-level", i);
         if (access == i) option.chng("selected", true);
         selectEL.append(option);
     }
@@ -279,15 +327,37 @@ Users.autopopulate = function(selectEL, access) {
     return selectEL;
 };
 
-Users.userLine = function(username, access) {
+Users.userLine = function(username, access, isOnlyAdmin) {
     let root = document.createElement("div").chng("className", "users-manage-line-root").attr("data-username", username);
 
     let usernameEL = document.createElement("div").chng("className", "users-manage-chunk-username").chng("innerText", username);
-    let accessSELECT = Users.autopopulate(document.createElement("select").chng("className", "select action users-manage-chunk-access"), access);
-    let resetButton = document.createElement("button").chng("className", "button action users-manage-chunk-reset-password").attr("data-username", username);
-    let deleteButton = document.createElement("button").chng("className", "button action users-manage-chunk-delete-account").attr("data-username", username);
+    // let accessTelegraphEL = document.createElement("div").chng("className", "users-manage-chunk-access-show").chng("innerText", Users.PERMISSION_LEVELS[access]);
+    let editAccessBUTTON = document.createElement("button").chng("className", "button action users-manage-chunk-access-edit").attr("data-username", username);
+    let resetBUTTON = document.createElement("button").chng("className", "button action users-manage-chunk-reset-password").attr("data-username", username);
+    let deleteBUTTON = document.createElement("button").chng("className", "button action users-manage-chunk-delete-account").attr("data-username", username);
 
-    root.append(usernameEL, accessSELECT, resetButton, deleteButton);
+    editAccessBUTTON.when("click", () => {
+        Auth.editAccess(username, access);
+    });
+
+    resetBUTTON.when("click", () => {
+        Auth.resetPassword(username);
+    });
+
+    deleteBUTTON.when("click", () => {
+        Auth.deleteAccount(username);
+    });
+
+    if (isOnlyAdmin) editAccessBUTTON.disabled = true;
+    if (isOnlyAdmin) deleteBUTTON.disabled = true;
+
+    root.append(usernameEL, editAccessBUTTON, resetBUTTON, deleteBUTTON);
+    return root;
+};
+
+Users.userGroup = function(access) {
+    let root = document.createElement("div").chng("className", "users-manage-group-root").attr("data-access", access).attr("data-pretty-access", Users.PERMISSION_LEVELS[access]);
+
     return root;
 };
 
@@ -295,9 +365,29 @@ Users.populateUsersCanvas = function(list) {
     let canvas = find("div.users-canvas")
     canvas.innerHTML = "";
 
-    for (let i in list) {
-        let { username, access } = list[i];
-        canvas.append(Users.userLine(username, access));
+    let keys = Object.keys(list);
+    keys.sort();
+
+    let copy = Object.assign({}, Users.PERMISSION_LEVELS);
+    let show = Object.assign({}, Users.PERMISSION_LEVELS);
+    for (let i in show) show[i] = false;
+    let permLevels = Object.keys(copy).map((val) => { return (typeof val == "number") ? val : parseInt(val) });
+    permLevels.sort((a, b) => { return b - a; });
+
+    for (let i in copy) {
+        copy[i] = Users.userGroup(i);
+    }
+
+    let isOnlyAdmin = (keys.filter((val) => { return list[val].access == 20; }).length) <= 1;
+
+    for (let i = 0; i < keys.length; i++) {
+        let { username, access } = list[keys[i]];
+        if (copy[access]) copy[access].append(Users.userLine(username, access, (access == 20 && isOnlyAdmin)));
+        if (typeof show[access] != "undefined") show[access] = true;
+    }
+
+    for (let i = 0; i < permLevels.length; i ++) {
+        if (show[permLevels[i]]) canvas.append(copy[permLevels[i]]);
     }
 };
 
@@ -346,7 +436,13 @@ Users.loginSuccess = async function(token) {
     if (Users.cache.access >= 20) accessLevelText = "Admin";
     find("span.user-details-access").chng("innerText", accessLevelText);
 
-    find("div.splash.users").attr("data-page", "basic");
+    if (find("input.input.action.users-login-password").value == "password") {
+        find("div.splash.users").attr("data-page", "password");
+    } else {
+        find("div.splash.users").attr("data-page", "basic");
+    }
+    
+    find("div.splash.users .users-page.login input.input.action").chng("value", "");
 };
 
 Users.handleStartup = async function() {
@@ -366,7 +462,93 @@ Users.handleStartup = async function() {
 
 Users.handleStartup();
 
-let Auth = {};
+Auth.createAccountActually = async function() {
+    if (!Users.testAccess(20)) return;
+    let username = find("input.input.action.create-user-username").value;
+    let access = getRadio("create-user-radio");
+    if (typeof access == "string") access = parseInt(access);
+
+    let { error } = await Home.users.create(username, access);
+
+    if (error) {
+        find("div.user-create-error").chng("innerText", error);
+    } else {
+        find("div.splash.create-user").rmtr("data-active");
+        find("input.input.action.create-user-username").value = "";
+        setRadio("create-user-radio", 1);
+        Users.showManage();
+    }
+};
+
+Auth.createAccount = function() {
+    find("div.user-create-error").chng("innerText", "");
+    find("div.splash.create-user").attr("data-active", true);
+    find("input.input.action.create-user-username").value = "";
+    setRadio("create-user-radio", 1);
+};
+
+find("button.button.action.confirm-create-user-yes").when("click", Auth.createAccountActually);
+find("button.button.action.confirm-create-user-no").when("click", () => { find("div.splash.create-user").rmtr("data-active"); });
+find("button.button.action.user-management-create").when("click", Auth.createAccount);
+find("input.input.action.create-user-username").when("input", (e) => {
+    if (e.target.value.split(" ").length > 1) {
+        e.target.value = e.target.value.split(" ").join("-");
+    }
+});
+
+Auth.editAccessActually = async function() {
+    if (!Users.testAccess(20)) return;
+    let username = find("div.splash.change-access").getr("data-username");
+    let access = getRadio("change-access-level-radio");
+    if (typeof access == "string") access = parseInt(access);
+    let result = await Home.users.edit(username, access);
+    console.log(result);
+    find("div.splash.change-access").rmtr("data-active");
+    Users.showManage();
+};
+
+Auth.editAccess = function(username, access) {
+    find("div.splash.change-access").attr("data-active", true).attr("data-username", username);
+    find("span.change-access-username").chng("innerText", username);
+    setRadio("change-access-level-radio", access);
+};
+
+find("button.button.action.confirm-change-access-yes").when("click", Auth.editAccessActually);
+find("button.button.action.confirm-change-access-no").when("click", () => { find("div.splash.change-access").rmtr("data-active"); });
+
+Auth.deleteAccountActually = async function() {
+    if (!Users.testAccess(20)) return;
+    let username = find("div.splash.delete-account").getr("data-username");
+    let result = await Home.users.delete(username);
+    console.log(result);
+    find("div.splash.delete-account").rmtr("data-active");
+    Users.showManage();
+};
+
+Auth.deleteAccount = function(username) {
+    find("div.splash.delete-account").attr("data-active", true).attr("data-username", username);
+    find("span.delete-account-username").chng("innerText", username);
+};
+
+find("button.button.action.confirm-delete-account-yes").when("click", Auth.deleteAccountActually);
+find("button.button.action.confirm-delete-account-no").when("click", () => { find("div.splash.delete-account").rmtr("data-active"); });
+
+Auth.resetPasswordActually = async function() {
+    if (!Users.testAccess(20)) return;
+    let username = find("div.splash.reset-password").getr("data-username");
+    let result = await Home.users.resetPassword(username);
+    console.log(result);
+    find("div.splash.reset-password").rmtr("data-active");
+    Users.showManage();
+};
+
+Auth.resetPassword = function(username) {
+    find("div.splash.reset-password").attr("data-active", true).attr("data-username", username);
+    find("span.reset-password-username").chng("innerText", username);
+};
+
+find("button.button.action.confirm-reset-password-yes").when("click", Auth.resetPasswordActually);
+find("button.button.action.confirm-reset-password-no").when("click", () => { find("div.splash.reset-password").rmtr("data-active"); });
 
 Auth.login = async function() {
     document.activeElement.blur();
@@ -415,7 +597,11 @@ Auth.show = function(page) {
 };
 
 find("button.button.user-manage-open").when("click", () => {
-    Auth.show();
+    if (Users.cache) {
+        Auth.show("basic");
+    } else {
+        Auth.show("login");
+    }
 });
 
 find("input.input.action.users-login-password").when("keydown", (e) => {
