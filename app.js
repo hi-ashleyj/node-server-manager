@@ -154,11 +154,17 @@ let storeFolder = path.resolve(rootFolder, "store");
 
 if (!fsSync.existsSync(storeFolder)) { // Create folders and default users
     try {
-        fs.mkdir(storeFolder).then(async function() {
-            await fs.writeFile(path.resolve(storeFolder, "servers.json"), "{}");
-        });
+        fsSync.mkdirSync(storeFolder);
     } catch (_err) {
         
+    }
+}
+
+if (!fsSync.existsSync(path.resolve(storeFolder, "servers.json"))) {
+    try {
+        fs.writeFile(path.resolve(storeFolder, "servers.json"), "{}");
+    } catch (_err) {
+
     }
 } else {
     fs.readFile(path.resolve(storeFolder, "servers.json"), {encoding: "utf8"}).then((data) => {
