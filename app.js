@@ -239,7 +239,9 @@ Manager.spawnServer = function(type, id) {
 
     options.cwd = path.resolve(rootFolder, type, "" + id);
 
-    let process = child_process.spawn("node", args, options);
+    let nodeLoc = path.resolve(rootFolder, "node", "node.exe");
+
+    let process = child_process.spawn(nodeLoc, args, options);
 
     Manager.runningServers[type][id] = new SpawnedServer(type, id, process);
     Manager.broadcast("start", id, type);
