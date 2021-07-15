@@ -661,7 +661,7 @@ Requests.Users.list = function(req, res, _data) {
     r403(res);
 };
 
-Requests.startServer = function(_req, res, data) {
+Requests.startServer = function(req, res, data) {
     if (!Auth.checkHeaders(req.headers, 1)) { r403(res); return; }
     let body = JSON.parse(data.toString("utf8"));
     if (body.id) {
@@ -675,7 +675,7 @@ Requests.startServer = function(_req, res, data) {
     }
 };
 
-Requests.stopServer = function(_req, res, data) {
+Requests.stopServer = function(req, res, data) {
     if (!Auth.checkHeaders(req.headers, 1)) { r403(res); return; }
     let body = JSON.parse(data.toString("utf8"));
     if (body.id) {
@@ -689,7 +689,7 @@ Requests.stopServer = function(_req, res, data) {
     }
 };
 
-Requests.restartServer = function(_req, res, data) {
+Requests.restartServer = function(req, res, data) {
     if (!Auth.checkHeaders(req.headers, 1)) { r403(res); return; }
     let body = JSON.parse(data.toString("utf8"));
     if (body.id) {
@@ -728,7 +728,7 @@ Requests.getServer = function(_req, res, data) {
     res.end(JSON.stringify(Manager.getServer(body.id)));
 }
 
-Requests.newServer = function(_req, res, data) {
+Requests.newServer = function(req, res, data) {
     if (!Auth.checkHeaders(req.headers, 10)) { r403(res); return; }
     let body = JSON.parse(data.toString("utf8"));
     let resss = Manager.newServer(body);
