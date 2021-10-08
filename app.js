@@ -242,6 +242,7 @@ Manager.spawnServer = function(type, id) {
 
     args.push(Manager.servers[id].runfile);
     args.push("port:" + (((type == "test") ? 30000 : 0) + Manager.servers[id].port));
+    args.push("using:" + type);
 
     options.cwd = path.resolve(rootFolder, type, "" + id);
 
