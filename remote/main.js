@@ -670,14 +670,12 @@ Telemetry.zone = function(endpoint, name, areas, canvas) {
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, graph.width, graph.height);
 
-    let details = document.createElement("div").chng("className", "telemetry-details");
     let total = document.createElement("div").chng("className", "telemetry-details-requests");
     let msaverage = document.createElement("div").chng("className", "telemetry-details-response");
     let failed = document.createElement("div").chng("className", "telemetry-details-failed");
-    details.append(total, msaverage, failed);
 
     let key = document.createElement("div").chng("className", "telemetry-key");
-    root.append(title, graph, details, key);
+    root.append(title, graph, total, msaverage, failed, key);
 
     canvas.append(root);
 
@@ -759,7 +757,6 @@ Telemetry.zone = function(endpoint, name, areas, canvas) {
             msaverage.innerText = Math.floor(mstotal * 100 / reqTotal) / 100;
         });
     }
-
 };
 
 Telemetry.display = function(base) {

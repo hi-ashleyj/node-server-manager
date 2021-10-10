@@ -683,3 +683,49 @@ div.radio-lines-styles input[type="radio"]:checked {
     opacity: 1;
     transform: scale(1);
 }
+
+div.telemetry-rooter {
+    display: grid;
+    grid-template-columns: 1fr max-content;
+    grid-template-rows: max-content 1fr 1fr 1fr max-content;
+    grid-template-areas: "t t" "g a" "g b" "g c" "k k";
+
+    gap: 1rem;
+}
+
+div.telemetry-title {
+    grid-area: "t";
+}
+
+div.telemetry-graph {
+    grid-area: "g";
+    border-radius: 0.5rem;
+}
+
+div.telemetry-details-requests {
+    font-size: 2rem;
+    grid-area: "a";
+}
+
+div.telemetry-details-response {
+    font-size: 2rem;
+    grid-area: "b";
+    color: #7700cc;
+}
+
+div.telemetry-details-failed {
+    font-size: 2rem;
+    grid-area: "c";
+    color: #ff3333;
+}
+
+div.telemetry-key {
+    grid-area: "k";
+}
+
+div.telemetry-key-entry {
+    display: inline-block;
+    padding: 0.5rem;
+    margin: 0.5rem;
+    border-radius: 0.5rem;
+}
