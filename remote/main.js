@@ -631,6 +631,153 @@ find("button.button.action.user-management-cancel").when("click", () => {
 
 find("button.button.action.user-change-password-go").when("click", Auth.changePassword);
 
+let Telemetry = {};
+
+Telemetry.get = function(endpoint) {
+    return new Promise(async (resolve, reject) => {
+        let request = new XMLHttpRequest();
+        request.open("GET", endpoint);
+        request.addEventListener("load", () => {
+            if (request.status < 400) {
+                resolve(request.responseText);
+            } else {
+                reject(request.status);
+            }
+        });
+        request.addEventListener("error", () => {
+            reject(request.status);
+        });
+        if (body) {
+            request.send(body);
+        } else {
+            request.send();
+        }
+    });
+};
+
+Telemetry.zone = function(endpoint, name, areas, canvas) {
+    let root = document.createElement("div").chng("className", "telemetry-rooter");
+
+    let title = document.createElement("div").chng("className", "telemetry-title").chng("innerText", name.toUpperCase());
+    let graph = document.createElement("canvas").chng("className", "telemetry-graph");
+    graph.width = 1000;
+    graph.height = 500;
+
+    /**
+     * @type {CanvasRenderingContext2D}
+     */
+    let ctx = graph.getContext("2d");
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, graph.width, graph.height);
+
+    let details = document.createElement("div").chng("className", "telemetry-details");
+    let total = document.createElement("div").chng("className", "telemetry-details-requests");
+    let msaverage = document.createElement("div").chng("className", "telemetry-details-response");
+    let failed = document.createElement("div").chng("className", "telemetry-details-failed");
+    details.append(total, msaverage, failed);
+
+    let key = document.createElement("div").chng("className", "telemetry-key");
+    root.append(title, graph, details, key);
+
+    canvas.append(root);
+
+    let reqTotal = 0;
+    let reqfail = 0;
+    let mstotal = 0;
+
+    let colours = {};
+    for (let i = 0; i < areas.length; i++) {
+        const area = areas[i]
+        colours[area] = `hsl(${Math.floor(i * 360/ areas.length)}, 100%, 60%)`;
+
+        let keyEntry = document.createElement("div").chng("className", "telemetry-key-entry").chng("innerText", areas[i]).styl("backgroundColor", colours[areas[i]]);
+        key.append(keyEntry);
+
+        Telemetry.get(endpoint + `?zone=${zone}&area=${area}`).then((val) => {
+            sevn = JSON.parse(val);
+
+            let plotdata = {};
+            
+            reqTotal += Object.keys(sevn.success).length + Object.keys(sevn.fail).length;
+            reqfail += Object.keys(sevn.fail).length;
+            let nowish = new Date();
+            let vbef = nowish.valueOf() - (7 * 24 * 60 * 60 * 1000);
+
+            for (let time in sevn.success) {
+                let ddd = new Date(time);
+                if (ddd.valueOf() < vbef) continue;
+                let day = ddd.getDay();
+                let hour = ddd.getHours();
+
+                if (!plotdata[day]) { plotdata[day] = {} }
+                if (!plotdata[day][hour]) plotdata[day][hour] = [];
+                plotdata[day][hour].push(sevn.success[time]);
+
+                mstotal += sevn.success[time];
+            }
+
+            for (let time in sevn.fail) {
+                let ddd = new Date(time);
+                if (ddd.valueOf() < vbef) continue;
+                let day = ddd.getDay();
+                let hour = ddd.getHours();
+
+                if (!plotdata[day]) { plotdata[day] = {} }
+                if (!plotdata[day][hour]) plotdata[day][hour] = [];
+                plotdata[day][hour].push(sevn.fail[time]);
+
+                mstotal += sevn.fail[time];
+            }
+            
+            let day = nowish.getDay();
+            let hour = nowish.getHours();
+
+            ctx.strokeStyle = colours[area];
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, graph.height);
+
+            let steps = 7 * 24;
+
+            for (let i = 0; i < steps; i ++) {
+                hour += 1;
+                let next = hour != hour % 24;
+                if (next) day += 1;
+                hour %= 24;
+                day %= 7;
+
+                let xPos = Math.floor(i * graph.width / steps); 
+                let avg = (plotdata[day] && plotdata[day][hour]) ? plotdata[day][hour].reduce((prev, cur) => prev + cur) / plotdata[day][hour].length : 0;
+                let yPos = Math.floor(graph.height - (avg * graph.height / 150));
+                
+                ctx.lineTo(xPos, yPos);
+            }
+
+            ctx.stroke();
+            total.innerText = reqTotal;
+            failed.innerText = reqfail;
+            msaverage.innerText = Math.floor(mstotal * 100 / reqTotal) / 100;
+        });
+    }
+
+};
+
+Telemetry.display = function(base) {
+    let endpoint = base + "/api/telemetry";
+    let canvas = find("div.telemetry-canvas").chng("innerHTML", "").styl("display", "none");
+    
+    // FETCH ZONES
+    Telemetry.get(endpoint).then((val) => {
+        let zones = JSON.parse(val);
+
+        for (let zone in zones) {
+            Telemetry.zone(endpoint, zone, zones[zone], canvas);
+        }
+    });
+};
+
+
+
 let UI = {};
 UI.events = [];
 UI.editing;
@@ -817,6 +964,7 @@ UI.showManage = async function(type, id) {
 
         if (goals.running[type]) {
             find("div.manage").attr("data-running", true);
+            Telemetry.display("http://" + window.location.hostname + ":" + ((type == "test") ? 30000 + goals.port : goals.port));
         } else {
             find("div.manage").rmtr("data-running");
         }
