@@ -160,6 +160,14 @@ if (!fsSync.existsSync(storeFolder)) { // Create folders and default users
     }
 }
 
+if (!fsSync.existsSync(path.resolve(storeFolder, "telemetry"))) {
+    try {
+        fsSync.mkdirSync(path.resolve(storeFolder, "telemetry"));
+    } catch (_err) {
+        
+    }
+}
+
 if (!fsSync.existsSync(path.resolve(storeFolder, "servers.json"))) {
     try {
         fs.writeFile(path.resolve(storeFolder, "servers.json"), "{}");
@@ -243,6 +251,9 @@ Manager.spawnServer = function(type, id) {
     args.push(Manager.servers[id].runfile);
     args.push("port:" + (((type == "test") ? 30000 : 0) + Manager.servers[id].port));
     args.push("using:" + type);
+    let telpath = path.resolve(storeFolder, "telemetry", id + "-" + type);
+    args.push("telemetry:" + telpath);
+    if (!fsSync.existsSync(telpath)) fsSync.mkdirSync(telpath);
 
     options.cwd = path.resolve(rootFolder, type, "" + id);
 
