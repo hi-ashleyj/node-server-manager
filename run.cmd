@@ -1,1 +1,0 @@
-..\node\node.exe .\app.js
