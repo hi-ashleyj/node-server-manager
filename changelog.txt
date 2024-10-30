@@ -1,6 +1,0 @@
----- 1.0.1
-
-# Fix some methods not being able to access headers
-
----- 1.0.0
-+ First version!

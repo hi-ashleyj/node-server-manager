@@ -1,23 +1,15 @@
 {
-  "name": "node-server-manager",
-  "version": "1.0.1",
-  "description": "",
-  "main": "app.js",
+  "name": "nsm",
+  "version": "0.1.0",
+  "main": "index.js",
   "scripts": {
-    "start": "node app.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/hi-ashleyj/node-server-manager.git"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "UNLICENSED",
-  "bugs": {
-    "url": "https://github.com/hi-ashleyj/node-server-manager/issues"
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "turbo": "^2.2.3"
   },
-  "homepage": "https://github.com/hi-ashleyj/node-server-manager#readme",
-  "dependencies": {
-    "node-windows": "^1.0.0-beta.5",
-    "ws": "^7.4.0"
-  }
+  "private": true,
 }
