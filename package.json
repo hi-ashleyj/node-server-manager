@@ -1,15 +1,21 @@
 {
-  "name": "nsm",
-  "version": "0.1.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "turbo": "^2.2.3"
-  },
-  "private": true,
+    "name": "nsm",
+    "version": "0.1.0",
+    "main": "index.js",
+    "scripts": {
+        "dev": "turbo run dev",
+        "build": "turbo run build",
+        "package": "turbo run package"
+    },
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "devDependencies": {
+        "turbo": "^2.2.3"
+    },
+    "private": true,
+    "workspaces": [
+        "apps/*"
+    ],
+    "packageManager": "npm@10.0.0"
 }

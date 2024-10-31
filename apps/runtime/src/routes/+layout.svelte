@@ -1,5 +1,6 @@
 <script>
     import "../app.css";
+    import "../fonts.css";
     import { computePosition, autoUpdate, offset, shift, flip, arrow } from "@floating-ui/dom";
     import { storePopup } from "@skeletonlabs/skeleton";
 
