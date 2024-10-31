@@ -1,7 +1,10 @@
 import type { Handle } from "@sveltejs/kit";
-import { ulid } from "ulidx";
 
-export const stats: () => Handle = () => {
+export type EventServerOptions = {
+    hub: string;
+}
+
+export const eventServer: (options: EventServerOptions) => Handle = () => {
     const recent = new Map<string, number>();
 
     return async ({ resolve, event }) => {
@@ -14,7 +17,6 @@ export const stats: () => Handle = () => {
             return new Response(JSON.stringify({ min, max, avg }));
         }
         const res = await resolve(event)
-        const li = ulid();
         setTimeout(() => recent.delete(li), 1000 * 60 * 5);
         const after = performance.now();
         recent.set(li, after - before);

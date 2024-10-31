@@ -11,7 +11,7 @@ const config = {
   // 2. Opt for dark mode to be handled via the class method
   darkMode: 'class',
   content: [
-    './src/**/*.{html,js,runtime,ts}',
+    './src/**/*.{html,js,runtime,ts,svelte}',
     // 3. Append the path to the Skeleton package
     join(require.resolve(
             '@skeletonlabs/skeleton'),

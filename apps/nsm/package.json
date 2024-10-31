@@ -5,7 +5,7 @@
 		"dev": "vite dev",
 		"build": "vite build && npm run package",
 		"preview": "vite preview",
-		"package": "svelte-kit sync && svelte-package && publint",
+		"package": "svelte-kit sync && svelte-package",
 		"prepublishOnly": "npm run package",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
@@ -18,13 +18,22 @@
 	"sideEffects": [
 		"**/*.css"
 	],
-	"svelte": "./dist/index.js",
-	"types": "./dist/index.d.ts",
 	"type": "module",
 	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"svelte": "./dist/index.js"
+		"./stats": {
+			"types": "./dist/stats.d.ts",
+			"svelte": "./dist/stats.js",
+			"import": "./dist/stats.js"
+		},
+		"./event-client": {
+			"types": "./dist/event-client.d.ts",
+			"svelte": "./dist/event-client.js",
+			"import": "./dist/event-client.js"
+		},
+		"./event-server": {
+			"types": "./dist/event-server.d.ts",
+			"svelte": "./dist/event-server.js",
+			"import": "./dist/event-server.js"
 		}
 	},
 	"peerDependencies": {
@@ -37,6 +46,10 @@
 		"svelte": "4.2.19",
 		"svelte-check": "^3.6.0",
 		"typescript": "^5.0.0",
-		"vite": "^4.0.0"
+		"vite": "^5.0.0"
+	},
+	"dependencies": {
+		"ulidx": "^2.4.1",
+		"ws": "^8.18.0"
 	}
 }
