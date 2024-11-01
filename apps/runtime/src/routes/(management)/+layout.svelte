@@ -12,9 +12,15 @@
 
 </script>
 
+<svelte:head>
+    <title>Node Servers</title>
+</svelte:head>
+
 <div class="w-full h-full grid grid-rows-[max-content_1fr] overflow-hidden">
     <div class="w-full h-max grid grid-cols-[1fr_max-content] p-6 gap-4 items-center">
-        <div class="font-heading-token text-2xl">node <span class="text-secondary-700-200-token">servers</span></div>
+        <a href="/" class="font-heading-token text-2xl w-max">
+            node <span class="text-secondary-700-200-token">servers</span>
+        </a>
         <button class="font-heading-token btn hover:variant-ghost-surface" use:popup={signoutPopup}>signed in as&nbsp;<span class="text-secondary-700-200-token">{data.name}</span></button>
     </div>
     <div>
@@ -24,6 +30,6 @@
 
 <div data-popup="signoutPopup">
     <div class="btn-group-vertical variant-ghost-surface">
-        <button class="hover:variant-filled-error">Log out</button>
+        <button class="variant-filled-error hover:variant-filled-error">Log out</button>
     </div>
 </div>

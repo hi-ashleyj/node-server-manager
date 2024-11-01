@@ -18,8 +18,15 @@ export type NodeServerEditable = NodeServer & {
     path: string;
     build: string;
 
+    test: RuntimeEditable;
+    prod: RuntimeEditable;
+
 }
 
 export type RuntimeInfo = {
     active: boolean;
+}
+
+export type RuntimeEditable = RuntimeInfo & {
+    env: Record<string, string>;
 }

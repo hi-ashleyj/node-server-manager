@@ -31,6 +31,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@ajwdmedia/svelterial-icons": "^0.1.3",
 		"@auth/sveltekit": "^1.7.2",
 		"lowdb": "^7.0.1",
 		"node-windows": "^1.0.0-beta.8",

@@ -7,7 +7,7 @@ export const load = (async ({ locals }) => {
         servers: [
             {
                 id: "test",
-                port: 7294,
+                port: 5173,
                 name: "test",
                 auto: false,
                 build: "",
