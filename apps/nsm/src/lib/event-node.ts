@@ -4,7 +4,7 @@ export type EventServerOptions = {
     hub: string;
 }
 
-export const eventServer: (options: EventServerOptions) => Handle = () => {
+export const eventNode: (options: EventServerOptions) => Handle = () => {
     const recent = new Map<string, number>();
 
     return async ({ resolve, event }) => {

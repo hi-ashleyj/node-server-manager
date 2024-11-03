@@ -25,15 +25,15 @@
 			"svelte": "./dist/stats.js",
 			"import": "./dist/stats.js"
 		},
-		"./event-client": {
-			"types": "./dist/event-client.d.ts",
-			"svelte": "./dist/event-client.js",
-			"import": "./dist/event-client.js"
+		"./event-browser": {
+			"types": "./dist/event-browser.d.ts",
+			"svelte": "./dist/event-browser.js",
+			"import": "./dist/event-browser.js"
 		},
-		"./event-server": {
-			"types": "./dist/event-server.d.ts",
-			"svelte": "./dist/event-server.js",
-			"import": "./dist/event-server.js"
+		"./event-node": {
+			"types": "./dist/event-node.d.ts",
+			"svelte": "./dist/event-node.js",
+			"import": "./dist/event-node.js"
 		}
 	},
 	"peerDependencies": {
