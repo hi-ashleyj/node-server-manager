@@ -1,25 +1,17 @@
 import type { Handle } from "@sveltejs/kit";
+import type { Message } from "./types.js";
+export type { Message };
 
-export type EventServerOptions = {
+export type EventNodeOptions = {
     hub: string;
 }
 
-export const eventNode: (options: EventServerOptions) => Handle = () => {
-    const recent = new Map<string, number>();
+export type EventNode = {
+    handle: Handle;
+    send: () => {};
+    listen: () => {};
+}
 
-    return async ({ resolve, event }) => {
-        const before = performance.now();
-        if (event.url.pathname === "/__nsm__/stats") {
-            const list = [ ...recent.values() ];
-            const min = Math.min(...list);
-            const max = Math.max(...list);
-            const avg = list.reduce((prev, it) => prev + it, 0) / list.length;
-            return new Response(JSON.stringify({ min, max, avg }));
-        }
-        const res = await resolve(event)
-        setTimeout(() => recent.delete(li), 1000 * 60 * 5);
-        const after = performance.now();
-        recent.set(li, after - before);
-        return res;
-    }
+export const eventNode: (options: EventNodeOptions) => {} = () => {
+    const recent = new Map<string, number>();
 };

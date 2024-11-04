@@ -1,6 +1,6 @@
 import ws from "ws";
 import { ulid } from "ulidx";
-import type { Message as NSMMessage } from "@repo/nsm-types";
+import type { Message as NSMMessage } from "$lib/package/types.js";
 
 type ActiveSocket = {
     socket: InstanceType<typeof ws>;
