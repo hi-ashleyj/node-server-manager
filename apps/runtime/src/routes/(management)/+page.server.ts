@@ -3,24 +3,22 @@ import type {NodeServer} from "$lib/types";
 
 export const load = (async ({ locals }) => {
 
-    return {
-        servers: [
-            {
-                id: "test",
-                port: 5173,
-                name: "test",
-                auto: false,
-                build: "",
-                path: "",
-                repo: "https://github.com/hi-ashleyj/test",
-                test: {
-                    active: true,
-                },
-                prod: {
-                    active: false,
-                },
+    const servers = locals.db.data.servers.map(it => {
+        return {
+            id: it.id,
+            port: it.port,
+            name: it.name,
+            repo: it.repo,
+
+            test: {
+                active: it.test.active
+            },
+            prod: {
+                active: it.prod.active
             }
-        ] as NodeServer[],
-    }
+
+        } as NodeServer;
+    })
+    return { servers };
 
 }) satisfies PageServerLoad;

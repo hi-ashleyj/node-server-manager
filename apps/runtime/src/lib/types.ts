@@ -4,10 +4,6 @@ export type NodeServer = {
     port: number;
     repo: string;
 
-    auto: boolean;
-    path: string;
-    build: string;
-
     test: RuntimeInfo;
     prod: RuntimeInfo;
 }
@@ -16,6 +12,7 @@ export type NodeServerEditable = NodeServer & {
 
     auto: boolean;
     path: string;
+    install: "" | "install" | "ci";
     build: string;
 
     test: RuntimeEditable;

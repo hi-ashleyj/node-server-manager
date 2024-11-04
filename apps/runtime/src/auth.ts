@@ -1,5 +1,6 @@
 import { SvelteKitAuth } from "@auth/sveltekit";
 import Credentials from "@auth/sveltekit/providers/credentials";
+import { JSONFilePreset } from "lowdb/node";
 
 const TEMP_USERS = {
     "admin": "admin",
