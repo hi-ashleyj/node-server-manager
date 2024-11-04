@@ -1,1 +1,0 @@
-On connect - server makes `NSM_EVENTS_NEGOTIATE` message, expects `NSM_EVENTS_EXPECTED`

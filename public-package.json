@@ -1,0 +1,32 @@
+{
+  "name": "@hi-ashleyj/nsm",
+  "version": "2.0.0",
+  "scripts": {},
+  "files": [
+    "dist",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
+  "type": "module",
+  "exports": {
+    "./stats": {
+      "types": "./stats.d.ts",
+      "svelte": "./stats.js",
+      "import": "./stats.js"
+    },
+    "./event-browser": {
+      "types": "./event-browser.d.ts",
+      "svelte": "./event-browser.js",
+      "import": "./event-browser.js"
+    },
+    "./event-node": {
+      "types": "./event-node.d.ts",
+      "svelte": "./event-node.js",
+      "import": "./event-node.js"
+    }
+  },
+  "dependencies": {
+    "ulidx": "^2.4.1",
+    "ws": "^8.18.0"
+  }
+}
