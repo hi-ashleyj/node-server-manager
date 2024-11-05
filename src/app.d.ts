@@ -8,8 +8,10 @@ declare global {
 		// interface Platform {}
 	}
 
+	type EventMap<T> = {[eventName in keyof T]: any[]};
+	type DefaultEventMap = {[eventName: string | symbol]: any[]};
+
 	const __NSM__VERSION__: string;
 }
 
 export {};
-
