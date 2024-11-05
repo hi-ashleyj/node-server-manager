@@ -1,12 +1,13 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { ProcessWrapper } from "./process-wrapper";
 
-class NPMCommand extends ProcessWrapper {
+export class NPMCommand extends ProcessWrapper {
     private npmPath: string;
     private process?: ChildProcessWithoutNullStreams;
 
     constructor(npm: string) {
-        this.npmPath = npm;
         super();
+        this.npmPath = npm;
     }
 
     async install(task: "install" | "ci", force: boolean, cwd: string) {
@@ -16,7 +17,7 @@ class NPMCommand extends ProcessWrapper {
             cwd: cwd,
         });
 
-        this.wrap(process);
+        this.wrap(this.process);
 
         this.emit("start");
         return true;
@@ -29,7 +30,7 @@ class NPMCommand extends ProcessWrapper {
             cwd: cwd,
         });
 
-        this.wrap(process);
+        this.wrap(this.process);
 
         this.emit("start");
         return true;
@@ -37,7 +38,7 @@ class NPMCommand extends ProcessWrapper {
 
     stop() {
         if (!this.process) return false;
-        this.gracefulExit = true;
+        this.graceful = true;
         this.process.kill();
         this.process = undefined;
         return true;
