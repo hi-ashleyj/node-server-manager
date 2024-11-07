@@ -13,6 +13,7 @@ export type NodeServerEditable = NodeServer & {
     auto: boolean;
     path: string;
     install: "" | "install" | "ci";
+    force_install: boolean;
     build: string;
 
     test: RuntimeEditable;

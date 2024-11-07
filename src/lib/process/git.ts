@@ -21,8 +21,10 @@ export class GitCommand extends ProcessWrapper {
 
     async run(task: "clone" | "pull", remote: string, cwd: string) {
         if (this.process) return false;
-        await rm(cwd, { recursive: true, force: true });
-        await mkdir(cwd, { recursive: true, mode: "" });
+        if (task === "clone") {
+            await rm(cwd, { recursive: true, force: true });
+            await mkdir(cwd, { recursive: true });
+        }
 
         this.process = spawn(this.gitPath, task === "pull" ? [ "pull" ] : [ "clone", remote, "." ], {
             cwd: cwd,

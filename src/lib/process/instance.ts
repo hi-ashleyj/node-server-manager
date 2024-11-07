@@ -5,6 +5,8 @@ import {join} from "node:path";
 import { stat } from "node:fs/promises";
 import {ulid} from "ulidx";
 import {LogFileHelper} from "$lib/process/logfile";
+import {GitCommand} from "$lib/process/git";
+import {NPMCommand} from "$lib/process/npm";
 
 const unwrappedStat = async (...params: Parameters<typeof stat>): Promise<[ Awaited<ReturnType<typeof stat>>, null ] | [ null, any ]> => {
     try {
@@ -23,11 +25,16 @@ export const ServerInstanceErrors = {
     PROJECT_MISSING: "Project is not downloaded",
     PROJECT_RUNNER_MISSING: "Main Executable is not present",
     START_FAILED: "Server Process Refused to Start",
-    NOT_IMPLEMENTED: "NOT_IMPLEMENTED",
+    NOT_IMPLEMENTED: "Not Implemented",
+    REPO_NOT_PRESENT: "Project cannot be updated - not present",
+    NO_BUILD_SCRIPT: "Build script not specified for project",
+    INSTALL_NOT_PERMITTED: "Npm Install mode not permitted",
 } as const;
 
 type ErrorCode = keyof typeof ServerInstanceErrors;
 type Unwrap<V, E> = [V, null] | [null, E];
+
+export type Operation = { exe: "npm", command: "install" | "build" } | { exe: "git", command: "pull" | "clone" };
 
 export class ServerInstance {
 
@@ -153,12 +160,40 @@ export class ServerInstance {
         if (this.server) this.server.stop();
     }
 
-    async operate() {
+    operate(operation: Operation): Promise<Unwrap<boolean, ErrorCode>> {
+        return new Promise((resolve) => {
+            if (this.server) return resolve([ null, "SERVER_RUNNING" ]);
+            if (this.operation) return resolve([ null, "OPERATION_RUNNING" ]);
 
-    }
+            if (operation.exe === "git") {
+                if (!this.is_present && operation.command === "pull") return resolve([ null, "REPO_NOT_PRESENT" ]);
+                const cmd = new GitCommand(this.git);
+                cmd.run(operation.command, this.info.repo, this.root);
+                this.operation = cmd;
+            } else if (operation.exe === "npm") {
+                if (!this.is_present) return resolve([ null, "REPO_NOT_PRESENT" ]);
+                const cmd = new NPMCommand(this.npm);
+                if (operation.command === "build") {
+                    if (!this.info.build || this.info.build.length < 1) return resolve([ null, "NO_BUILD_SCRIPT" ]);
+                    cmd.build(this.info.build, this.root);
+                } else {
+                    if (this.info.install === "") return resolve([ null, "INSTALL_NOT_PERMITTED" ]);
+                    cmd.install(this.info.install, this.info.force_install, this.root);
+                }
+                this.operation = cmd;
+            } else {
+                resolve([ null, "NOT_IMPLEMENTED" ])
+                return null as never;
+            }
 
-    async script() {
+            this.operation.on("log", (log) => {
 
+            });
+            this.operation.on("exit", (code) => {
+                this.operation = undefined;
+                resolve([ true, null ]);
+            });
+        });
     }
 
 }
