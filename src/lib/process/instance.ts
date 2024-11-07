@@ -1,9 +1,11 @@
 import { SpawnedServer } from "$lib/process/spawn";
 import type {ProcessWrapper} from "$lib/process/process-wrapper";
-import type {Log, NodeServerEditable, RuntimeEditable} from "$lib/types";
+import type {NodeServerEditable, RuntimeEditable} from "$lib/types";
+import type { Log } from "$lib/log/common";
 import {join} from "node:path";
 import { stat } from "node:fs/promises";
 import {ulid} from "ulidx";
+import {LogFileHelper} from "$lib/process/logfile";
 
 const unwrappedStat = async (...params: Parameters<typeof stat>): Promise<[ Awaited<ReturnType<typeof stat>>, null ] | [ null, any ]> => {
     try {
@@ -43,7 +45,7 @@ export class ServerInstance {
     private git: string;
 
     private timing?: { start: number };
-    private active_log?: Log[];
+    private active_log?: LogFileHelper;
 
     private is_present = false;
     private is_installed = false;
@@ -91,29 +93,45 @@ export class ServerInstance {
         }
     }
 
-    private startLog() {
-
-    }
-
-    private handleLog(log: Log) {
-
-    }
-
     private events(server: SpawnedServer) {
-        server.on("stop", () => {
+        this.run = ulid();
+        this.active_log = new LogFileHelper(this.run, this.log);
 
-        })
+        server.on("stop", async (signal, graceful) => {
+            if (!this.active_log) return;
+            await this.active_log.end(Date.now(), `KILLED ${signal}`);
+            this.active_log = undefined;
+            this.server = undefined;
+            this.timing = undefined;
+            if (this.params.restarts && !graceful) {
+                setTimeout(this.start.bind(this), 500);
+            }
+        });
 
-        server.on("exit", () => {
-
-        })
+        server.on("exit", async (code, graceful) => {
+            if (!this.active_log) return;
+            await this.active_log.end(Date.now(), `STOPPED ${"EXIT CODE: " + code}`);
+            this.active_log = undefined;
+            this.server = undefined;
+            this.timing = undefined;
+            if (this.params.restarts && !graceful) {
+                setTimeout(this.start.bind(this), 500);
+            }
+        });
 
         server.on("error", () => {
 
         })
 
+        server.on("start", () => {
+            this.timing = { start: Date.now() };
+            if (!this.active_log) return;
+            this.active_log.start(this.timing.start);
+        });
+
         server.on("log", (type, message) => {
-            this.handleLog({ type, message, at: Date.now() });
+            if (!this.active_log) return;
+            this.active_log.handleLog({ type, message, at: Date.now() });
         })
     }
 
@@ -129,14 +147,11 @@ export class ServerInstance {
 
         if (!result) return [ null, "START_FAILED" ];
 
-        this.run = ulid();
-        this.timing = { start: Date.now() };
-
         return [ true, null ];
     }
 
     async stop() {
-
+        this.server?.stop();
     }
 
     async operate() {

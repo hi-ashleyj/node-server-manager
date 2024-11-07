@@ -27,16 +27,3 @@ export type RuntimeInfo = {
 export type RuntimeEditable = RuntimeInfo & {
     env: Record<string, string>;
 }
-
-export type Log = {
-    type: "log" | "error";
-    message: string;
-    at: number;
-}
-
-export type LogFile = {
-    start: number;
-    end: number;
-    circumstance: `STOPPED ${string}` | `KILLED ${string}`;
-    logs: Log[];
-}
