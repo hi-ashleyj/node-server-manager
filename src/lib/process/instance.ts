@@ -1,7 +1,6 @@
 import { SpawnedServer } from "$lib/process/spawn";
 import type {ProcessWrapper} from "$lib/process/process-wrapper";
 import type {NodeServerEditable, RuntimeEditable} from "$lib/types";
-import type { Log } from "$lib/log/common";
 import {join} from "node:path";
 import { stat } from "node:fs/promises";
 import {ulid} from "ulidx";
@@ -151,7 +150,7 @@ export class ServerInstance {
     }
 
     async stop() {
-        this.server?.stop();
+        if (this.server) this.server.stop();
     }
 
     async operate() {
