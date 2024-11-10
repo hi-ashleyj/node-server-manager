@@ -28,3 +28,5 @@ export type RuntimeInfo = {
 export type RuntimeEditable = RuntimeInfo & {
     env: Record<string, string>;
 }
+
+export type ServerDatabase = { servers: NodeServerEditable[], paths: { node?: string, npm?: string, git?: string } };

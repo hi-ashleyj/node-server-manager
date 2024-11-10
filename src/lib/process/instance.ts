@@ -1,5 +1,4 @@
 import { SpawnedServer } from "$lib/process/spawn";
-import type {ProcessWrapper} from "$lib/process/process-wrapper";
 import type {NodeServerEditable, RuntimeEditable} from "$lib/types";
 import {join} from "node:path";
 import { stat } from "node:fs/promises";
@@ -18,12 +17,14 @@ const unwrappedStat = async (...params: Parameters<typeof stat>): Promise<[ Awai
 }
 
 export const ServerInstanceErrors = {
+    SERVER_NOT_FOUND: "Could not find server runtime information",
     SERVER_RUNNING: "Server is currently running",
     SERVER_OFFLINE: "Server is currently offline",
     OPERATION_RUNNING: "Server is currently being modified",
     OPERATION_OFFLINE: "Server is not being modified",
     PROJECT_MISSING: "Project is not downloaded",
     PROJECT_RUNNER_MISSING: "Main Executable is not present",
+    PACKAGES_MISSING: "Package Install is configured but node_modules not present",
     START_FAILED: "Server Process Refused to Start",
     NOT_IMPLEMENTED: "Not Implemented",
     REPO_NOT_PRESENT: "Project cannot be updated - not present",
@@ -36,11 +37,15 @@ type Unwrap<V, E> = [V, null] | [null, E];
 
 export type Operation = { exe: "npm", command: "install" | "build" } | { exe: "git", command: "pull" | "clone" };
 
+export type ServerInstancePaths = {
+    node: string, npm: string, git: string, root: string, logs: string
+}
+
 export class ServerInstance {
 
     private server?: SpawnedServer;
     private run?: string;
-    private operation?: ProcessWrapper;
+    private operation?: GitCommand | NPMCommand;
     private root: string;
     private info: NodeServerEditable;
     private params: RuntimeEditable & { auto: boolean, restarts: boolean };
@@ -57,7 +62,9 @@ export class ServerInstance {
     private is_installed = false;
     private is_built = false;
 
-    constructor(environment: { node: string, npm: string, git: string, root: string, logs: string }, server: NodeServerEditable, params: RuntimeEditable & { auto: boolean, restarts: boolean }) {
+    private updates?: (restart: boolean) => any;
+
+    constructor(environment: ServerInstancePaths, server: NodeServerEditable, params: RuntimeEditable & { auto: boolean, restarts: boolean }) {
         this.root = environment.root;
         this.node = environment.node;
         this.npm = environment.npm;
@@ -96,6 +103,7 @@ export class ServerInstance {
             built: this.is_built,
             running: !!this.server,
             operating: !!this.operation,
+            waiting_for_update: !!this.updates,
         }
     }
 
@@ -109,6 +117,7 @@ export class ServerInstance {
             this.active_log = undefined;
             this.server = undefined;
             this.timing = undefined;
+            if (this.after_stop) return this.updates(!graceful);
             if (this.params.restarts && !graceful) {
                 setTimeout(this.start.bind(this), 500);
             }
@@ -120,6 +129,7 @@ export class ServerInstance {
             this.active_log = undefined;
             this.server = undefined;
             this.timing = undefined;
+            if (this.after_stop) return this.updates(!graceful);
             if (this.params.restarts && !graceful) {
                 setTimeout(this.start.bind(this), 500);
             }
@@ -146,6 +156,7 @@ export class ServerInstance {
         if (this.operation) return [ null, "OPERATION_RUNNING" ];
         await this.check();
         if (!this.is_present) return [ null, "PROJECT_MISSING" ];
+        if (!this.is_installed && this.info.install !== "") return [ null, "PACKAGES_MISSING" ];
         if (!this.is_built) return [ null, "PROJECT_RUNNER_MISSING" ];
 
         const server = new SpawnedServer(this.node);
@@ -156,12 +167,12 @@ export class ServerInstance {
         return [ true, null ];
     }
 
-    async stop() {
+    stop() {
         if (this.server) this.server.stop();
     }
 
     operate(operation: Operation): Promise<Unwrap<boolean, ErrorCode>> {
-        return new Promise((resolve) => {
+        const promise = new Promise<Unwrap<boolean, ErrorCode>>((resolve) => {
             if (this.server) return resolve([ null, "SERVER_RUNNING" ]);
             if (this.operation) return resolve([ null, "OPERATION_RUNNING" ]);
 
@@ -191,9 +202,52 @@ export class ServerInstance {
             });
             this.operation.on("exit", (code) => {
                 this.operation = undefined;
+                if (this.after_stop) this.updates(!graceful);
                 resolve([ true, null ]);
             });
+            this.operation.on("stop", (sign) => {
+                this.operation = undefined;
+                if (this.after_stop) this.updates(false);
+                resolve([ false, null ]);
+            });
         });
+
+        promise.then(this.check);
+        return promise;
+    }
+
+    stopOperation() {
+        if (this.operation) {
+            this.operation.stop();
+        }
+    }
+
+    onStop(call: (restart: boolean) => any) {
+        this.updates = call;
+    }
+
+    forceQuit() {
+        return new Promise((resolve) => {
+            let count = 0;
+            this.updates = undefined;
+            const isClosed = () => {
+                count --;
+                if (count <= 0) resolve();
+            }
+            if (this.server) {
+                count ++;
+                this.server.stop();
+                this.server.on("stop", () => isClosed());
+                this.server.on("exit", () => isClosed());
+            }
+            if (this.operation) {
+                count ++;
+                this.operation.stop();
+                this.operation.on("stop", () => isClosed());
+                this.operation.on("exit", () => isClosed());
+            }
+            if (count === 0) resolve();
+        })
     }
 
 }
