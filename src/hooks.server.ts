@@ -17,14 +17,14 @@ await db.read();
 {
     const { node, npm, git } = db.data.paths;
     if (node && npm && git) {
-        manager = await start({ git, npm, node, nsm: join(homedir(), "nsm") });
+        manager = await start({ git, npm, node, nsm: join(homedir(), "nsm") }, db);
     }
 }
 
-const setPaths = async ({ node, npm, git }) => {
+const setPaths = async ( node: string, npm: string, git: string ) => {
     db.update(({ paths }) => paths = { node, npm, git });
     if (manager) manager.shutdown();
-    manager = await start({ git, npm, node, nsm: join(homedir(), "nsm") });
+    manager = await start({ git, npm, node, nsm: join(homedir(), "nsm") }, db);
 }
 
 declare global {

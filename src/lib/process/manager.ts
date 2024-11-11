@@ -14,7 +14,7 @@ export type ServerManager = {
     start: (id: string, env: "test" | "production") => ReturnType<ServerInstance["start"]>;
     stop: (id: string, env: "test" | "production") => ReturnType<ServerInstance["stop"]>;
     operate: (id: string, env: "test" | "production", operation: Operation) => ReturnType<ServerInstance["operate"]>;
-    script: (id: string, env: "test" | "production", mode: "install" | "update") => Promise<Awaited<ReturnType<ServerInstance["operate"]>[]>>;
+    script: (id: string, env: "test" | "production", mode: "install" | "update") => Promise<Awaited<ReturnType<ServerInstance["operate"]>>[]>;
     shutdown: () => Promise<any>;
 };
 
@@ -53,11 +53,14 @@ export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>):
 
     return {
         create: async (data) => {
+            const more = db.data.servers.some(it => it.id === data.id);
+            if (more) return false;
             db.update(({ servers }) => servers.push(data));
-            await mkdir(join(paths.nsm, "logs", "test", id), { recursive: true });
-            await mkdir(join(paths.nsm, "logs", "production", id), { recursive: true });
+            await mkdir(join(paths.nsm, "logs", "test", data.id), { recursive: true });
+            await mkdir(join(paths.nsm, "logs", "production", data.id), { recursive: true });
             servers.set(`${data.id}/test`, new ServerInstance(makePaths(data.id, "test"), data, { ...data.test, auto: false, restarts: false }));
-            servers.set(`${data.id}/production`, new ServerInstance(makePaths(data.id, "production"), data, { ...data.production, auto: data.auto, restarts: true }));
+            servers.set(`${data.id}/production`, new ServerInstance(makePaths(data.id, "production"), data, { ...data.prod, auto: data.auto, restarts: true }));
+            return true;
         },
         update: (id, data) => {
             db.update(({servers}) => {
@@ -85,21 +88,21 @@ export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>):
             }
         },
         remove: (id) => {
-            const test = servers.get(`${data.id}/test`);
-            const production = servers.get(`${data.id}/production`);
+            const test = servers.get(`${id}/test`);
+            const production = servers.get(`${id}/production`);
 
             if (test) {
                 const stat = test.getStatus();
                 if (stat.running) test.stop();
                 if (stat.operating) test.stopOperation();
-                servers.delete(`${data.id}/test`);
+                servers.delete(`${id}/test`);
             }
 
             if (production) {
                 const stat = production.getStatus();
                 if (stat.running) production.stop();
                 if (stat.operating) production.stopOperation();
-                servers.delete(`${data.id}/production`);
+                servers.delete(`${id}/production`);
             }
 
             db.update(({ servers }) => {

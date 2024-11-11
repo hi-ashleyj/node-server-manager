@@ -117,7 +117,7 @@ export class ServerInstance {
             this.active_log = undefined;
             this.server = undefined;
             this.timing = undefined;
-            if (this.after_stop) return this.updates(!graceful);
+            if (this.updates) return this.updates(!graceful);
             if (this.params.restarts && !graceful) {
                 setTimeout(this.start.bind(this), 500);
             }
@@ -129,7 +129,7 @@ export class ServerInstance {
             this.active_log = undefined;
             this.server = undefined;
             this.timing = undefined;
-            if (this.after_stop) return this.updates(!graceful);
+            if (this.updates) return this.updates(!graceful);
             if (this.params.restarts && !graceful) {
                 setTimeout(this.start.bind(this), 500);
             }
@@ -200,14 +200,14 @@ export class ServerInstance {
             this.operation.on("log", (log) => {
 
             });
-            this.operation.on("exit", (code) => {
+            this.operation.on("exit", (code, graceful) => {
                 this.operation = undefined;
-                if (this.after_stop) this.updates(!graceful);
+                if (this.updates) this.updates(!graceful);
                 resolve([ true, null ]);
             });
             this.operation.on("stop", (sign) => {
                 this.operation = undefined;
-                if (this.after_stop) this.updates(false);
+                if (this.updates) this.updates(false);
                 resolve([ false, null ]);
             });
         });
@@ -227,7 +227,7 @@ export class ServerInstance {
     }
 
     forceQuit() {
-        return new Promise((resolve) => {
+        return new Promise<void>((resolve) => {
             let count = 0;
             this.updates = undefined;
             const isClosed = () => {
