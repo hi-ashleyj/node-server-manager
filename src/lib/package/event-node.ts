@@ -12,6 +12,7 @@ export type EventNode = {
     listen: () => {};
 }
 
-export const eventNode: (options: EventNodeOptions) => {} = () => {
+export const eventNode = (options: EventNodeOptions): EventNode => {
     const recent = new Map<string, number>();
+    return {}
 };

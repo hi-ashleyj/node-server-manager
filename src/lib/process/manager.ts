@@ -4,13 +4,15 @@ import {type Operation, ServerInstance, type ServerInstancePaths} from "$lib/pro
 import { join } from "node:path";
 import { mkdir } from "node:fs/promises";
 
+type ServerStatus = ReturnType<ServerInstance["getStatus"]> | null;
+
 export type ServerManager = {
     create: (data: NodeServerEditable) => any;
     update: (id: string, data: NodeServerEditable) => any;
     remove: (id: string) => any;
     status: (id: string, env: "test" | "production") => ReturnType<ServerInstance["getStatus"]> | null;
-    list: () => NodeServerEditable[];
-    information: (id: string) => NodeServerEditable | null;
+    list: () => { info: NodeServerEditable, test: ServerStatus, prod: ServerStatus }[];
+    information: (id: string) => { info: NodeServerEditable, test: ServerStatus, prod: ServerStatus } | null;
     start: (id: string, env: "test" | "production") => ReturnType<ServerInstance["start"]>;
     stop: (id: string, env: "test" | "production") => ReturnType<ServerInstance["stop"]>;
     operate: (id: string, env: "test" | "production", operation: Operation) => ReturnType<ServerInstance["operate"]>;
@@ -116,10 +118,18 @@ export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>):
             return server.getStatus();
         },
         list: () => {
-            return db.data.servers;
+            return db.data.servers.map(info => {
+                const test = servers.get(`${info.id}/test`)?.getStatus() ?? null;
+                const prod = servers.get(`${info.id}/test`)?.getStatus() ?? null;
+                return { info, test, prod };
+            });
         },
         information: (id) => {
-            return db.data.servers.find(it => it.id === id) ?? null;
+            const info = db.data.servers.find(it => it.id === id);
+            if (!info) return null;
+            const test = servers.get(`${id}/test`)?.getStatus() ?? null;
+            const prod = servers.get(`${id}/test`)?.getStatus() ?? null;
+            return { info, test, prod };
         },
         start: (id, env) => {
             const server = servers.get(`${id}/${env}`);
