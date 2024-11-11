@@ -15,7 +15,7 @@ const config = {
     // 3. Append the path to the Skeleton package
     join(require.resolve(
             '@skeletonlabs/skeleton'),
-        '../**/*.{html,js,runtime,ts}'
+        '../**/*.{html,js,runtime,svelte,ts}'
     )
   ],
   theme: {

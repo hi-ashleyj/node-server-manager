@@ -2,7 +2,7 @@
 
     import { SlideToggle, RadioGroup, RadioItem } from "@skeletonlabs/skeleton";
 
-    let deps = "";
+    let deps = "install";
 
 </script>
 
@@ -25,30 +25,35 @@
         </div>
         <div class="card w-full h-max p-4 mb-4 grid grid-cols-[1fr_2fr] items-center gap-y-4 gap-x-6">
             <label for="auto">Production Server Auto-Start</label>
-            <div class="text-right h-8">
+            <div class="text-left h-8">
                 <SlideToggle name="auto" active="bg-primary-500" />
             </div>
 
-            <label>Install Dependencies</label>
-            <div class="">
+            <label for="deps">Install Dependencies</label>
+            <div class="grid grid-cols-[max-content_max-content_max-content] items-center gap-4">
                 <RadioGroup active="variant-filled-primary">
-                    <RadioItem bind:group={deps} name="deps" value="">No</RadioItem>
+                    <RadioItem bind:group={deps} name="deps" value="">disabled</RadioItem>
                     <RadioItem bind:group={deps} name="deps" value="install">npm install</RadioItem>
                     <RadioItem bind:group={deps} name="deps" value="ci">npm ci</RadioItem>
                 </RadioGroup>
+                <label for="install-force" class="pl-8">force</label>
+                <SlideToggle name="install-force" active="bg-primary-500" />
             </div>
 
-            <label>Build Script</label>
+            <label for="build">Build Script</label>
             <div class="input-group variant-ghost-surface grid grid-cols-[max-content_1fr] items-center">
                 <span class="pl-3 text-surface-600-300-token">npm run</span>
-                <input type="text" class="pl-1" value="build" />
+                <input type="text" class="pl-1" name="build" value="build" />
             </div>
 
-            <label>Entry Point</label>
+            <label for="entry ">Entry Point</label>
             <div class="input-group variant-ghost-surface grid grid-cols-[max-content_1fr] items-center">
                 <span class="pl-3 text-surface-600-300-token">node</span>
-                <input type="text" class="pl-1" value="build/index.js" />
+                <input type="text" class="pl-1" name="entry" value="build/index.js" />
             </div>
+        </div>
+        <div class="text-right">
+            <button class="btn variant-filled-surface">Create</button>
         </div>
     </div>
 </div>
