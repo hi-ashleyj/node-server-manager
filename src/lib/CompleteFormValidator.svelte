@@ -2,19 +2,20 @@
 
     let counter = 0;
     let valids = 0;
+    let changed = 0;
 
-    const valid = (c: 1) => {
-        valids += c;
+    const valid = (c: CustomEvent<1 | 0 | -1>) => {
+        valids += c.detail;
     }
 
-    const invalid = (c: 0 | -1) => {
-        valids += c;
+    const changedEvent = (c: CustomEvent<1 | -1>) => {
+        changed += c.detail;
     }
 
-    const count = (c: 1) => {
-        counter += c;
+    const count = (c: CustomEvent<1>) => {
+        counter += c.detail;
     }
 
 </script>
 
-<slot count={count} invalid={invalid} valid={valid} ok={counter === valids} />
+<slot count={count} valid={valid} changed={changedEvent} identical={changed === 0} ok={counter === valids} />

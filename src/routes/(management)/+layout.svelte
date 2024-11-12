@@ -1,5 +1,6 @@
 <script lang="ts">
 
+    import { signOut } from "@auth/sveltekit/client"
     import { popup } from '@skeletonlabs/skeleton';
     import type { PopupSettings } from '@skeletonlabs/skeleton';
     export let data;
@@ -30,6 +31,6 @@
 
 <div data-popup="signoutPopup">
     <div class="btn-group-vertical variant-ghost-surface">
-        <button class="variant-filled-error hover:variant-filled-error">Log out</button>
+        <button class="variant-filled-error hover:variant-filled-error" on:click={signOut}>Log out</button>
     </div>
 </div>

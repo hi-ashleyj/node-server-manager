@@ -1,10 +1,6 @@
 import { SvelteKitAuth } from "@auth/sveltekit";
 import Credentials from "@auth/sveltekit/providers/credentials";
-import { JSONFilePreset } from "lowdb/node";
-
-const TEMP_USERS = {
-    "admin": "admin",
-} as Record<string, string>;
+import {authorise} from "./permissions";
 
 export const { handle, signIn, signOut } = SvelteKitAuth({
     providers: [
@@ -14,19 +10,16 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
                 password: {},
             },
             authorize: async (credentials) => {
-                if (typeof credentials.username === "string" && credentials.username in TEMP_USERS
-                    && typeof credentials.password === "string" && TEMP_USERS[credentials.username] === credentials.password) {
-                    console.log(`logged in ${credentials.username}`);
-                    return {
-                        id: credentials.username,
-                        name: credentials.username,
-                        email: credentials.username,
-                        image: "https://cat.com",
-                    }
+                if (typeof credentials.username !== "string" || typeof credentials.password !== "string") return null;
+                const answer = authorise(credentials.username, credentials.password);
+                if (!answer) return null;
+
+                return {
+                    id: answer.id,
+                    name: answer.id,
+                    email: answer.name,
                 }
 
-                console.log("failed");
-                return null;
             },
         }),
     ],

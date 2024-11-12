@@ -1,34 +1,44 @@
-<script lang="ts">
+<script lang="ts" generics='T extends "text" | "number"'>
 
     import { onMount, createEventDispatcher } from "svelte";
 
-    const dispatch = createEventDispatcher<{ invalid: 0 | -1, valid: 1, count: 1 }>();
+    const dispatch = createEventDispatcher<{ valid: 1 | 0 | -1, count: 1, changed: 1 | -1 }>();
 
-    export let type: "text" | "number" = "text";
+    export let type: T = "text";
     export let name: string;
     export let caption: string;
 
-    export let value: typeof type extends "text" ? string : number = type === "text" ? "" : 0;
-    export let validator: (value: typeof type extends "text" ? string : number) => string | null;
-    export let error: boolean;
+    export let initial: T extends "number" ? number : string = type === "number" ? 0 : "";
+    export let value: T extends "number" ? number : string = type === "number" ? 0 : "";
+    export let validator: (value: T extends "number" ? number : string) => string | null;
+    export let error: boolean = false;
 
     let last: string | null = null;
+    let changed = false;
 
     const check = (f = false) => {
         const res = validator(value);
         if (res === null) {
             last = null;
-            if (error === true) dispatch("valid", 1);
+            if (error === true || f) dispatch("valid", 1);
             error = false;
         } else {
             last = res;
-            if (error === false) dispatch("invalid", f ? 0 : -1);
+            if (error === false && !f) dispatch("valid", -1);
             error = true;
+        }
+        if (value === initial && changed) {
+            dispatch("changed", -1);
+            changed = false;
+        } else if (value !== initial && !changed) {
+            dispatch("changed", 1);
+            changed = true;
         }
     }
 
     onMount(() => {
-        dispatch("count");
+        value = initial;
+        dispatch("count", 1);
         check(true);
     });
 
@@ -42,7 +52,7 @@
 </label>
 
 {#if type === "text"}
-    <input type="text" name={name} class="input" class:variant-ghost-surface={!error} class:variant-ghost-error={error} bind:value={value} on:input on:input={check} />
+    <input type="text" name={name} class="input" class:variant-ghost-surface={!error} class:variant-ghost-error={error} bind:value={value} on:input={() => check()} />
 {:else if type === "number"}
-    <input type="number" name={name} class="input" class:variant-ghost-surface={!error} class:variant-ghost-error={error} bind:value={value} on:input on:input={check} />
+    <input type="number" name={name} class="input" class:variant-ghost-surface={!error} class:variant-ghost-error={error} bind:value={value} on:input={() => check()} />
 {/if}

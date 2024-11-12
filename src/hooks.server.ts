@@ -6,6 +6,8 @@ import { mkdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { start, type ServerManager } from "$lib/process/manager";
+import { handle as authHandle } from "./auth";
+import {perms, type Perms} from "./permissions";
 
 await mkdir(join(homedir(), "nsm"), { recursive: true });
 
@@ -22,8 +24,8 @@ await db.read();
 }
 
 const setPaths = async ( node: string, npm: string, git: string ) => {
-    db.update(({ paths }) => paths = { node, npm, git });
-    if (manager) manager.shutdown();
+    await db.update((data) => data.paths = { node, npm, git });
+    if (manager) await manager.shutdown();
     manager = await start({ git, npm, node, nsm: join(homedir(), "nsm") }, db);
 }
 
@@ -33,11 +35,10 @@ declare global {
             db: typeof db;
             manager?: ServerManager;
             paths: typeof setPaths;
+            perms: Perms;
         }
     }
 }
-
-import { handle as authHandle } from "./auth";
 
 const localHandle: Handle = async ({ event, resolve }) => {
     const auth = await event.locals.auth();
@@ -52,6 +53,7 @@ const localHandle: Handle = async ({ event, resolve }) => {
     event.locals.db = db;
     event.locals.manager = manager;
     event.locals.paths = setPaths;
+    event.locals.perms = perms(auth?.user?.name);
     return resolve(event);
 };
 

@@ -1,5 +1,7 @@
 <script>
     import { signIn } from "@auth/sveltekit/client"
+    import encodeHash64 from "crypto-js/enc-base64";
+    import sha512 from "crypto-js/sha512";
 
     let username = "";
     let password = "";
@@ -16,7 +18,7 @@
             <label class="input-group-shim grid place-items-center" for="password">Password</label>
             <input name="password" type="password" bind:value={password} />
         </div>
-        <button class="btn variant-filled-primary" on:click={() => signIn('credentials', { username, password })}>
+        <button class="btn variant-filled-primary" on:click={() => signIn('credentials', { username, password: encodeHash64.stringify(sha512(password)) })}>
             Log in
         </button>
     </div>
