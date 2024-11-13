@@ -51,8 +51,12 @@
     {/if}
 </label>
 
-{#if type === "text"}
-    <input type="text" name={name} class="input" class:variant-ghost-surface={!error} class:variant-ghost-error={error} bind:value={value} on:input={() => check()} />
-{:else if type === "number"}
-    <input type="number" name={name} class="input" class:variant-ghost-surface={!error} class:variant-ghost-error={error} bind:value={value} on:input={() => check()} />
+{#if $$slots.input}
+    <slot name="input" input_for={name} error={error} check={check} value={value}></slot>
+{:else}
+    {#if type === "text"}
+        <input type="text" name={name} class="input" class:variant-ghost-surface={!error} class:variant-ghost-error={error} bind:value={value} on:input={() => check()} />
+    {:else if type === "number"}
+        <input type="number" name={name} class="input" class:variant-ghost-surface={!error} class:variant-ghost-error={error} bind:value={value} on:input={() => check()} />
+    {/if}
 {/if}

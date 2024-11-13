@@ -5,6 +5,9 @@ import sha512 from "crypto-js/sha512";
 import {JSONFilePreset} from "lowdb/node";
 import {join} from "node:path";
 import {homedir} from "node:os";
+import {mkdir} from "node:fs/promises";
+
+await mkdir(join(homedir(), "nsm"), { recursive: true });
 
 export type User = {
     id: string,
