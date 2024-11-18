@@ -7,7 +7,7 @@ import { mkdir } from "node:fs/promises";
 type ServerStatus = ReturnType<ServerInstance["getStatus"]> | null;
 
 export type ServerManager = {
-    create: (data: NodeServerEditable) => any;
+    create: (data: NodeServerEditable) => Promise<boolean>;
     update: (id: string, data: NodeServerEditable) => any;
     remove: (id: string) => any;
     status: (id: string, env: "test" | "production") => ReturnType<ServerInstance["getStatus"]> | null;
@@ -120,7 +120,7 @@ export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>):
         list: () => {
             return db.data.servers.map(info => {
                 const test = servers.get(`${info.id}/test`)?.getStatus() ?? null;
-                const prod = servers.get(`${info.id}/test`)?.getStatus() ?? null;
+                const prod = servers.get(`${info.id}/production`)?.getStatus() ?? null;
                 return { info, test, prod };
             });
         },
@@ -128,7 +128,7 @@ export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>):
             const info = db.data.servers.find(it => it.id === id);
             if (!info) return null;
             const test = servers.get(`${id}/test`)?.getStatus() ?? null;
-            const prod = servers.get(`${id}/test`)?.getStatus() ?? null;
+            const prod = servers.get(`${id}/production`)?.getStatus() ?? null;
             return { info, test, prod };
         },
         start: (id, env) => {

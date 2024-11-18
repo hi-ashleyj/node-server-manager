@@ -4,6 +4,9 @@
     import CompleteFormValidator from "$lib/CompleteFormValidator.svelte";
     import InputItem from "$lib/InputItem.svelte";
     import InputWrapper from "$lib/InputWrapper.svelte";
+    import {goto, invalidateAll} from "$app/navigation";
+
+    let saving = false;
 
     let id = "";
     let name = "";
@@ -16,6 +19,18 @@
     let build = "build";
     let entry = "build/index.js";
 
+    const create = async () => {
+        saving = true;
+        const res = await fetch("/new", {
+            method: "PUT",
+            body: JSON.stringify({ id, name, port, repo, auto, deps, deps_force, build, entry }),
+        });
+        if (res.ok) {
+            await goto("/");
+        }
+        saving = false;
+    }
+
 </script>
 
 <CompleteFormValidator let:count let:valid let:changed let:ok let:identical>
@@ -26,7 +41,7 @@
 
                 <InputItem caption="ID" initial="" name="id" type="text" bind:value={id} validator={v => v.length > 0 ? null : "Required"} on:valid={valid} on:changed={changed} on:count={count} />
                 <InputItem caption="Name" initial="" name="name" type="text" bind:value={name} validator={v => v.length > 0 ? null : "Required"} on:valid={valid} on:changed={changed} on:count={count} />
-                <InputItem caption="Port" initial={null} name="port" type="number" bind:value={port} validator={v => v >= 7000 && v <= 7999 ? null : "Required"} on:valid={valid} on:changed={changed} on:count={count} />
+                <InputItem caption="Port" initial={null} name="port" type="number" bind:value={port} validator={v => v >= 7000 && v <= 7999 ? null : "Must be in 7xxx space"} on:valid={valid} on:changed={changed} on:count={count} />
                 <InputItem caption="Repository" initial="" name="repo" type="text" bind:value={repo} validator={v => v.length > 0 ? null : "Required"} on:valid={valid} on:changed={changed} on:count={count} />
 
             </div>
@@ -73,7 +88,7 @@
 
             </div>
             <div class="text-right">
-                <button class="btn variant-filled-surface" class:variant-filled-surface={!ok} class:variant-filled-primary={ok} disabled={!ok || identical}>Create</button>
+                <button class="btn variant-filled-surface" class:variant-filled-surface={!ok} class:variant-filled-primary={ok} disabled={!ok || identical || saving} on:click={create}>Create</button>
             </div>
         </div>
     </div>
