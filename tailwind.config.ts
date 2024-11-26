@@ -19,8 +19,7 @@ const config = {
     )
   ],
   theme: {
-    extend: {
-    },
+    extend: {},
   },
   plugins: [
     forms,

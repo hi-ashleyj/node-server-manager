@@ -59,7 +59,7 @@
                                         {#if result.status === "unknown"}
                                             <span class="w-2 h-2 bg-surface-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">unknown</span>
-                                        {:else if result.status === "down" && server.test.running}
+                                        {:else if result.status === "down" && server.test.active}
                                             <span class="w-2 h-2 bg-error-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">running • nsm down</span>
                                         {:else if result.status === "down"}
@@ -72,7 +72,7 @@
                                             <span class="w-2 h-2 bg-success-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">{result.frequency.toFixed(2)}/m - {result.avg.toFixed(2)}ms - {result.min.toFixed(2)}ms - {result.max.toFixed(2)}ms</span>
                                         {/if}
-                                    {:catch}
+                                    {:catch e}
                                             <span>failure</span>
                                     {/await}
                                 </div>
@@ -93,6 +93,9 @@
                                         {#if result.status === "unknown"}
                                             <span class="w-2 h-2 bg-surface-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">unknown</span>
+                                        {:else if result.status === "down" && server.prod.active}
+                                            <span class="w-2 h-2 bg-error-500 rounded-full inline-block align-middle mr-2"></span>
+                                            <span class="align-middle text-sm">running • nsm down</span>
                                         {:else if result.status === "down"}
                                             <span class="w-2 h-2 bg-error-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">down</span>
@@ -103,7 +106,7 @@
                                             <span class="w-2 h-2 bg-success-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">{result.frequency.toFixed(2)}/m - {result.avg.toFixed(2)}ms - {result.min.toFixed(2)}ms - {result.max.toFixed(2)}ms</span>
                                         {/if}
-                                    {:catch}
+                                    {:catch e}
                                         <span>failure</span>
                                     {/await}
                                 </div>

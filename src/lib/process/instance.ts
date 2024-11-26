@@ -1,11 +1,13 @@
 import { SpawnedServer } from "$lib/process/spawn";
 import type {NodeServerEditable, RuntimeEditable} from "$lib/types";
 import {join} from "node:path";
-import { stat } from "node:fs/promises";
+import { stat, readdir, readFile } from "node:fs/promises";
 import {ulid} from "ulidx";
 import {LogFileHelper} from "$lib/process/logfile";
+import { decodeLogFile } from "$lib/log/decode";
 import {GitCommand} from "$lib/process/git";
 import {NPMCommand} from "$lib/process/npm";
+import type {LogFile} from "$lib/log/common";
 
 const unwrappedStat = async (...params: Parameters<typeof stat>): Promise<[ Awaited<ReturnType<typeof stat>>, null ] | [ null, any ]> => {
     try {
@@ -105,6 +107,10 @@ export class ServerInstance {
             operating: !!this.operation,
             waiting_for_update: !!this.updates,
         }
+    }
+
+    getLogger() {
+        return this.active_log;
     }
 
     private events(server: SpawnedServer) {
@@ -248,6 +254,22 @@ export class ServerInstance {
             }
             if (count === 0) resolve();
         })
+    }
+
+    async logfiles(): Promise<string[]> {
+        const list = await readdir(this.log, { withFileTypes: true, encoding: "utf8" });
+        const checked = list.filter(it => it.isFile() && (!this.run || it.name !== this.run)).map(it => it.name);
+        return checked.sort().reverse();
+    }
+
+    async getLogFile(run: string): Promise<string | null> {
+        try {
+            // noinspection UnnecessaryLocalVariableJS
+            const file = await readFile(join(this.log, run), { encoding: "utf8" });
+            return file;
+        } catch (_) {
+            return null;
+        }
     }
 
 }

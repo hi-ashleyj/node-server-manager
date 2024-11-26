@@ -1,5 +1,6 @@
 import type { Low } from "lowdb";
 import type {NodeServerEditable, ServerDatabase} from "$lib/types";
+import type {Log} from "$lib/log/common";
 import {type Operation, ServerInstance, type ServerInstancePaths} from "$lib/process/instance";
 import { join } from "node:path";
 import { mkdir } from "node:fs/promises";
@@ -11,6 +12,7 @@ export type ServerManager = {
     update: (id: string, data: NodeServerEditable) => any;
     remove: (id: string) => any;
     status: (id: string, env: "test" | "production") => ReturnType<ServerInstance["getStatus"]> | null;
+    recent: (id: string, env: "test" | "production") => Log[];
     list: () => { info: NodeServerEditable, test: ServerStatus, prod: ServerStatus }[];
     information: (id: string) => { info: NodeServerEditable, test: ServerStatus, prod: ServerStatus } | null;
     start: (id: string, env: "test" | "production") => ReturnType<ServerInstance["start"]>;
@@ -18,6 +20,10 @@ export type ServerManager = {
     operate: (id: string, env: "test" | "production", operation: Operation) => ReturnType<ServerInstance["operate"]>;
     script: (id: string, env: "test" | "production", mode: "install" | "update") => Promise<Awaited<ReturnType<ServerInstance["operate"]>>[]>;
     shutdown: () => Promise<any>;
+    hit: () => [ any, any ][];
+
+    listLogFiles: (id: string, env: "test" | "production") => Promise<string[]>;
+    getLogFile: (id: string, env: "test" | "production", run: string) => Promise<string | null>;
 };
 
 export type RunTimeInformation = {
@@ -52,6 +58,11 @@ export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>):
         const next = new ServerInstance(makePaths(id, env), info, Object.assign({}, env === "test" ? info.test : info.prod, { auto: start, restarts: env === "production" }));
         servers.set(`${id}/${env}`, next);
     };
+
+    db.data.servers.forEach((it) => {
+        servers.set(`${it.id}/test`, new ServerInstance(makePaths(it.id, "test"), it, { ...it.test, auto: false, restarts: false }));
+        servers.set(`${it.id}/production`, new ServerInstance(makePaths(it.id, "production"), it, { ...it.prod, auto: it.auto, restarts: true }));
+    })
 
     return {
         create: async (data) => {
@@ -172,13 +183,16 @@ export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>):
         script: async (id, env, mode) => {
             let server = servers.get(`${id}/${env}`);
             const info = db.data.servers.find(it => it.id === id);
-            if (!server || !info) {
-                if (!info) {
-                    return [];
-                }
+            if (!info) {
+                return [];
+            }
+            if (!server) {
                 server = new ServerInstance(makePaths(id, env), info, Object.assign({}, env === "test" ? info.test : info.prod, { auto: false, restarts: env === "production" }));
                 servers.set(`${id}/${env}`, server);
             }
+            const stat = server.getStatus();
+            if (stat.operating) return [];
+            if (stat.running) server.stop();
             if (mode === "install") {
                 const clone = await server.operate({ exe: "git", command: "clone" });
                 const packages = await server.operate({ exe: "npm", command: "install" });
@@ -195,6 +209,26 @@ export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>):
         },
         shutdown: () => {
             return Promise.allSettled([...servers.values()].map(it => it.forceQuit()));
+        },
+        hit: () => {
+            return [ ...servers.entries() ];
+        },
+        recent: (id, env) => {
+            let server = servers.get(`${id}/${env}`);
+            if (!server) return [];
+            const logger = server.getLogger();
+            if (!logger) return [];
+            return logger.getRecent();
+        },
+        listLogFiles: async (id, env) => {
+            let server = servers.get(`${id}/${env}`);
+            if (!server) return [];
+            return await server.logfiles();
+        },
+        getLogFile: async (id, env, run) => {
+            let server = servers.get(`${id}/${env}`);
+            if (!server) return null;
+            return await server.getLogFile(run);
         }
     }
 }
