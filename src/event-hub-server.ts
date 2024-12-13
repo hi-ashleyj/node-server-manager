@@ -18,12 +18,34 @@ const messageHandler = (active: ActiveSocket, sockets: Map<string, ActiveSocket>
             break;
         }
         case "subscribe": {
+            const repairedChannel = (message.message.channel[0] !== "/" ? "/" : "") + message.message.channel;
+            const spec = message.message.exact ? "!" : ".";
+            const channel = spec + repairedChannel;
+            active.listeners.add(channel);
+            active.socket.send(JSON.stringify({ type: "subscribed", message: { channel: repairedChannel, exact: message.message.exact} } as NSMMessage<"subscribed">));
             break;
         }
         case "unsubscribe": {
+            const repairedChannel = (message.message.channel[0] !== "/" ? "/" : "") + message.message.channel;
+            active.listeners.delete("!" + repairedChannel);
+            active.listeners.delete("." + repairedChannel);
+            active.socket.send(JSON.stringify({ type: "unsubscribed", message: { channel: repairedChannel } } as NSMMessage<"unsubscribed">));
             break;
         }
         case "broadcast": {
+            const repairedChannel = (message.channel[0] !== "/" ? "/" : "") + message.channel;
+            for (let sock of sockets.values()) {
+                if (sock.listeners.has("!" + repairedChannel)) {
+                    sock.socket.send(JSON.stringify({ type: "message", message: message.message, channel: repairedChannel } as NSMMessage<"message">));
+                    continue;
+                }
+                for (let line of sock.listeners.values()) {
+                    if (`.${repairedChannel}`.startsWith(line)) {
+                        sock.socket.send(JSON.stringify({ type: "message", message: message.message, channel: repairedChannel } as NSMMessage<"message">));
+                        break;
+                    }
+                }
+            }
             break;
         }
         case "system": {
@@ -61,12 +83,20 @@ export const start = (host = "0.0.0.0") => {
                 const [ mark, version ] = message.split("=");
                 if (mark !== "NSM_EVENTS_VERSION") return socket.close();
                 active.version = version;
-                const clientMajor = version.split(".")[0];
-                const serverMajor = __NSM__VERSION__.split(".")[0];
+                const [ clientMajor, clientMinor ] = version.split(".");
+                const [ serverMajor, serverMinor ] = __NSM__VERSION__.split(".");
+
                 if (clientMajor !== serverMajor) {
-                    socket.send("NSM_EVENTS_VERSION_REQUIRED=" + serverMajor);
+                    socket.send(`NSM_EVENTS_VERSION_REQUIRED=${serverMajor}.${serverMinor}`);
                     return socket.close();
                 }
+                const pc = parseInt(clientMinor);
+                const ps = parseInt(serverMinor);
+                if (pc < ps) {
+                    socket.send(`NSM_EVENTS_VERSION_REQUIRED=${serverMajor}.${serverMinor}`);
+                    return socket.close();
+                }
+
                 socket.send("NSM_EVENTS_READY");
             } else {
                 if (message !== "NSM_EVENTS_PROTOCOL_ACCEPTED") return close();
