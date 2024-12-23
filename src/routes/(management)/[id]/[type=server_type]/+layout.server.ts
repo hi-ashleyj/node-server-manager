@@ -1,4 +1,4 @@
-import type { LayoutServerLoad } from "./$types";
+import type { LayoutServerLoad } from "./$types.js";
 import {error} from "@sveltejs/kit";
 
 export const load = (async ({ locals, params }) => {

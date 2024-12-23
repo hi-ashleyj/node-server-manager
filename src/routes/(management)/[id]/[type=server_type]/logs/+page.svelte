@@ -3,9 +3,12 @@
     import Terminal from "@ajwdmedia/svelterial-icons/Outlined/Terminal.svelte";
     import {page} from "$app/stores";
     import { decodeTime } from "ulidx";
+    import { encodeLogFile } from "$lib/log/encode";
     export let data;
 
     const timeFormat = new Intl.DateTimeFormat("en-NZ", { day: "numeric", hour: "numeric", hour12: true, year: "numeric", month: "short", minute: "2-digit", second: "2-digit" })
+
+    $: console.log(encodeLogFile);
 
 </script>
 

@@ -3,6 +3,7 @@
     import Status from "@ajwdmedia/svelterial-icons/Outlined/QueryStats.svelte";
     import {browser} from "$app/environment";
     import {serverUrl} from "$lib";
+    import LogViewer from "../LogViewer.svelte";
     export let data;
 
     type StatusResponse = { status: "unknown" } | { status: "down" } | { status: "up", requests: 0 } | { status: "up", frequency: number, min: number, max: number, avg: number };
@@ -83,17 +84,5 @@
             <button disabled={data.status?.installed}>Build</button>
         </div>
     </div>
-    <div class="bg-black rounded-container-token text-white border-surface-300-600-token py-2 px-4 overflow-y-scroll">
-        <div class="grid grid-cols-[max-content_1fr] font-mono-token gap-x-4">
-            {#each data.recent as log (log.at)}
-                {#if log.type === "log"}
-                    <span class="text-primary-500-400-token">LOG</span>
-                {:else if log.type === "error"}
-                    <span class="text-error-500-400-token">ERR</span>
-                {/if}
-<!--                LOOK OUT - THERE'S A NBSP ON THE NEXT LINE-->
-                <span>{#each log.message.split("\n") as line}{line.split(" ").join("\u{A0}")}<br/>{/each}</span>
-            {/each}
-        </div>
-    </div>
+    <LogViewer logs={data.recent ?? []} />
 </div>

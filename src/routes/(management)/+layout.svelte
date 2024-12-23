@@ -14,13 +14,13 @@
 </script>
 
 <svelte:head>
-    <title>Node Servers</title>
+    <title>Node Server Manager</title>
 </svelte:head>
 
 <div class="w-full h-full grid grid-rows-[max-content_1fr] overflow-hidden">
     <div class="w-full h-max grid grid-cols-[1fr_max-content] p-6 gap-4 items-center">
         <a href="/" class="font-heading-token text-2xl w-max">
-            node <span class="text-secondary-700-200-token">servers</span>
+            node server <span class="text-secondary-700-200-token">manager</span>
         </a>
         <button class="font-heading-token btn hover:variant-ghost-surface" use:popup={signoutPopup}>signed in as&nbsp;<span class="text-secondary-700-200-token">{data.name}</span></button>
     </div>
