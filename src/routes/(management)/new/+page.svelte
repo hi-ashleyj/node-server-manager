@@ -5,8 +5,11 @@
     import InputItem from "$lib/InputItem.svelte";
     import InputWrapper from "$lib/InputWrapper.svelte";
     import {goto, invalidateAll} from "$app/navigation";
+    import { Circle } from "svelte-loading-spinners";
 
     let saving = false;
+    let status = "";
+    export let data;
 
     let id = "";
     let name = "";
@@ -27,6 +30,9 @@
         });
         if (res.ok) {
             await goto("/");
+        } else {
+            status = `${res.status} ${res.statusText}`;
+            setTimeout(() => status = "", 3000);
         }
         saving = false;
     }
@@ -88,6 +94,18 @@
 
             </div>
             <div class="text-right">
+                {#if saving}
+                    <span class="pr-4 inline-block align-middle">
+                        <Circle size="1.5" unit="em" color="#ffffff" />
+                    </span>
+                {:else if status.length > 0}
+                    <span class="pr-4 align-middle">
+                        {status}
+                    </span>
+                {/if}
+                {#if !data.has_permission}
+                    <span class="pr-4 text-error-600-300-token align-middle">Currently missing permission</span>
+                {/if}
                 <button class="btn variant-filled-surface" class:variant-filled-surface={!ok} class:variant-filled-primary={ok} disabled={!ok || identical || saving} on:click={create}>Create</button>
             </div>
         </div>

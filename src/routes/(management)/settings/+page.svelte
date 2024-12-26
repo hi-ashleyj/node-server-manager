@@ -2,9 +2,11 @@
     import InputItem from "$lib/InputItem.svelte";
     import CompleteFormValidator from "$lib/CompleteFormValidator.svelte";
     import { invalidateAll } from "$app/navigation";
+    import { Circle } from "svelte-loading-spinners";
 
     export let data;
     let saving = false;
+    let status = "";
 
     let node: string;
     let npm: string;
@@ -17,6 +19,12 @@
             body: JSON.stringify({ node, npm, git }),
         });
 
+        if (!res.ok) {
+            status = `${res.status} ${res.statusText}`;
+        } else {
+            status = "Saved!";
+        }
+        setTimeout(() => status = "", 3000);
         await invalidateAll();
         saving = false;
     }
@@ -34,10 +42,18 @@
 
             </div>
             <div class="text-right">
+                {#if saving}
+                    <span class="pr-4 inline-block align-middle">
+                        <Circle size="1.5" unit="em" color="#ffffff" />
+                    </span>
+                {:else if status.length > 0}
+                    <span class="pr-4 align-middle">
+                        {status}
+                    </span>
+                {/if}
                 {#if !data.has_permission}
                     <span class="pr-4 text-error-600-300-token align-middle">Currently missing permission</span>
                 {/if}
-                {@debug identical, saving, ok}
                 <button class="btn align-middle" on:click={save} class:variant-filled-surface={!ok} class:variant-filled-primary={ok} disabled={!ok || saving || identical}>Save</button>
             </div>
         </div>

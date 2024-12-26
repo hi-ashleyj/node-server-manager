@@ -14,6 +14,7 @@
 
     const count = (c: CustomEvent<1>) => {
         counter += c.detail;
+        changed += c.detail;
     }
 
 </script>

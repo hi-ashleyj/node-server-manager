@@ -36,6 +36,11 @@
         }
     }
 
+    const initialChanged = (val) => {
+        check();
+    }
+    $: initialChanged(initial);
+
     onMount(() => {
         value = initial;
         dispatch("count", 1);

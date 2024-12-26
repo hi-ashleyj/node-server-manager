@@ -6,6 +6,7 @@
 
     export let initial: T;
     export let value: T;
+    export let name: string;
 
     let changed = false;
 
@@ -19,11 +20,17 @@
         }
     }
 
+    const initialChanged = (val) => {
+        check();
+    }
+
+    $: initialChanged(initial);
+
     onMount(() => {
         value = initial;
         dispatch("count", 1);
         dispatch("valid", 1);
-        check(true);
+        check();
     });
 
 </script>
