@@ -20,7 +20,7 @@
         }
     }
 
-    const initialChanged = (val) => {
+    const initialChanged = (_) => {
         check();
     }
 

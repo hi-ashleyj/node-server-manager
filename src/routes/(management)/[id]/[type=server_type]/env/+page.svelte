@@ -2,8 +2,6 @@
 
     import Environment from "@ajwdmedia/svelterial-icons/Outlined/Tune.svelte";
     import ExistingLine from "./ExistingLine.svelte";
-    import InputWrapper from "$lib/InputWrapper.svelte";
-    import { Circle } from "svelte-loading-spinners";
     import Delete from "@ajwdmedia/svelterial-icons/Outlined/Delete.svelte";
     import Save from "@ajwdmedia/svelterial-icons/Outlined/Save.svelte";
     export let data;

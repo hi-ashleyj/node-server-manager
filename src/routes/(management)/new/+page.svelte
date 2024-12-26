@@ -4,7 +4,7 @@
     import CompleteFormValidator from "$lib/CompleteFormValidator.svelte";
     import InputItem from "$lib/InputItem.svelte";
     import InputWrapper from "$lib/InputWrapper.svelte";
-    import {goto, invalidateAll} from "$app/navigation";
+    import {goto} from "$app/navigation";
     import { Circle } from "svelte-loading-spinners";
 
     let saving = false;
@@ -74,7 +74,7 @@
                     </InputWrapper>
                 </div>
 
-                <InputItem caption="Build Script" initial="build" name="build" type="text" bind:value={build} validator={v => null} on:valid={valid} on:changed={changed} on:count={count}>
+                <InputItem caption="Build Script" initial="build" name="build" type="text" bind:value={build} validator={() => null} on:valid={valid} on:changed={changed} on:count={count}>
                     <svelte:fragment slot="input" let:input_for let:error let:check>
                         <div class="input-group grid grid-cols-[max-content_1fr] items-center" class:variant-ghost-surface={!error} class:variant-ghost-error={error} >
                             <span class="pl-3 text-surface-600-300-token">npm run</span>
