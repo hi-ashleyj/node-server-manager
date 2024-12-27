@@ -1,8 +1,7 @@
 <script lang="ts">
 
     import { signOut } from "@auth/sveltekit/client"
-    import { popup } from '@skeletonlabs/skeleton';
-    import type { PopupSettings } from '@skeletonlabs/skeleton';
+    import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
     export let data;
 
     const signoutPopup: PopupSettings = {

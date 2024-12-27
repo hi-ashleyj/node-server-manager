@@ -16,12 +16,8 @@ export const load = (async ({ locals, params }) => {
     const current = params.type === "test" ? test.env : prod.env;
     const alternate = params.type === "test" ? prod.env : test.env;
 
-    const dual: EnvironmentItemPresent[] = [
-        { key: "HOST", current: "0.0.0.0", present: true, alt: "0.0.0.0" },
-    ];
-    const only: EnvironmentItemMissing[] = [
-        { key: "DATABASE", present: false, alt: "192.168.50.69" },
-    ];
+    const dual: EnvironmentItemPresent[] = [];
+    const only: EnvironmentItemMissing[] = [];
 
     for (let item in current) {
         dual.push({

@@ -75,13 +75,13 @@
         <span>Packages</span>
         <span>{data.status.dependencies ? "Installed" : data.server.info.install !== "" ? "Not Installed" : "Not Configured"}</span>
         <div class="btn-group variant-filled-surface w-max place-self-end">
-            <button disabled={data.status?.installed}>Install</button>
+            <button disabled={!data.status?.installed || data.server.info.install === ""}>Install</button>
         </div>
 
         <span>Build</span>
         <span>{data.status.built ? "Ready" : data.server.info.build !== "" ? "Not Built" : "Not Configured"}</span>
         <div class="btn-group variant-filled-surface w-max place-self-end">
-            <button disabled={data.status?.installed}>Build</button>
+            <button disabled={!data.status?.installed || data.server.info.build === ""}>Build</button>
         </div>
     </div>
     <LogViewer logs={data.recent ?? []} />
