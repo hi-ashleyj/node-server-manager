@@ -63,10 +63,10 @@
             {/await}
         </div>
         <div class="btn-group variant-filled-surface">
-            <button disabled={data.status?.installed} on:click={}>Setup</button>
-            <button disabled={!data.status?.installed}>Update</button>
-            <button disabled={data.status?.running || data.status?.operating || !data.status?.installed || (!data.status?.dependencies && data.server.info.install.length > 0) || !data.status?.built}>Start</button>
-            <button disabled={!data.status?.running || data.status?.operating}>Stop</button>
+            <button on:click={() => work("setup")}  disabled={data.status?.installed}>Setup</button>
+            <button on:click={() => work("update")} disabled={!data.status?.installed}>Update</button>
+            <button on:click={() => work("start")}  disabled={data.status?.running || data.status?.operating || !data.status?.installed || (!data.status?.dependencies && data.server.info.install.length > 0) || !data.status?.built}>Start</button>
+            <button on:click={() => work("stop")}   disabled={!data.status?.running || data.status?.operating}>Stop</button>
         </div>
     </div>
 
@@ -74,20 +74,20 @@
         <span>Source</span>
         <span>{data.status.installed ? "Downloaded" : "Missing"}</span>
         <div class="btn-group variant-filled-surface w-max place-self-end">
-            <button disabled={data.status?.installed}>Clone</button>
-            <button disabled={!data.status?.installed}>Pull</button>
+            <button on:click={() => work("clone")} disabled={data.status?.installed}>Clone</button>
+            <button on:click={() => work("pull")}  disabled={!data.status?.installed}>Pull</button>
         </div>
 
         <span>Packages</span>
         <span>{data.status.dependencies ? "Installed" : data.server.info.install !== "" ? "Not Installed" : "Not Configured"}</span>
         <div class="btn-group variant-filled-surface w-max place-self-end">
-            <button disabled={!data.status?.installed || data.server.info.install === ""}>Install</button>
+            <button on:click={() => work("install")} disabled={!data.status?.installed || data.server.info.install === ""}>Install</button>
         </div>
 
         <span>Build</span>
         <span>{data.status.built ? "Ready" : data.server.info.build !== "" ? "Not Built" : "Not Configured"}</span>
         <div class="btn-group variant-filled-surface w-max place-self-end">
-            <button disabled={!data.status?.installed || data.server.info.build === ""}>Build</button>
+            <button on:click={() => work("build")} disabled={!data.status?.installed || data.server.info.build === ""}>Build</button>
         </div>
     </div>
     <LogViewer logs={data.recent ?? []} />
