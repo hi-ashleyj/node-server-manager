@@ -33,6 +33,6 @@ export type ClientAPI = {
     send: (channel: string, message: any) => Unwrap<true, "CLOSED">;
 }
 
-export type ExposedAPI = {
-    connect: (server: string) => Unwrap<ClientAPI, null>;
+export type ExposedAPI<T> = {
+    connect: (options: T) => Unwrap<ClientAPI, null>;
 }

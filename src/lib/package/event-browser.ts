@@ -7,7 +7,7 @@ export type EventBrowserOptions = {
     hub: string
 }
 
-export const connect: ExposedAPI["connect"] = ({ hub }: EventBrowserOptions) => {
+export const connect: ExposedAPI<EventBrowserOptions>["connect"] = ({ hub }) => {
     let active = true;
     let backoff = 1;
     const events = new Set<{ type: keyof ClientEvents, listen: Function }>();
