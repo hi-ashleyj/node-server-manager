@@ -62,7 +62,7 @@ const messageHandler = (active: ActiveSocket, sockets: Map<string, ActiveSocket>
 export const start = (host = "0.0.0.0") => {
 
     const server = new ws.Server({
-        port: 7667,
+        port: 14554,
         host,
     });
 

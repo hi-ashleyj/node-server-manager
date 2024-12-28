@@ -3,7 +3,11 @@ export type { Message };
 
 type Handler = { channel: string, exact: boolean, listener: ( channel: string, message: any ) => any };
 
-export const connect: ExposedAPI["connect"] = (server) => {
+export type EventBrowserOptions = {
+    hub: string
+}
+
+export const connect: ExposedAPI["connect"] = ({ hub }: EventBrowserOptions) => {
     let active = true;
     let backoff = 1;
     const events = new Set<{ type: keyof ClientEvents, listen: Function }>();
@@ -108,7 +112,7 @@ export const connect: ExposedAPI["connect"] = (server) => {
         if (ws) return;
         connecting = true;
         try {
-            ws = new WebSocket(server);
+            ws = new WebSocket(hub);
             ws.addEventListener("error", () => {
                 fire("error", "WEBSOCKET_ERROR");
                 if (active) {
