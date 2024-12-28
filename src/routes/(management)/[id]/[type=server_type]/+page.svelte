@@ -4,6 +4,8 @@
     import {browser} from "$app/environment";
     import {serverUrl} from "$lib";
     import LogViewer from "../LogViewer.svelte";
+    import { controlRequest, type Controls } from "./make-control-request";
+    import { page } from "$app/stores";
     export let data;
 
     type StatusResponse = { status: "unknown" } | { status: "down" } | { status: "up", requests: 0 } | { status: "up", frequency: number, min: number, max: number, avg: number };
@@ -23,6 +25,10 @@
         } catch (_) {
             return { status: "down" };
         }
+    }
+
+    const work = async (control: Controls) => {
+        const [ ok, status, and ] = await controlRequest(control);
     }
 
 </script>
@@ -57,7 +63,7 @@
             {/await}
         </div>
         <div class="btn-group variant-filled-surface">
-            <button disabled={data.status?.installed}>Setup</button>
+            <button disabled={data.status?.installed} on:click={}>Setup</button>
             <button disabled={!data.status?.installed}>Update</button>
             <button disabled={data.status?.running || data.status?.operating || !data.status?.installed || (!data.status?.dependencies && data.server.info.install.length > 0) || !data.status?.built}>Start</button>
             <button disabled={!data.status?.running || data.status?.operating}>Stop</button>

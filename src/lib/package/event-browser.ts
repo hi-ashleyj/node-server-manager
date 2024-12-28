@@ -1,7 +1,5 @@
-import type { ExposedAPI, Message, ClientEvents, Unwrap } from "./types.js";
+import type { ExposedAPI, Message, ClientEvents, Unwrap, Handle } from "./types.js";
 export type { Message };
-
-type Handler = { channel: string, exact: boolean, listener: ( channel: string, message: any ) => any };
 
 export type EventBrowserOptions = {
     hub: string

@@ -26,6 +26,8 @@ export type ClientEvents = {
     "error": [ "NSM_NOT_DETECTED" | "NSM_NEGOTIATE_ERROR" | "SERVER_CLOSED" | "SUBSCRIBE_FAILED" | "UNSUBSCRIBE_FAILED" | "WEBSOCKET_ERROR" ],
 }
 
+export type Handler = { channel: string, exact: boolean, listener: ( channel: string, message: any ) => any };
+
 export type ClientAPI = {
     on: <T extends keyof ClientEvents>(type: T, callback: ( ...params: ClientEvents[T] ) => any | void ) => Unwrap<() => void, "CLOSED">;
     subscribe: <T = any>(listener: (channel: string, message: T) => {}, channel: string, exact: boolean) => Unwrap<() => void, "CLOSED" | "SUBSCRIBE_FAILED" >;
@@ -36,3 +38,4 @@ export type ClientAPI = {
 export type ExposedAPI<T> = {
     connect: (options: T) => Unwrap<ClientAPI, null>;
 }
+
