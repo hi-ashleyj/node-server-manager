@@ -7,6 +7,8 @@
     import { controlRequest, type Controls } from "./make-control-request";
     import { page } from "$app/stores";
     export let data;
+    import { onMount } from "svelte";
+    import { EventsSubscription } from "$lib/package/event-svelte";
 
     type StatusResponse = { status: "unknown" } | { status: "down" } | { status: "up", requests: 0 } | { status: "up", frequency: number, min: number, max: number, avg: number };
 
@@ -28,8 +30,14 @@
     }
 
     const work = async (control: Controls) => {
-        const [ ok, status, and ] = await controlRequest(control);
+        const [ ok, status, and ] = await controlRequest($page.params, control);
     }
+
+
+    let logList = [];
+    onMount(() => {
+        logList = data.recent ?? [];
+    })
 
 </script>
 
@@ -46,7 +54,7 @@
                     <span class="w-2 h-2 bg-surface-500 rounded-full inline-block align-middle mr-2"></span>
                     <span class="align-middle text-sm">unknown</span>
                 {:else if result.status === "down" && data.status?.running}
-                    <span class="w-2 h-2 bg-error-500 rounded-full inline-block align-middle mr-2"></span>
+                    <span class="w-2 h-2 bg-warning-500 rounded-full inline-block align-middle mr-2"></span>
                     <span class="align-middle text-sm">running • nsm down</span>
                 {:else if result.status === "down"}
                     <span class="w-2 h-2 bg-error-500 rounded-full inline-block align-middle mr-2"></span>
@@ -90,5 +98,6 @@
             <button on:click={() => work("build")} disabled={!data.status?.installed || data.server.info.build === ""}>Build</button>
         </div>
     </div>
-    <LogViewer logs={data.recent ?? []} />
+    <LogViewer logs={logList} />
+    <EventsSubscription channel="/__nsm__process__/{$page.params.id}/{$page.params.type.toUpperCase()}" on:message={({ detail }) => logList = [ ...logList, detail.message ]} exact={false} />
 </div>

@@ -1,11 +1,12 @@
 import {error, type RequestHandler} from "@sveltejs/kit";
 
-export const PUT = (async ({ request, locals }) => {
-    if (!locals.perms.hasPermission("", "CREATE_SERVER")) throw error(403);
+export const PUT = (async ({ request, locals, params }) => {
+    if (!locals.perms.hasPermission("", "MODIFY_SERVER")) throw error(403);
     if (!locals.manager) throw error(522);
     const data = await request.json();
-    const success = await locals.manager.create({
-        id: data.id,
+    const { info } = locals.manager.information(params.id);
+    const success = await locals.manager.update(params.id, {
+        id: params.id,
         name: data.name,
         repo: data.repo,
         port: data.port,
@@ -15,14 +16,9 @@ export const PUT = (async ({ request, locals }) => {
         force_install: data.deps_force,
         build: data.build,
         path: data.entry,
-        prod: {
-            env: {},
-            active: false,
-        },
-        test: {
-            env: {},
-            active: false,
-        }
+
+        prod: info.prod,
+        test: info.test
     });
 
     return new Response(null, { status: 204 });

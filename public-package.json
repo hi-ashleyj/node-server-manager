@@ -1,6 +1,6 @@
 {
     "name": "@hi-ashleyj/nsm",
-    "version": "2.0.0",
+    "version": "2.0.0-alpha.1",
     "scripts": {},
     "files": [
         "dist",
@@ -23,6 +23,11 @@
             "types": "./event-node.d.ts",
             "svelte": "./event-node.js",
             "import": "./event-node.js"
+        },
+        "./event-svelte": {
+            "types": "./event-svelte.d.ts",
+            "svelte": "./event-svelte.js",
+            "import": "./event-svelte.js"
         }
     },
     "dependencies": {

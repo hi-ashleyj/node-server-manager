@@ -1,4 +1,4 @@
-import ws from "ws";
+import ws, { WebSocketServer } from "ws";
 import { ulid } from "ulidx";
 import type { Message as NSMMessage } from "$lib/package/types.js";
 
@@ -40,7 +40,7 @@ const messageHandler = (active: ActiveSocket, sockets: Map<string, ActiveSocket>
                     continue;
                 }
                 for (let line of sock.listeners.values()) {
-                    if (`.${repairedChannel}`.startsWith(line)) {
+                    if (`.${repairedChannel}`.startsWith(line)) { // TODO: Using startsWith like this will cause problems in future
                         sock.socket.send(JSON.stringify({ type: "message", message: message.message, channel: repairedChannel } as NSMMessage<"message">));
                         break;
                     }
@@ -61,7 +61,7 @@ const messageHandler = (active: ActiveSocket, sockets: Map<string, ActiveSocket>
 
 export const start = (host = "0.0.0.0") => {
 
-    const server = new ws.Server({
+    const server = new WebSocketServer({
         port: 14554,
         host,
     });
@@ -118,7 +118,8 @@ export const start = (host = "0.0.0.0") => {
 
         socket.on("open", () => {
             socket.send("NSM_EVENTS_PROTOCOL");
-        })
+        });
+        socket.send("NSM_EVENTS_PROTOCOL");
     });
 
     return () => {

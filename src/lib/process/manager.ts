@@ -4,6 +4,7 @@ import type {Log} from "$lib/log/common";
 import {type Operation, ServerInstance, type ServerInstancePaths} from "$lib/process/instance";
 import { join } from "node:path";
 import { mkdir } from "node:fs/promises";
+import type { ClientAPI } from "$lib/package/types";
 
 type ServerStatus = ReturnType<ServerInstance["getStatus"]> | null;
 
@@ -33,7 +34,7 @@ export type RunTimeInformation = {
     npm: string;
 }
 
-export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>): Promise<ServerManager> => {
+export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>, send: ClientAPI["send"]): Promise<ServerManager> => {
     const servers = new Map<`${string}/test` | `${string}/production`, ServerInstance>();
 
     await mkdir(join(paths.nsm, "test"), { recursive: true });
@@ -55,13 +56,23 @@ export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>):
         const info = db.data.servers.find(it => it.id === id);
         servers.delete(`${id}/${env}`);
         if (!info) return;
-        const next = new ServerInstance(makePaths(id, env), info, Object.assign({}, env === "test" ? info.test : info.prod, { auto: start, restarts: env === "production" }));
+        const next = new ServerInstance(makePaths(id, env), info, Object.assign({}, env === "test" ? info.test : info.prod, { auto: start, restarts: env === "production" }), send);
         servers.set(`${id}/${env}`, next);
     };
 
+    const srv = (info: NodeServerEditable, type: "test" | "production", auto: boolean, restarts: boolean): ServerInstance => {
+        const md = type === "test" ? info.test : info.prod;
+        return new ServerInstance(makePaths(info.id, type), info, {
+            env: Object.assign({}, md.env, { PORT: info.port + (type === "test" ? 30000 : 0), NSM_RUNTIME: type.toUpperCase() }),
+            auto,
+            restarts,
+            active: false,
+        }, send);
+    };
+
     db.data.servers.forEach((it) => {
-        servers.set(`${it.id}/test`, new ServerInstance(makePaths(it.id, "test"), it, { ...it.test, auto: false, restarts: false }));
-        servers.set(`${it.id}/production`, new ServerInstance(makePaths(it.id, "production"), it, { ...it.prod, auto: it.auto, restarts: true }));
+        servers.set(`${it.id}/test`, srv(it, "test", false, false));
+        servers.set(`${it.id}/production`, srv(it, "production", it.auto, true));
     })
 
     return {
@@ -71,8 +82,8 @@ export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>):
             db.update(({ servers }) => servers.push(data));
             await mkdir(join(paths.nsm, "logs", "test", data.id), { recursive: true });
             await mkdir(join(paths.nsm, "logs", "production", data.id), { recursive: true });
-            servers.set(`${data.id}/test`, new ServerInstance(makePaths(data.id, "test"), data, { ...data.test, auto: false, restarts: false }));
-            servers.set(`${data.id}/production`, new ServerInstance(makePaths(data.id, "production"), data, { ...data.prod, auto: data.auto, restarts: true }));
+            servers.set(`${data.id}/test`, srv(data, "test", false, false));
+            servers.set(`${data.id}/production`, srv(data, "production", data.auto, true));
             return true;
         },
         update: (id, data) => {
@@ -149,7 +160,7 @@ export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>):
                 if (!info) {
                     return Promise.resolve([ null, "SERVER_NOT_FOUND" ]);
                 }
-                const next = new ServerInstance(makePaths(id, env), info, Object.assign({}, env === "test" ? info.test : info.prod, { auto: false, restarts: env === "production" }));
+                const next = srv(info, env, false, env === "production");
                 servers.set(`${id}/${env}`, next);
                 return next.start();
             }
@@ -162,7 +173,7 @@ export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>):
                 if (!info) {
                     return Promise.resolve();
                 }
-                const next = new ServerInstance(makePaths(id, env), info, Object.assign({}, env === "test" ? info.test : info.prod, { auto: false, restarts: env === "production" }));
+                const next = srv(info, env, false, env === "production");
                 servers.set(`${id}/${env}`, next);
                 return Promise.resolve();
             }
@@ -175,8 +186,9 @@ export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>):
                 if (!info) {
                     return Promise.resolve([ null, "SERVER_NOT_FOUND" ]);
                 }
-                server = new ServerInstance(makePaths(id, env), info, Object.assign({}, env === "test" ? info.test : info.prod, { auto: false, restarts: env === "production" }));
-                servers.set(`${id}/${env}`, server);
+                const next = srv(info, env, false, env === "production");
+                servers.set(`${id}/${env}`, next);
+                server = next;
             }
             return server.operate(operation);
         },
@@ -187,8 +199,9 @@ export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>):
                 return [];
             }
             if (!server) {
-                server = new ServerInstance(makePaths(id, env), info, Object.assign({}, env === "test" ? info.test : info.prod, { auto: false, restarts: env === "production" }));
-                servers.set(`${id}/${env}`, server);
+                const next = srv(info, env, false, env === "production");
+                servers.set(`${id}/${env}`, next);
+                server = next;
             }
             const stat = server.getStatus();
             if (stat.operating) return [];

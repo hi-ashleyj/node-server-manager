@@ -4,10 +4,9 @@ import {join} from "node:path";
 import { stat, readdir, readFile } from "node:fs/promises";
 import {ulid} from "ulidx";
 import {LogFileHelper} from "$lib/process/logfile";
-import { decodeLogFile } from "$lib/log/decode";
 import {GitCommand} from "$lib/process/git";
 import {NPMCommand} from "$lib/process/npm";
-import type {LogFile} from "$lib/log/common";
+import type { ClientAPI } from "$lib/package/types";
 
 const unwrappedStat = async (...params: Parameters<typeof stat>): Promise<[ Awaited<ReturnType<typeof stat>>, null ] | [ null, any ]> => {
     try {
@@ -66,7 +65,9 @@ export class ServerInstance {
 
     private updates?: (restart: boolean) => any;
 
-    constructor(environment: ServerInstancePaths, server: NodeServerEditable, params: RuntimeEditable & { auto: boolean, restarts: boolean }) {
+    private send: ClientAPI["send"];
+
+    constructor(environment: ServerInstancePaths, server: NodeServerEditable, params: RuntimeEditable & { auto: boolean, restarts: boolean }, send: ClientAPI["send"]) {
         this.root = environment.root;
         this.node = environment.node;
         this.npm = environment.npm;
@@ -74,6 +75,7 @@ export class ServerInstance {
         this.log = environment.logs;
         this.info = server;
         this.params = params;
+        this.send = send;
 
         this.check().then(() => {
             if (this.params.auto) this.start();
@@ -118,6 +120,7 @@ export class ServerInstance {
         this.active_log = new LogFileHelper(this.run, this.log);
 
         server.on("stop", async (signal, graceful) => {
+            this.send(`__nsm__process__/${this.info.id}/${this.params.env.NSM_RUNTIME}/server`, { type: "log", message: `KILLED ${signal}`, at: Date.now() });
             if (!this.active_log) return;
             await this.active_log.end(Date.now(), `KILLED ${signal}`);
             this.active_log = undefined;
@@ -130,6 +133,7 @@ export class ServerInstance {
         });
 
         server.on("exit", async (code, graceful) => {
+            this.send(`__nsm__process__/${this.info.id}/${this.params.env.NSM_RUNTIME}/server`, { type: "log", message: `STOPPED EXIT CODE: ${code}`, at: Date.now() });
             if (!this.active_log) return;
             await this.active_log.end(Date.now(), `STOPPED ${"EXIT CODE: " + code}`);
             this.active_log = undefined;
@@ -147,11 +151,13 @@ export class ServerInstance {
 
         server.on("start", () => {
             this.timing = { start: Date.now() };
+            this.send(`__nsm__process__/${this.info.id}/${this.params.env.NSM_RUNTIME}/server`, { type: "log", message: `STARTED`, at: Date.now() });
             if (!this.active_log) return;
             this.active_log.start(this.timing.start);
         });
 
         server.on("log", (type, message) => {
+            this.send(`__nsm__process__/${this.info.id}/${this.params.env.NSM_RUNTIME}/server`, { type, message, at: Date.now() });
             if (!this.active_log) return;
             this.active_log.handleLog({ type, message, at: Date.now() });
         })
@@ -166,6 +172,8 @@ export class ServerInstance {
         if (!this.is_built) return [ null, "PROJECT_RUNNER_MISSING" ];
 
         const server = new SpawnedServer(this.node);
+        this.events(server);
+        this.server = server;
         const result = await server.start(join(this.root, this.info.path), this.root, this.params);
 
         if (!result) return [ null, "START_FAILED" ];
@@ -203,22 +211,27 @@ export class ServerInstance {
                 return null as never;
             }
 
-            this.operation.on("log", (log) => {
-
+            this.operation.on("log", (type, message) => {
+                this.send(`__nsm__process__/${this.info.id}/${this.params.env.NSM_RUNTIME}/operate`, { type, message, at: Date.now() });
             });
             this.operation.on("exit", (code, graceful) => {
+                this.send(`__nsm__process__/${this.info.id}/${this.params.env.NSM_RUNTIME}/operate`, { type: "log", message: `STOPPED EXIT ${code}`, at: Date.now() });
                 this.operation = undefined;
                 if (this.updates) this.updates(!graceful);
                 resolve([ true, null ]);
             });
             this.operation.on("stop", (sign) => {
+                this.send(`__nsm__process__/${this.info.id}/${this.params.env.NSM_RUNTIME}/operate`, { type: "log", message: `KILLED ${sign}`, at: Date.now() });
                 this.operation = undefined;
                 if (this.updates) this.updates(false);
                 resolve([ false, null ]);
             });
+            this.operation.on("start", () => {
+                this.send(`__nsm__process__/${this.info.id}/${this.params.env.NSM_RUNTIME}/operate`, { type: "log", message: `OPERATION STARTED - ${operation.exe}/${operation.command}`, at: Date.now() });
+            })
         });
 
-        promise.then(this.check);
+        promise.then(this.check.bind(this));
         return promise;
     }
 

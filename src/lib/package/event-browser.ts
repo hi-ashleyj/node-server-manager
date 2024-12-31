@@ -1,4 +1,4 @@
-import type { ExposedAPI, Message, ClientEvents, Unwrap, Handle } from "./types.js";
+import type { ExposedAPI, Message, ClientEvents, Unwrap, Handler, Message as NSMMessage } from "./types.js";
 export type { Message };
 
 export type EventBrowserOptions = {
@@ -33,12 +33,14 @@ export const connect: ExposedAPI<EventBrowserOptions>["connect"] = ({ hub }) => 
     const deregister = (handler: Handler): Unwrap<true, "FUCK_YOU" | "REGISTERED"> => {
         if (!ws || !is_nsm || !is_ready) return [ null, "FUCK_YOU" ];
         if ([...handlers.values()].some(it => it.channel === handler.channel && it.exact === handler.exact)) return [ null, "REGISTERED" ];
-        ws.send(JSON.stringify({ type: "subscribe", message: { channel: handler.channel, exact: handler.exact }, at: Date.now() } as Message));
+        ws.send(JSON.stringify({ type: "unsubscribe", message: { channel: handler.channel, exact: handler.exact }, at: Date.now() } as Message));
         return [ true, null ];
     }
 
     const unsubscribe = (handler: Handler) => {
+        console.log(handlers);
         handlers.delete(handler);
+        console.log(handlers);
         if (is_ready && is_nsm) {
             const [ success, error ] = deregister(handler);
             if (!success && error !== "REGISTERED") {
@@ -64,9 +66,11 @@ export const connect: ExposedAPI<EventBrowserOptions>["connect"] = ({ hub }) => 
     let waiting: string[] = [];
 
     const startup = () => {
+        console.log(!ws, !is_ready, !is_nsm, [ ...handlers.values() ], waiting);
         if (!ws || !is_ready || !is_nsm) return;
         for (let subs of handlers.values()) {
-            register(subs);
+            const [ res, err ] = register(subs);
+            console.log(!ws, !is_ready, !is_nsm, subs, res, err );
         }
         for (let girlfail of waiting) {
             ws.send(girlfail);
@@ -104,6 +108,43 @@ export const connect: ExposedAPI<EventBrowserOptions>["connect"] = ({ hub }) => 
             return;
         }
         // NSM Message
+        const friend = JSON.parse(message.data) as Message;
+
+        switch (friend.type) {
+            case "subscribe":
+            case "unsubscribe":
+            case "broadcast": {
+                ws.send(JSON.stringify({ type: "system", code: "TEAPOT", message: `Operation ${message.type} should always be sent by client` } as NSMMessage));
+                break;
+            }
+            case "subscribed": {
+                // do something in future probably
+                break;
+            }
+            case "unsubscribed": {
+                // do something in future probably
+                break;
+            }
+            case "message": {
+                const ch = friend.channel;
+                const mes = friend.message;
+                for (let cunt of handlers.values()) {
+                    if (cunt.exact && ch === cunt.channel) {
+                        cunt.listener(ch, mes);
+                    } else if (!cunt.exact && ch.startsWith(cunt.channel)) { // TODO: Using startsWith like this will cause problems in future
+                        cunt.listener(ch, mes);
+                    }
+                }
+                console.log(friend.channel, friend.message);
+            }
+            case "system": {
+                break;
+            }
+            default: {
+                ws.send(JSON.stringify({ type: "system", code: "UNSUPPORTED", message: `Operation ${message.type} is not supported by this version of NSM` } as NSMMessage));
+                break;
+            }
+        }
     }
 
     const setup = () => {

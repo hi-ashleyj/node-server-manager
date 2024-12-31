@@ -22,7 +22,7 @@ export class LogFileHelper {
 
     constructor (run: string, directory: string) {
         this.run = run;
-        this.path = join(run, directory);
+        this.path = join(directory, run);
     }
 
     private async writeLogs() {

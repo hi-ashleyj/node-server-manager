@@ -60,7 +60,7 @@
                                             <span class="w-2 h-2 bg-surface-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">unknown</span>
                                         {:else if result.status === "down" && server.test.active}
-                                            <span class="w-2 h-2 bg-error-500 rounded-full inline-block align-middle mr-2"></span>
+                                            <span class="w-2 h-2 bg-warning-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">running • nsm down</span>
                                         {:else if result.status === "down"}
                                             <span class="w-2 h-2 bg-error-500 rounded-full inline-block align-middle mr-2"></span>
@@ -94,7 +94,7 @@
                                             <span class="w-2 h-2 bg-surface-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">unknown</span>
                                         {:else if result.status === "down" && server.prod.active}
-                                            <span class="w-2 h-2 bg-error-500 rounded-full inline-block align-middle mr-2"></span>
+                                            <span class="w-2 h-2 bg-warning-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">running • nsm down</span>
                                         {:else if result.status === "down"}
                                             <span class="w-2 h-2 bg-error-500 rounded-full inline-block align-middle mr-2"></span>

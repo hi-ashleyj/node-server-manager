@@ -19,8 +19,8 @@
 
 
 <div class="bg-black rounded-container-token text-white border-surface-300-600-token py-2 px-4 overflow-y-scroll">
-    <div class="grid grid-cols-[max-content_max-content_1fr] font-mono-token gap-x-4">
-        {#each logs as log (log.at)}
+    {#each logs as log}
+        <div class="grid grid-cols-[19ch_3ch_1fr] font-mono-token gap-x-4">
             <span class="text-surface-300">{fmt(log.at)}</span>
             {#if log.type === "log"}
                 <span class="text-primary-500-400-token">LOG</span>
@@ -28,7 +28,7 @@
                 <span class="text-error-500-400-token">ERR</span>
             {/if}
             <!--                LOOK OUT - THERE'S A NBSP ON THE NEXT LINE-->
-            <span>{#each log.message.split("\n") as line}{line.split(" ").join("\u{A0}")}<br/>{/each}</span>
-        {/each}
-    </div>
+            <span>{#each log.message.split("\n").filter(it => it.length > 0) as line}{line.split(" ").join("\u{A0}")}<br/>{/each}</span>
+        </div>
+    {/each}
 </div>

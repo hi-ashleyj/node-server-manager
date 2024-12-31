@@ -23,7 +23,7 @@
         </a>
         <button class="font-heading-token btn hover:variant-ghost-surface" use:popup={signoutPopup}>signed in as&nbsp;<span class="text-secondary-700-200-token">{data.name}</span></button>
     </div>
-    <div>
+    <div class="h-full overflow-hidden">
         <slot />
     </div>
 </div>
