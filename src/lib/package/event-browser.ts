@@ -23,15 +23,15 @@ export const connect: ExposedAPI<EventBrowserOptions>["connect"] = ({ hub }) => 
     let is_nsm = false;
     let is_ready = false;
 
-    const register = (handler: Handler): Unwrap<true, "FUCK_YOU" | "REGISTERED"> => {
-        if (!ws || !is_nsm || !is_ready) return [ null, "FUCK_YOU" ];
+    const register = (handler: Handler): Unwrap<true, "INVALID_SESSION" | "REGISTERED"> => {
+        if (!ws || !is_nsm || !is_ready) return [ null, "INVALID_SESSION" ];
         if ([...handlers.values()].some(it => it.channel === handler.channel && it.exact === handler.exact)) return [ null, "REGISTERED" ];
         ws.send(JSON.stringify({ type: "subscribe", message: { channel: handler.channel, exact: handler.exact }, at: Date.now() } as Message));
         return [ true, null ];
     };
 
-    const deregister = (handler: Handler): Unwrap<true, "FUCK_YOU" | "REGISTERED"> => {
-        if (!ws || !is_nsm || !is_ready) return [ null, "FUCK_YOU" ];
+    const deregister = (handler: Handler): Unwrap<true, "INVALID_SESSION" | "REGISTERED"> => {
+        if (!ws || !is_nsm || !is_ready) return [ null, "INVALID_SESSION" ];
         if ([...handlers.values()].some(it => it.channel === handler.channel && it.exact === handler.exact)) return [ null, "REGISTERED" ];
         ws.send(JSON.stringify({ type: "unsubscribe", message: { channel: handler.channel, exact: handler.exact }, at: Date.now() } as Message));
         return [ true, null ];
@@ -128,11 +128,11 @@ export const connect: ExposedAPI<EventBrowserOptions>["connect"] = ({ hub }) => 
             case "message": {
                 const ch = friend.channel;
                 const mes = friend.message;
-                for (let cunt of handlers.values()) {
-                    if (cunt.exact && ch === cunt.channel) {
-                        cunt.listener(ch, mes);
-                    } else if (!cunt.exact && ch.startsWith(cunt.channel)) { // TODO: Using startsWith like this will cause problems in future
-                        cunt.listener(ch, mes);
+                for (let handler of handlers.values()) {
+                    if (handler.exact && ch === handler.channel) {
+                        handler.listener(ch, mes);
+                    } else if (!handler.exact && ch.startsWith(handler.channel)) { // TODO: Using startsWith like this will cause problems in future
+                        handler.listener(ch, mes);
                     }
                 }
                 console.log(friend.channel, friend.message);

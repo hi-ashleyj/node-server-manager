@@ -1,6 +1,6 @@
 import { getContext, setContext } from "svelte";
 import type { Readable } from "svelte/store";
-import type { ClientAPI } from "../types.js";
+import type { ClientAPI } from "./types.js";
 
 const NSM_EVENTS_CONTEXT = Symbol();
 
@@ -15,7 +15,7 @@ export const prepare = (ctx: EventSvelteContext) => {
 export const getEventsContext = (): EventSvelteContext => {
     const ctx = getContext(NSM_EVENTS_CONTEXT);
     if (!ctx) throw new Error("DO NOT USE CONTEXT BEFORE INITIALISATION");
-    return ctx;
+    return ctx as EventSvelteContext;
 }
 
 import EventsContext from "./svelte/EventsContext.svelte";

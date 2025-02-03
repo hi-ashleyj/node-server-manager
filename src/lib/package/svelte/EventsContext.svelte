@@ -24,7 +24,7 @@
 
         return () => {
             work.set(null);
-            api.disconnect();
+            api?.disconnect();
         }
     })
 

@@ -30,7 +30,7 @@ export type Handler = { channel: string, exact: boolean, listener: ( channel: st
 
 export type ClientAPI = {
     on: <T extends keyof ClientEvents>(type: T, callback: ( ...params: ClientEvents[T] ) => any | void ) => Unwrap<() => void, "CLOSED">;
-    subscribe: <T = any>(listener: (channel: string, message: T) => {}, channel: string, exact: boolean) => Unwrap<() => void, "CLOSED" | "SUBSCRIBE_FAILED" >;
+    subscribe: <T = any>(listener: (channel: string, message: T) => any | void, channel: string, exact: boolean) => Unwrap<() => void, "CLOSED" | "SUBSCRIBE_FAILED" >;
     disconnect: () => Unwrap<true, "CLOSED">;
     send: (channel: string, message: any) => Unwrap<true, "CLOSED">;
 }

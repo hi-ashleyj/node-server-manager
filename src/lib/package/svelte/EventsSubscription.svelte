@@ -14,7 +14,7 @@
 
     onMount(async () => {
         if (!browser) return;
-        if ($events === null) await tick();
+        if ($events === null) await tick();0
 
         const [ yeet, error ] = $events.subscribe((channel, message) => {
             dispatch("message", { channel, message });

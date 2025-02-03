@@ -24,15 +24,15 @@ export const connect: ExposedAPI<EventNodeOptions>["connect"] = ({ hub }) => {
     let is_nsm = false;
     let is_ready = false;
 
-    const register = (handler: Handler): Unwrap<true, "FUCK_YOU" | "REGISTERED"> => {
-        if (!ws || !is_nsm || !is_ready) return [ null, "FUCK_YOU" ];
+    const register = (handler: Handler): Unwrap<true, "INVALID_SESSION" | "REGISTERED"> => {
+        if (!ws || !is_nsm || !is_ready) return [ null, "INVALID_SESSION" ];
         if ([...handlers.values()].some(it => it.channel === handler.channel && it.exact === handler.exact)) return [ null, "REGISTERED" ];
         ws.send(JSON.stringify({ type: "subscribe", message: { channel: handler.channel, exact: handler.exact }, at: Date.now() } as Message));
         return [ true, null ];
     };
 
-    const deregister = (handler: Handler): Unwrap<true, "FUCK_YOU" | "REGISTERED"> => {
-        if (!ws || !is_nsm || !is_ready) return [ null, "FUCK_YOU" ];
+    const deregister = (handler: Handler): Unwrap<true, "INVALID_SESSION" | "REGISTERED"> => {
+        if (!ws || !is_nsm || !is_ready) return [ null, "INVALID_SESSION" ];
         if ([...handlers.values()].some(it => it.channel === handler.channel && it.exact === handler.exact)) return [ null, "REGISTERED" ];
         ws.send(JSON.stringify({ type: "unsubscribe", message: { channel: handler.channel, exact: handler.exact }, at: Date.now() } as Message));
         return [ true, null ];
