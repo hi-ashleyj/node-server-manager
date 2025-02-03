@@ -130,7 +130,7 @@
 
     <div class="p-6 text-center">
         <button class="btn variant-ghost-surface">Logs</button>
-        <button class="btn variant-ghost-surface">Users</button>
+        <a href="/users" class="btn variant-ghost-surface">Users</a>
         <a href="/settings" class="btn variant-ghost-surface">Settings</a>
     </div>
 
