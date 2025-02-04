@@ -6,6 +6,7 @@ import {JSONFilePreset} from "lowdb/node";
 import {join} from "node:path";
 import {homedir} from "node:os";
 import {mkdir} from "node:fs/promises";
+import { Roles } from "$lib/roles.js";
 
 await mkdir(join(homedir(), "nsm"), { recursive: true });
 
@@ -21,20 +22,6 @@ export type User = {
 export type UserDatabase = {
     users: User[]
 };
-
-export const Roles = {
-    "VIEW_SERVER":          0b000000000001,
-    "CONFIGURE_TEST":       0b000000000010,
-    "CONFIGURE_PRODUCTION": 0b000000000100,
-    "CONTROL_TEST":         0b000000001000,
-    "CONTROL_PRODUCTION":   0b000000010000,
-    "CREATE_SERVER":        0b000000100000,
-    "MODIFY_SERVER":        0b000001000000,
-    "DELETE_SERVER":        0b000010000000,
-    "ADMINISTRATE_PERMS":   0b001000000000,
-    "ADMINISTRATE_GLOBAL":  0b010000000000,
-    "ADMINISTRATE_USERS":   0b100000000000,
-} as const;
 
 const createSalt = () => {
     return randomBytes(512 / 8).toString("hex");
@@ -61,11 +48,15 @@ export const authorise = (name: string, pass_hash: string): { id: string, name: 
 export type Perms = {
     hasPermission: (server: string, permission: keyof typeof Roles) => boolean;
     grantPermission: (server: string | null, permission: keyof typeof Roles) => boolean;
+    userInfo: () => User | null;
+    listAllPerms: () => User[] | null;
 }
 
 const badPerms: Perms = {
     hasPermission: () => false,
     grantPermission: () => false,
+    userInfo: () => null,
+    listAllPerms: () => null,
 }
 
 export const perms = (id: string | undefined | null): Perms => {
@@ -81,6 +72,12 @@ export const perms = (id: string | undefined | null): Perms => {
         },
         grantPermission: (server, permission) => {
             return false;
+        },
+        userInfo: () => {
+            return user;
+        },
+        listAllPerms: () => {
+            return db.data.users;
         }
     }
 }
