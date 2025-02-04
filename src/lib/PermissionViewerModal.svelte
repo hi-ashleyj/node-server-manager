@@ -2,7 +2,7 @@
 	import type { SvelteComponent } from 'svelte';
 
 	import { getModalStore } from '@skeletonlabs/skeleton';
-    import { Roles } from "$lib/roles";
+	import PermissionViewer from "$lib/PermissionViewer.svelte";
 
 	// Props
 	/** Exposes parent props to this component. */
@@ -16,16 +16,27 @@
 		modalStore.close();
 	}
 
+	let selected = "";
+
 </script>
 
 {#if $modalStore[0]}
-	<div class="card p-4 w-modal shadow-xl space-y-4">
-		<header class="text-2xl font-bold">{$modalStore[0].title ?? '(title missing)'}</header>
-		<article>{$modalStore[0].body ?? '(body missing)'}</article>
+	<div class="card p-4 w-full max-w-7xl shadow-xl space-y-4">
+		<div class="grid grid-cols-[1fr_3fr] gap-4 overflow-hidden">
+			<div class="overflow-y-auto">
+				<div class="p-2 px-4 text-surface-700-200-token">User Permissions</div>
+				<div class="p-2 px-4 rounded-lg cursor-pointer" on:click={() => selected = ""} class:bg-primary-400-500-token={selected === ""}>{$modalStore[0].meta.username}</div>
+				<div class="p-2 px-4 text-surface-700-200-token">Server Overrides</div>
+				{#each $modalStore[0].meta.servers as id}
+					<div class="p2 px-4 rounded-lg cursor-pointer" on:click={() => selected = id} class:bg-primary-400-500-token={selected === id}>{id}</div>
+				{/each}
+			</div>
+			<PermissionViewer perms={$modalStore[0].meta.global} upstream={selected.length ? $modalStore[0].meta.global : 0} />
+		</div> 
 		<!-- prettier-ignore -->
 		<footer class="modal-footer {parent.regionFooter}">
             <button class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{parent.buttonTextCancel}</button>
-            <button class="btn {parent.buttonPositive}" on:click={onFormSubmit}>Select Flavors</button>
+            <button class="btn {parent.buttonPositive}" on:click={onFormSubmit}>Update</button>
         </footer>
 	</div>
 {/if}

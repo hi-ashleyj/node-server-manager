@@ -57,19 +57,19 @@
                             {user.username}<span class="text-sm align-middle italic pl-10 text-surface-600-300-token">{user.id}</span>
                         </div>
                         <div class="btn-group variant-filled-surface w-max">
-                            <button on:click={modals.trigger({
+                            <button on:click={() => modals.trigger({
                                 type: "prompt",
                                 title: "Reset Password",
                                 body: "Enter user's new password",
                                 valueAttr: { type: "password", minLength: 8, required: true },
                                 response: (r) => r ? resetPassword(user.username, r) : null,
                             })}>Reset Password</button>
-                            <button on:click={modals.trigger({
+                            <button on:click={() => modals.trigger({
                                 type: "component",
                                 component: "permission",
-                                title: "Reset Password",
-                                meta: { global: user.roles },
-                                response: (r) => r ? resetPassword(user.username, r) : null,
+                                title: `Permissions for ${user.username}`,
+                                meta: { global: user.roles, username: user.username, servers: data.servers },
+                                response: (r) => r ? resetPassword(user.id, r) : null,
                             })}>Edit Permissions</button>
                         </div>
                     </div>
