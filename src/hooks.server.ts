@@ -15,7 +15,6 @@ await mkdir(join(homedir(), "nsm"), { recursive: true });
 
 const eventHubDeath = startEvents('0.0.0.0');
 const [ events, eventsSetupError ] = connect({ hub: "ws://localhost:14554" });
-console.log(events);
 
 export type ClientEvents = {
     "connect": [],
@@ -39,14 +38,14 @@ await db.read();
 {
     const { node, npm, git } = db.data.paths;
     if (node && npm && git) {
-        manager = await start({ git, npm, node, nsm: join(homedir(), "nsm") }, db, events?.send ?? ((channel, message) => console.log(channel, message)));
+        manager = await start({ git, npm, node, nsm: join(homedir(), "nsm") }, db, events?.send ?? ((channel, message) => { console.log(channel, message); return [ null, "CLOSED" ] }));
     }
 }
 
 const setPaths = async ( node: string, npm: string, git: string ) => {
     await db.update((data) => data.paths = { node, npm, git });
     if (manager) await manager.shutdown();
-    manager = await start({ git, npm, node, nsm: join(homedir(), "nsm") }, db, events?.send ?? ((channel, message) => console.log(channel, message)));
+    manager = await start({ git, npm, node, nsm: join(homedir(), "nsm") }, db, events?.send ?? ((channel, message) => { console.log(channel, message); return [ null, "CLOSED" ] }));
 }
 
 declare global {
