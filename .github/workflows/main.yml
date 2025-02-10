@@ -1,0 +1,9 @@
+name: Build System
+on:
+  release:
+    types:
+      - released
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
