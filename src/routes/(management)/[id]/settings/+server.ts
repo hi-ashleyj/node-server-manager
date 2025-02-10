@@ -1,8 +1,9 @@
 import {error, type RequestHandler} from "@sveltejs/kit";
 
-export const PUT = (async ({ request, locals, params }) => {
-    if (!locals.perms.hasPermission("", "MODIFY_SERVER")) throw error(403);
-    if (!locals.manager) throw error(522);
+export const PATCH = (async ({ request, locals, params }) => {
+    if (!locals.perms.hasPermission("", "MODIFY_SERVER")) error(403);
+    if (!locals.manager) error(522);
+    if (!params.id) error(400);
     const data = await request.json();
     const { info } = locals.manager.information(params.id);
     const success = await locals.manager.update(params.id, {

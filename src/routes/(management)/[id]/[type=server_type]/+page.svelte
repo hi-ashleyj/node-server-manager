@@ -82,7 +82,7 @@
         <span>Source</span>
         <span>{data.status.installed ? "Downloaded" : "Missing"}</span>
         <div class="btn-group variant-filled-surface w-max place-self-end">
-            <button on:click={() => work("clone")} disabled={data.status?.installed}>Clone</button>
+            <button on:click={() => work("clone")}>Clone</button>
             <button on:click={() => work("pull")}  disabled={!data.status?.installed}>Pull</button>
         </div>
 

@@ -7,23 +7,23 @@
     import { decodeTime } from "ulidx";
     export let data;
 
-    $: res = decodeLogFile(data.file);
+    $: res = decodeLogFile(data.file ?? "");
     // TODO: All the error checking
-    $: file = res[0][1];
+    $: file = res && res[0] ? res[0][1] : { logs: [] };
 
     const timeFormat = new Intl.DateTimeFormat("en-NZ", { day: "numeric", hour: "numeric", hour12: true, year: "numeric", month: "short", minute: "2-digit", second: "2-digit" })
-    $: diff = file.end - file.start;
+    $: diff = res && res[0] && file.start && file.end ? file.end - file.start : 0;
     $: seconds = (diff / 1000) % 60;
     $: minutes = Math.floor(diff / 60000) % 60;
     $: hours = Math.floor(diff / 60 / 60000) % 24
     $: days = Math.floor(diff / 24 / 60 / 60000);
 
-    $: uncreditted = [
+    $: uncreditted = res[0] ? [
         { type: "log", message: "STARTED", at: file.start },
         ...(file.logs ?? []),
         { type: "log", message: file.circumstance, at: file.end },
-        { type: "log", message: `RAN FOR ${days > 0 ? `${days} DAYS, ` : ""}${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`, at: file.end },
-    ];
+        { type: "log", message: `RAN FOR ${days > 0 ? `${days} DAYS, ` : ""}${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toFixed(6).padStart(2, "0")}`, at: file.end },
+    ] : [ { type: "error", message: "Failed to parse log file", at: 0 }, { type: "error", message: res[1], at: 0 }];
 
 </script>
 

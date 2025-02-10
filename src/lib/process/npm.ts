@@ -23,11 +23,12 @@ export class NPMCommand extends ProcessWrapper {
         return true;
     }
 
-    async build(script: string, cwd: string) {
+    async build(script: string, cwd: string, env: Record<string,string>) {
         if (this.process) return false;
 
         this.process = spawn(this.npmPath, [ "run" , script ], {
             cwd: cwd,
+            env: Object.assign({}, process.env, env),
         });
 
         this.wrap(this.process);

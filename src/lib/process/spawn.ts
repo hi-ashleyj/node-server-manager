@@ -23,7 +23,7 @@ export class SpawnedServer extends ProcessWrapper {
         if (this.process) return false;
         this.process = spawn(this.nodePath, [ file ], {
             cwd: cwd,
-            env: Object.assign(process.env, options.env),
+            env: Object.assign({}, process.env, options.env),
         });
 
         this.wrap(this.process);

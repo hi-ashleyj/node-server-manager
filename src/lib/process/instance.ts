@@ -36,7 +36,7 @@ export const ServerInstanceErrors = {
 type ErrorCode = keyof typeof ServerInstanceErrors;
 type Unwrap<V, E> = [V, null] | [null, E];
 
-export type Operation = { exe: "npm", command: "install" | "build" } | { exe: "git", command: "pull" | "clone" };
+export type Operation = { exe: "npm", command: "install" | "build" } | { exe: "git", command: "pull" | "clone"};
 
 export type ServerInstancePaths = {
     node: string, npm: string, git: string, root: string, logs: string
@@ -124,6 +124,7 @@ export class ServerInstance {
             if (!this.active_log) return;
             await this.active_log.end(Date.now(), `KILLED ${signal}`);
             this.active_log = undefined;
+            this.run = undefined;
             this.server = undefined;
             this.timing = undefined;
             if (this.updates) return this.updates(!graceful);
@@ -137,6 +138,7 @@ export class ServerInstance {
             if (!this.active_log) return;
             await this.active_log.end(Date.now(), `STOPPED ${"EXIT CODE: " + code}`);
             this.active_log = undefined;
+            this.run = undefined;
             this.server = undefined;
             this.timing = undefined;
             if (this.updates) return this.updates(!graceful);
@@ -200,7 +202,7 @@ export class ServerInstance {
                 const cmd = new NPMCommand(this.npm);
                 if (operation.command === "build") {
                     if (!this.info.build || this.info.build.length < 1) return resolve([ null, "NO_BUILD_SCRIPT" ]);
-                    cmd.build(this.info.build, this.root);
+                    cmd.build(this.info.build, this.root, this.params.env);
                 } else {
                     if (this.info.install === "") return resolve([ null, "INSTALL_NOT_PERMITTED" ]);
                     cmd.install(this.info.install, this.info.force_install, this.root);
