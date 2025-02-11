@@ -37,6 +37,25 @@ const db = await JSONFilePreset<UserDatabase>(join(homedir(), "nsm", "users.json
 await db.read();
 await db.write();
 
+
+export const createUser = (name: string, pass_hash: string): string => {
+    const id = ulid();
+    const salt = createSalt();
+
+    db.update(({ users }) => {
+        users.push({
+            id,
+            username: name,
+            hash: hash(pass_hash, salt),
+            salt,
+            roles: 0,
+            server_roles: {},
+        })
+    });
+
+    return id;
+}
+
 export const authorise = (name: string, pass_hash: string): { id: string, name: string } | null => {
     const user = db.data.users.find(it => it.username === name);
     if (!user) return null;
@@ -50,6 +69,7 @@ export type Perms = {
     grantPermission: (server: string | null, permission: keyof typeof Roles) => boolean;
     userInfo: () => User | null;
     listAllPerms: () => User[] | null;
+    createUser: (name: string, hash: string) => string;
 }
 
 const badPerms: Perms = {
@@ -57,6 +77,7 @@ const badPerms: Perms = {
     grantPermission: () => false,
     userInfo: () => null,
     listAllPerms: () => null,
+    createUser: () => "",
 }
 
 export const perms = (id: string | undefined | null): Perms => {
@@ -78,6 +99,9 @@ export const perms = (id: string | undefined | null): Perms => {
         },
         listAllPerms: () => {
             return db.data.users;
+        },
+        createUser: (name, hash) => {
+            return createUser(name, hash);
         }
     }
 }
