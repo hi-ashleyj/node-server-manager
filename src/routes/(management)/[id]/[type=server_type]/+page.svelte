@@ -9,6 +9,8 @@
     export let data;
     import { onMount } from "svelte";
     import { EventsSubscription } from "$lib/package/event-svelte";
+    import type { Works, WorkZones } from "./workstype";
+    import Works from "./Works.svelte";
 
     type StatusResponse = { status: "unknown" } | { status: "down" } | { status: "up", requests: 0 } | { status: "up", frequency: number, min: number, max: number, avg: number };
 
@@ -29,8 +31,41 @@
         }
     }
 
+    let works: Works = {
+        zone: "none",
+    }
+    let worksTimeout: number | undefined;
+
+    const workTypeMap: { [ X in Controls ]: WorkZones } = {
+        "build": "build",
+        "clone": "git",
+        "install": "install",
+        "pull": "git",
+        "setup": "script",
+        "start": "script",
+        "stop": "script",
+        "update": "script",
+    }
+
     const work = async (control: Controls) => {
+        if (worksTimeout) clearTimeout(worksTimeout)
+        works = {
+            zone: workTypeMap[control],
+            spinner: true,
+        }
         const [ ok, status, and ] = await controlRequest($page.params, control);
+        if (ok) {
+            works = {
+                zone: works.zone,
+                success: true,
+            };
+        } else {
+            works = {
+                zone: works.zone,
+                error: "" + status,
+            }
+        }
+        worksTimeout = setTimeout(() => { works = { zone: "none" }}, 3000);
     }
 
 
@@ -42,7 +77,7 @@
 </script>
 
 <div class="w-full h-full card p-6 grid grid-rows-[max-content_max-content_1fr] overflow-hidden">
-    <div class="grid grid-cols-[max-content_max-content_1fr_max-content] items-center gap-4">
+    <div class="grid grid-cols-[max-content_max-content_1fr_max-content_max-content] items-center gap-4">
         <Status size="2em" fill="white" />
         <span class="text-xl">Status</span>
         <div>
@@ -70,6 +105,7 @@
                 <span>failure</span>
             {/await}
         </div>
+        <Works {works} zone="script" />
         <div class="btn-group variant-filled-surface">
             <button on:click={() => work("setup")}  disabled={data.status?.installed}>Setup</button>
             <button on:click={() => work("update")} disabled={!data.status?.installed}>Update</button>
@@ -78,9 +114,10 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-[max-content_1fr_max-content] gap-y-2 gap-x-6 py-4 items-center">
+    <div class="grid grid-cols-[max-content_1fr_max-content_max-content] gap-y-2 gap-x-6 py-4 items-center">
         <span>Source</span>
         <span>{data.status.installed ? "Downloaded" : "Missing"}</span>
+        <Works {works} zone="git" />
         <div class="btn-group variant-filled-surface w-max place-self-end">
             <button on:click={() => work("clone")}>Clone</button>
             <button on:click={() => work("pull")}  disabled={!data.status?.installed}>Pull</button>
@@ -88,12 +125,14 @@
 
         <span>Packages</span>
         <span>{data.status.dependencies ? "Installed" : data.server.info.install !== "" ? "Not Installed" : "Not Configured"}</span>
+        <Works {works} zone="install" />
         <div class="btn-group variant-filled-surface w-max place-self-end">
             <button on:click={() => work("install")} disabled={!data.status?.installed || data.server.info.install === ""}>Install</button>
         </div>
 
         <span>Build</span>
         <span>{data.status.built ? "Ready" : data.server.info.build !== "" ? "Not Built" : "Not Configured"}</span>
+        <Works {works} zone="build" />
         <div class="btn-group variant-filled-surface w-max place-self-end">
             <button on:click={() => work("build")} disabled={!data.status?.installed || data.server.info.build === ""}>Build</button>
         </div>
