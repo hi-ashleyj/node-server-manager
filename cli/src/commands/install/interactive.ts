@@ -1,8 +1,9 @@
-import { text, intro, cancel, log, isCancel, select, spinner } from "@clack/prompts";
+import { text, intro, cancel, log, isCancel, select, spinner, confirm, outro } from "@clack/prompts";
 import type { InstallCommandOptions } from "./options.js";
 import color from 'picocolors';
+import { setTimeout } from "node:timers/promises";
 
-export const interact = async (partial: Partial<InstallCommandOptions>): InstallCommandOptions => {
+export const interact = async (partial: Partial<InstallCommandOptions>): Promise<InstallCommandOptions> => {
     // Opening Line
     intro(color.inverse("nsm cli : installer"));
     
@@ -20,6 +21,7 @@ export const interact = async (partial: Partial<InstallCommandOptions>): Install
         if (isCancel(next)) { cancel("adios!"); process.exit(0); }
         if (next) location = next;
     }
+    // TODO: STAT AND READDIR IT
 
     // Install Type
     let install = "manual";
@@ -39,7 +41,7 @@ export const interact = async (partial: Partial<InstallCommandOptions>): Install
         if (next) install = next;
     }
 
-    // Executable Required
+    // Executable Required if not manual
     let node = process.execPath;
     if (install !== "manual") {
         const next = await text({
@@ -50,8 +52,33 @@ export const interact = async (partial: Partial<InstallCommandOptions>): Install
         if (isCancel(next)) { cancel("adios!"); process.exit(0); }
         if (next) node = next;
     }
-    
-    console.log({ location, install, node })
+    // TODO: STAT THAT
 
+    // User required for linux
+    let user = "";
+    if (install === "linux" || install === "linux-print") {
+        const next = await text({
+            message: "User for running service",
+        });
+        if (isCancel(next)) { cancel("adios!"); process.exit(0); }
+        if (next) user = next;
+    }
 
+    const res = await confirm({
+        message: "Last Chance! This will wipe the install directory. Proceed?",
+    })
+    if (isCancel(res)) { cancel("adios!"); process.exit(0); }
+    if (!res) { cancel("Aborted"); process.exit(0); }
+
+    const spin = spinner();
+    spin.start("Clearing Install Directory");
+    await setTimeout(200);
+    spin.message("Downloading Latest Release");
+    await setTimeout(2000);
+    spin.message("Unzipping");
+    await setTimeout(200);
+    spin.message("Installing Service");
+    await setTimeout(200);
+    spin.stop("Installed");
+    outro("Ready to go!");
 }
