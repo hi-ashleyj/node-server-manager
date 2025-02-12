@@ -81,28 +81,23 @@
         <Status size="2em" fill="white" />
         <span class="text-xl">Status</span>
         <div>
-            {#await getServerStatus(data.server.info.port + 30000)}
-                <span class="w-2 h-2 bg-surface-500 rounded-full inline-block align-middle mr-2"></span>
-                <span class="align-middle text-sm">{data.status?.running ? "running • " : ""}loading</span>
+            <span class="w-2 h-2 rounded-full inline-block align-middle mr-2" class:bg-success-500={data?.status?.running} class:bg-error-500={!data?.status?.running}></span>
+            <span class="align-middle text-sm">{data?.status?.running ? "running" : "down"}</span>
+            <span class="align-middle text-sm mx-1">•</span>
+            {#await getServerStatus((data?.server?.info.port ?? 0) + 30000)}
+                <span class="align-middle text-sm">loading</span>
             {:then result}
                 {#if result.status === "unknown"}
-                    <span class="w-2 h-2 bg-surface-500 rounded-full inline-block align-middle mr-2"></span>
                     <span class="align-middle text-sm">unknown</span>
-                {:else if result.status === "down" && data.status?.running}
-                    <span class="w-2 h-2 bg-warning-500 rounded-full inline-block align-middle mr-2"></span>
-                    <span class="align-middle text-sm">running • nsm down</span>
                 {:else if result.status === "down"}
-                    <span class="w-2 h-2 bg-error-500 rounded-full inline-block align-middle mr-2"></span>
-                    <span class="align-middle text-sm">down</span>
+                    <span class="align-middle text-sm">stats fail</span>
                 {:else if result.status === "up" && "requests" in result}
-                    <span class="w-2 h-2 bg-success-500 rounded-full inline-block align-middle mr-2"></span>
                     <span class="align-middle text-sm">no requests</span>
                 {:else if result.status === "up"}
-                    <span class="w-2 h-2 bg-success-500 rounded-full inline-block align-middle mr-2"></span>
                     <span class="align-middle text-sm">{result.frequency.toFixed(2)}/m - {result.avg.toFixed(2)}ms - {result.min.toFixed(2)}ms - {result.max.toFixed(2)}ms</span>
                 {/if}
             {:catch e}
-                <span>failure</span>
+                <span>error loading stats</span>
             {/await}
         </div>
         <Works {works} zone="script" />
@@ -116,7 +111,7 @@
 
     <div class="grid grid-cols-[max-content_1fr_max-content_max-content] gap-y-2 gap-x-6 py-4 items-center">
         <span>Source</span>
-        <span>{data.status.installed ? "Downloaded" : "Missing"}</span>
+        <span>{data.status.installed ? `Downloaded Package Version ${data.status.version}` : "Missing"}</span>
         <Works {works} zone="git" />
         <div class="btn-group variant-filled-surface w-max place-self-end">
             <button on:click={() => work("clone")}>Clone</button>

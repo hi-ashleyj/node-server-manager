@@ -17,6 +17,15 @@ const unwrappedStat = async (...params: Parameters<typeof stat>): Promise<[ Awai
     }
 }
 
+const unwrappedFsRead = async (...params: Parameters<typeof readFile>): Promise<[ Awaited<ReturnType<typeof readFile>>, null ] | [ null, any ]> => {
+    try {
+        const info = await readFile(...params);
+        return [ info, null ];
+    } catch (e) {
+        return [ null, e ];
+    }
+}
+
 export const ServerInstanceErrors = {
     SERVER_NOT_FOUND: "Could not find server runtime information",
     SERVER_RUNNING: "Server is currently running",
@@ -63,6 +72,8 @@ export class ServerInstance {
     private is_installed = false;
     private is_built = false;
 
+    private known_version = "<unknown>";
+
     private updates?: (restart: boolean) => any;
 
     private send: ClientAPI["send"];
@@ -98,6 +109,17 @@ export class ServerInstance {
         this.is_present = packageJSON !== null && packageJSON.isFile();
         this.is_installed = modules !== null && modules.isDirectory();
         this.is_built = runner !== null && runner.isFile();
+
+        if (this.is_present) {
+            const [ packageFile, _p ] = await unwrappedFsRead(join(this.root, "package.json"), { encoding: "utf8" });
+            try {
+                if (!packageFile) throw new Error(); // just break out
+                const parsed = JSON.parse(packageFile);
+                this.known_version = parsed.version;
+            } catch (e) {
+                this.known_version = "<unknown>";
+            }
+        }
     }
 
     getStatus() {
@@ -108,6 +130,7 @@ export class ServerInstance {
             running: !!this.server,
             operating: !!this.operation,
             waiting_for_update: !!this.updates,
+            version: this.known_version,
         }
     }
 

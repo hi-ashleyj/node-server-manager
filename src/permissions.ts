@@ -70,6 +70,8 @@ export type Perms = {
     userInfo: () => User | null;
     listAllPerms: () => User[] | null;
     createUser: (name: string, hash: string) => string;
+    id: () => string | null;
+    updatePassword: (id: string, hash: string) => boolean;
 }
 
 const badPerms: Perms = {
@@ -78,6 +80,8 @@ const badPerms: Perms = {
     userInfo: () => null,
     listAllPerms: () => null,
     createUser: () => "",
+    id: () => null,
+    updatePassword: () => false,
 }
 
 export const perms = (id: string | undefined | null): Perms => {
@@ -102,6 +106,18 @@ export const perms = (id: string | undefined | null): Perms => {
         },
         createUser: (name, hash) => {
             return createUser(name, hash);
+        },
+        id: () => {
+            return id;
+        },
+        updatePassword: (id, pass_hash) => {
+            db.update(({ users }) => {
+                const idx = users.findIndex((user) => user.id === id);
+                const item = users[idx];
+                item.hash = hash(pass_hash, item.salt);
+                users[idx] = item;
+            });
+            return true;
         }
     }
 }

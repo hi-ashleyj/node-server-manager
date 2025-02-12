@@ -18,7 +18,6 @@
         <span class="text-xl">Logs</span>
     </div>
     <div class="h-full overflow-y-scroll pt-4">
-        {@debug data}
         {#each data.files as file}
             <a class="grid grid-cols-[1fr_max-content] px-3 py-2 border-surface-300-600-token border rounded-lg my-2" href="/{$page.params.id}/test/logs/{file}">
                 <span>Run {file}</span>

@@ -5,6 +5,7 @@ import {type Operation, ServerInstance, type ServerInstancePaths} from "$lib/pro
 import { join } from "node:path";
 import { mkdir } from "node:fs/promises";
 import type { ClientAPI } from "$lib/package/types";
+import { setTimeout } from "node:timers/promises";
 
 type ServerStatus = ReturnType<ServerInstance["getStatus"]> | null;
 
@@ -204,17 +205,22 @@ export const start = async (paths: RunTimeInformation, db: Low<ServerDatabase>, 
                 server = next;
             }
             const stat = server.getStatus();
+            const shouldRestart = stat.running;
             if (stat.operating) return [];
             if (stat.running) server.stop();
             if (mode === "install") {
                 const clone = await server.operate({ exe: "git", command: "clone" });
+                await setTimeout(500);
                 const packages = await server.operate({ exe: "npm", command: "install" });
                 const build = await server.operate({ exe: "npm", command: "build" });
+                if (shouldRestart) await server.start();
                 return [ clone, packages, build ];
             } else if (mode === "update") {
                 const pull = await server.operate({ exe: "git", command: "pull" });
+                await setTimeout(500);
                 const packages = await server.operate({ exe: "npm", command: "install" });
                 const build = await server.operate({ exe: "npm", command: "build" });
+                if (shouldRestart) await server.start();
                 return [ pull, packages, build ];
             } else {
                 return [] as never;

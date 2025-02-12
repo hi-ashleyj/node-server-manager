@@ -1,8 +1,7 @@
 <script lang="ts">
 
     import { Roles } from "$lib/roles";
-    import Check from "@ajwdmedia/svelterial-icons/Outlined/Check.svelte";
-    import Uncheck from "@ajwdmedia/svelterial-icons/Outlined/Remove.svelte";
+    import { SlideToggle } from '@skeletonlabs/skeleton';
 
     export let globalAllowed = false;
     export let perms: number;
@@ -33,14 +32,7 @@
         <div class="p-2 px-4 grid grid-cols-[1fr_max-content_max-content] items-center gap-4">
             <div>{rolesTitles[role]}</div>
             <div class="italic text-error-700-200-token">{(!globalAllowed && restrictedRoles.includes(role)) ? "Global Permission" : (upstream & Roles[role]) > 0 ? "Enabled at User Level" : ""}</div>
-            <div class="h-8 aspect-square rounded-lg grid place-items-center" class:bg-surface-500={!((upstream & Roles[role]) > 0 || (perms & Roles[role]) > 0)} class:bg-primary-500={(upstream & Roles[role]) > 0 || (perms & Roles[role]) > 0}>
-                {#if (upstream & Roles[role]) > 0 || (perms & Roles[role]) > 0}
-                    <Check size="1.5em" fill="white"/>
-                {:else}
-                    <Uncheck size="1.5em" fill="white" />
-                {/if}
-            </div>
-            <!-- <SlideToggle name="CHECKBOX_{role}" disabled={(upstream & Roles[role]) > 0 || (!globalAllowed && restrictedRoles.includes(role))} active={(upstream & Roles[role]) > 0 ? "bg-surface-500" : "bg-primary-500"} checked={(upstream & Roles[role]) > 0 || (perms & Roles[role]) > 0} /> -->
+            <SlideToggle name="CHECKBOX_{role}" disabled={(upstream & Roles[role]) > 0 || (!globalAllowed && restrictedRoles.includes(role))} active={(upstream & Roles[role]) > 0 ? "bg-surface-500" : "bg-primary-500"} checked={(upstream & Roles[role]) > 0 || (perms & Roles[role]) > 0} />
         </div>
     {/each}
 </div>
