@@ -30,11 +30,17 @@
 
 <div class="grid grid-cols-1">
     {#each rolesList as role}
+    {@const hasPerm = (perms & Roles[role]) > 0}
+    {@const hasUpstream = (upstream & Roles[role]) > 0}
         <div class="p-2 px-4 grid grid-cols-[1fr_max-content_max-content] items-center gap-4">
             <div>{rolesTitles[role]}</div>
             <div class="italic text-error-700-200-token">{(!globalAllowed && restrictedRoles.includes(role)) ? "Global Permission" : (upstream & Roles[role]) > 0 ? "Enabled at User Level" : ""}</div>
-            <div class="h-8 aspect-square rounded-lg grid place-items-center" class:bg-surface-500={!((upstream & Roles[role]) > 0 || (perms & Roles[role]) > 0)} class:bg-primary-500={(upstream & Roles[role]) > 0 || (perms & Roles[role]) > 0}>
-                {#if (upstream & Roles[role]) > 0 || (perms & Roles[role]) > 0}
+            <div class="h-8 aspect-square rounded-lg grid place-items-center" 
+                class:dark:bg-surface-700={!hasUpstream && !hasPerm}
+                class:bg-surface-400={!hasUpstream && !hasPerm} 
+                class:bg-surface-500={hasUpstream || !hasPerm}
+                class:bg-primary-500={!hasUpstream || hasPerm}>
+                {#if hasUpstream || hasPerm}
                     <Check size="1.5em" fill="white"/>
                 {:else}
                     <Uncheck size="1.5em" fill="white" />

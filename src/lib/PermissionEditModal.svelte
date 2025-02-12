@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { SvelteComponent } from 'svelte';
+	import { type SvelteComponent, onMount } from 'svelte';
 
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import PermissionEdit from "$lib/PermissionEdit.svelte";
@@ -10,13 +10,33 @@
 
 	const modalStore = getModalStore();
 
-	// Handle Form Submission
-	function onFormSubmit(): void {
-		if ($modalStore[0].response) $modalStore[0].response("");
-		modalStore.close();
+	let selected = "";
+	let global = 0;
+	let servers: Record<string, number> = {};
+
+	$: {
+		if ($modalStore[0]) {
+			global = $modalStore[0].meta.global;
+			servers = Object.assign({}, $modalStore[0].meta.server_roles);
+		}
 	}
 
-	let selected = "";
+	const permissionChanged = (e: CustomEvent<number>) => {
+		if (selected.length) {
+			servers[selected] = e.detail;
+		} else {
+			global = e.detail;
+		}
+	}
+
+	// Handle Form Submission
+	const submit = () => {
+		if ($modalStore[0].response) $modalStore[0].response({
+			global,
+			servers
+		});
+		modalStore.close();
+	}
 
 </script>
 
@@ -31,12 +51,14 @@
 					<div class="p-2 px-4 rounded-lg cursor-pointer" role="tab" aria-selected={selected === id} tabindex={i} on:click={() => selected = id} on:keydown={() => selected = id} class:bg-primary-400-500-token={selected === id}>{id}</div>
 				{/each}
 			</div>
-			<PermissionEdit perms={$modalStore[0].meta.global} upstream={selected.length ? $modalStore[0].meta.global : 0} globalAllowed={selected === ""} />
+			{#key selected}
+				<PermissionEdit on:status={permissionChanged} perms={selected.length ? (servers[selected] ?? 0) : global} upstream={selected.length ? global : 0} globalAllowed={selected === ""} />
+			{/key}
 		</div>
 		<!-- prettier-ignore -->
 		<footer class="modal-footer {parent.regionFooter}">
             <button class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{parent.buttonTextCancel}</button>
-            <button class="btn {parent.buttonPositive}" on:click={onFormSubmit}>Update</button>
+            <button class="btn {parent.buttonPositive}" on:click={submit}>Update</button>
         </footer>
 	</div>
 {/if}

@@ -36,7 +36,18 @@
             method: "DELETE",
         });
         await invalidateAll();
-    } 
+    }
+
+    const updatePermissions = async (id: string, info: { global: number, servers: Record<string, number> }) => {
+        const taste = await fetch(`/users/${id}`, {
+            method: "PATCH",
+            body: JSON.stringify(info),
+        });
+        if (taste.ok) {
+            console.log("Permissions updated");
+        }
+        await invalidateAll();
+    }
 
 </script>
 
@@ -61,13 +72,12 @@
                             valueAttr: { type: "password", minLength: 8, required: true },
                             response: (r) => r ? resetPassword(data.mine.id, r) : null,
                         })}>Change Password</button>
-                        {@debug data}
                         <button on:click={() => modals.trigger({
                             type: "component",
                             component: "permission",
                             title: `Permissions for ${data.mine.username}`,
-                            meta: { global: data.mine.roles, username: data.mine.username, servers: data.servers },
-                            response: (r) => r ? resetPassword(user.id, r) : null,
+                            meta: { global: data.mine.roles, server_roles: data.mine.server_roles, username: data.mine.username, servers: data.servers },
+                            response: (r) => r ? resetPassword(data.mine.id, r) : null,
                         })}>View Permissions</button>
                     </div>
                 </div>
@@ -101,7 +111,7 @@
                 {#each data.all as user}
                     <div class="grid grid-cols-[1fr_max-content] items-center">
                         <div class="text-xl align-middle">
-                            {user.username}<span class="text-sm align-middle italic pl-10 text-surface-600-300-token">{user.id}</span>
+                            {user.username}<span class="text-sm align-middle italic pl-8 text-surface-600-300-token">{user.id}</span>
                         </div>
                         <div class="btn-group variant-filled-surface w-max">
                             <button on:click={() => modals.trigger({
@@ -115,8 +125,8 @@
                                 type: "component",
                                 component: "permissionEdit",
                                 title: `Permissions for ${user.username}`,
-                                meta: { global: user.roles, username: user.username, servers: data.servers },
-                                response: (r) => r ? resetPassword(user.id, r) : null,
+                                meta: { global: user.roles, server_roles: user.server_roles, username: user.username, servers: data.servers },
+                                response: (r) => r ? updatePermissions(user.id, r) : null,
                             })}>Edit Permissions</button>
                             <button class="hover:variant-filled-error" on:click={() => modals.trigger({
                                 type: "confirm",

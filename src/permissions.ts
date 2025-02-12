@@ -66,7 +66,7 @@ export const authorise = (name: string, pass_hash: string): { id: string, name: 
 
 export type Perms = {
     hasPermission: (server: string, permission: keyof typeof Roles) => boolean;
-    grantPermission: (server: string | null, permission: keyof typeof Roles) => boolean;
+    editPermissions: (id: string, global: number, servers: Record<string, number>) => boolean;
     userInfo: () => User | null;
     listAllPerms: () => User[] | null;
     createUser: (name: string, hash: string) => string;
@@ -77,7 +77,7 @@ export type Perms = {
 
 const badPerms: Perms = {
     hasPermission: () => false,
-    grantPermission: () => false,
+    editPermissions: () => false,
     userInfo: () => null,
     listAllPerms: () => null,
     createUser: () => "",
@@ -97,8 +97,15 @@ export const perms = (id: string | undefined | null): Perms => {
             if ((user.server_roles[server] & Roles[permission]) > 0) return true;
             return false;
         },
-        grantPermission: (server, permission) => {
-            return false;
+        editPermissions: (user, global, servers) => {
+            db.update(({ users }) => {
+                const idx = users.findIndex((it) => it.id === user);
+                const item = users[idx];
+                item.roles = global;
+                item.server_roles = servers;
+                users[idx] = item;
+            });
+            return true;
         },
         userInfo: () => {
             return user;
