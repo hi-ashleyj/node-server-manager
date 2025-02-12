@@ -19,7 +19,7 @@
     </div>
     <div class="h-full overflow-y-scroll pt-4">
         {#each data.files as file}
-            <a class="grid grid-cols-[1fr_max-content] px-3 py-2 border-surface-300-600-token border rounded-lg my-2" href="/{$page.params.id}/test/logs/{file}">
+            <a class="grid grid-cols-[1fr_max-content] px-3 py-2 border-surface-300-600-token border rounded-lg my-2" href="/{$page.params.id}/{$page.params.type}/logs/{file}">
                 <span>Run {file}</span>
                 <span class="text-surface-700-200-token">{timeFormat.format(new Date(decodeTime(file)))}</span>
             </a>
