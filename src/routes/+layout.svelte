@@ -8,6 +8,7 @@
     import { scale } from "svelte/transition";
     import PermissionViewerModal from "$lib/PermissionViewerModal.svelte";
     import PermissionEditModal from "$lib/PermissionEditModal.svelte";
+    import CreateUserModal from "$lib/CreateUserModal.svelte";
 
     storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
     initializeStores();
@@ -21,6 +22,7 @@
     components={{ 
         permission: { ref: PermissionViewerModal },
         permissionEdit: { ref: PermissionEditModal }, 
+        createUser: { ref: CreateUserModal },
         }} />
 
 <EventsContext hub={browser ? `ws://${window.location.hostname}:14554` : ""}>

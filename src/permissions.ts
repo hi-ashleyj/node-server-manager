@@ -70,6 +70,7 @@ export type Perms = {
     userInfo: () => User | null;
     listAllPerms: () => User[] | null;
     createUser: (name: string, hash: string) => string;
+    deleteUser: (id: string) => boolean;
     id: () => string | null;
     updatePassword: (id: string, hash: string) => boolean;
 }
@@ -80,6 +81,7 @@ const badPerms: Perms = {
     userInfo: () => null,
     listAllPerms: () => null,
     createUser: () => "",
+    deleteUser: () => false,
     id: () => null,
     updatePassword: () => false,
 }
@@ -106,6 +108,13 @@ export const perms = (id: string | undefined | null): Perms => {
         },
         createUser: (name, hash) => {
             return createUser(name, hash);
+        },
+        deleteUser: (id) => {
+            db.update(({ users }) => {
+                const idx = users.findIndex((user) => user.id === id);
+                users.splice(idx, 1);
+            });
+            return true;
         },
         id: () => {
             return id;

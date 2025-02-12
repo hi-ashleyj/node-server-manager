@@ -2,6 +2,9 @@
 
     import { Roles } from "$lib/roles";
     import { SlideToggle } from '@skeletonlabs/skeleton';
+    import { createEventDispatcher } from "svelte";
+
+    const dispatch = createEventDispatcher<{ status: number }>();
 
     export let globalAllowed = false;
     export let perms: number;

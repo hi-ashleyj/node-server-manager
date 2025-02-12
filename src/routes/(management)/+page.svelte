@@ -52,28 +52,24 @@
                                     </a>
                                 </div>
                                 <div class="px-4">
+                                    <span class="w-2 h-2 rounded-full inline-block align-middle mr-2" class:bg-success-500={server.test.active} class:bg-error-500={!server.test.active}></span>
+                                    <span class="align-middle text-sm">{server.test.active ? "running" : "down"}</span>
+                                    <span class="align-middle text-sm mx-1">•</span>
+                                    
                                     {#await getServerStatus(server.port + 30000)}
-                                        <span class="w-2 h-2 bg-surface-500 rounded-full inline-block align-middle mr-2"></span>
-                                        <span class="align-middle text-sm">{server.test.active ? "running • " : ""}loading</span>
+                                        <span class="align-middle text-sm">loading</span>
                                     {:then result}
                                         {#if result.status === "unknown"}
-                                            <span class="w-2 h-2 bg-surface-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">unknown</span>
-                                        {:else if result.status === "down" && server.test.active}
-                                            <span class="w-2 h-2 bg-warning-500 rounded-full inline-block align-middle mr-2"></span>
-                                            <span class="align-middle text-sm">running • nsm down</span>
                                         {:else if result.status === "down"}
-                                            <span class="w-2 h-2 bg-error-500 rounded-full inline-block align-middle mr-2"></span>
-                                            <span class="align-middle text-sm">down</span>
+                                            <span class="align-middle text-sm">stats fail</span>
                                         {:else if result.status === "up" && "requests" in result}
-                                            <span class="w-2 h-2 bg-success-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">no requests</span>
                                         {:else if result.status === "up"}
-                                            <span class="w-2 h-2 bg-success-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">{result.frequency.toFixed(2)}/m - {result.avg.toFixed(2)}ms - {result.min.toFixed(2)}ms - {result.max.toFixed(2)}ms</span>
                                         {/if}
                                     {:catch e}
-                                            <span>failure</span>
+                                        <span>error loading stats</span>
                                     {/await}
                                 </div>
                             </div>
@@ -86,28 +82,24 @@
                                     </a>
                                 </div>
                                 <div class="px-4">
+                                    <span class="w-2 h-2 rounded-full inline-block align-middle mr-2" class:bg-success-500={server.prod.active} class:bg-error-500={!server.prod.active}></span>
+                                    <span class="align-middle text-sm">{server.prod.active ? "running" : "down"}</span>
+                                    <span class="align-middle text-sm mx-1">•</span>
+                                    
                                     {#await getServerStatus(server.port)}
-                                        <span class="w-2 h-2 bg-surface-500 rounded-full inline-block align-middle mr-2"></span>
                                         <span class="align-middle text-sm">loading</span>
                                     {:then result}
                                         {#if result.status === "unknown"}
-                                            <span class="w-2 h-2 bg-surface-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">unknown</span>
-                                        {:else if result.status === "down" && server.prod.active}
-                                            <span class="w-2 h-2 bg-warning-500 rounded-full inline-block align-middle mr-2"></span>
-                                            <span class="align-middle text-sm">running • nsm down</span>
                                         {:else if result.status === "down"}
-                                            <span class="w-2 h-2 bg-error-500 rounded-full inline-block align-middle mr-2"></span>
-                                            <span class="align-middle text-sm">down</span>
+                                            <span class="align-middle text-sm">stats fail</span>
                                         {:else if result.status === "up" && "requests" in result}
-                                            <span class="w-2 h-2 bg-success-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">no requests</span>
                                         {:else if result.status === "up"}
-                                            <span class="w-2 h-2 bg-success-500 rounded-full inline-block align-middle mr-2"></span>
                                             <span class="align-middle text-sm">{result.frequency.toFixed(2)}/m - {result.avg.toFixed(2)}ms - {result.min.toFixed(2)}ms - {result.max.toFixed(2)}ms</span>
                                         {/if}
                                     {:catch e}
-                                        <span>failure</span>
+                                        <span>error loading stats</span>
                                     {/await}
                                 </div>
                             </div>

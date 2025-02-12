@@ -17,3 +17,10 @@ export const PATCH = (async ({ request, locals, params }) => {
     await locals.paths(node, npm, git);
     return new Response(null, { status: 204 });
 }) satisfies RequestHandler
+
+export const DELETE = (async ({ locals, params }) => {
+    if (!locals.perms.hasPermission("", "ADMINISTRATE_USERS")) error(403);
+    if (params.id === locals.perms.id()) error(400);
+    locals.perms.deleteUser(params.id);
+    return new Response(null, { status: 204 });
+}) satisfies RequestHandler

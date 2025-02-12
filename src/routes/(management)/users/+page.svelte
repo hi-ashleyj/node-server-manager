@@ -3,6 +3,8 @@
     import { getModalStore } from "@skeletonlabs/skeleton";
     import encodeHash64 from "crypto-js/enc-base64";
     import sha512 from "crypto-js/sha512";
+    import { invalidateAll } from "$app/navigation";
+    import Delete from "@ajwdmedia/svelterial-icons/Outlined/Delete.svelte";
 
     const modals = getModalStore();
 
@@ -18,7 +20,23 @@
         if (taste.ok) {
             console.log("Changed");
         }
-    }
+    };
+
+    const createUser = async (name: string, password: string) => {
+        const hash = encodeHash64.stringify(sha512(password));
+        const result = await fetch(`/users`, {
+            method: "PUT",
+            body: JSON.stringify({ name, hash }),
+        });
+        await invalidateAll();
+    } 
+
+    const deleteUser = async (id: string) => {
+        const result = await fetch(`/users/${id}`, {
+            method: "DELETE",
+        });
+        await invalidateAll();
+    } 
 
 </script>
 
@@ -71,7 +89,12 @@
                         User Management
                     </div>
                     <div class="btn-group variant-filled-surface w-max">
-                        <button>Create New</button>
+                        <button on:click={() => modals.trigger({
+                            type: "component",
+                            component: "createUser",
+                            title: "Create New User",
+                            response: (r) => r ? createUser(r.name, r.password) : null
+                        })} >Create New</button>
                     </div>
                 </div>
                 <hr />
@@ -95,6 +118,14 @@
                                 meta: { global: user.roles, username: user.username, servers: data.servers },
                                 response: (r) => r ? resetPassword(user.id, r) : null,
                             })}>Edit Permissions</button>
+                            <button class="hover:variant-filled-error" on:click={() => modals.trigger({
+                                type: "confirm",
+                                title: `Confirm: Deleting ${user.username}`,
+                                body: "This action is irreversable!",
+                                response: (r) => r ? deleteUser(user.id) : null,
+                            })}>
+                                <Delete fill="white" size="1.5em" />    
+                            </button>
                         </div>
                     </div>
                 {/each}
