@@ -3,7 +3,7 @@ import type { InstallCommandOptions } from "./options.js";
 import color from 'picocolors';
 import { setTimeout } from "node:timers/promises";
 
-export const interact = async (partial: Partial<InstallCommandOptions>): Promise<InstallCommandOptions> => {
+export const interact = async (partial: Partial<InstallCommandOptions>): Promise<void> => {
     // Opening Line
     intro(color.inverse("nsm cli : installer"));
     
@@ -18,7 +18,7 @@ export const interact = async (partial: Partial<InstallCommandOptions>): Promise
             placeholder: "Leave empty to choose current directory",
             defaultValue: process.cwd(),
         });
-        if (isCancel(next)) { cancel("adios!"); process.exit(0); }
+        if (isCancel(next)) { cancel("Cancelled. Haere rā!"); process.exit(0); }
         if (next) location = next;
     }
     // TODO: STAT AND READDIR IT
@@ -37,7 +37,7 @@ export const interact = async (partial: Partial<InstallCommandOptions>): Promise
                 { value: "linux-print", label: "Systemd Service - Print Configuration"}
             ]
         });
-        if (isCancel(next)) { cancel("adios!"); process.exit(0); }
+        if (isCancel(next)) { cancel("Cancelled. Haere rā!"); process.exit(0); }
         if (next) install = next;
     }
 
@@ -49,7 +49,7 @@ export const interact = async (partial: Partial<InstallCommandOptions>): Promise
             defaultValue: process.execPath,
             placeholder: "Enter to use current executable",
         });
-        if (isCancel(next)) { cancel("adios!"); process.exit(0); }
+        if (isCancel(next)) { cancel("Cancelled. Haere rā!"); process.exit(0); }
         if (next) node = next;
     }
     // TODO: STAT THAT
@@ -60,15 +60,15 @@ export const interact = async (partial: Partial<InstallCommandOptions>): Promise
         const next = await text({
             message: "User for running service",
         });
-        if (isCancel(next)) { cancel("adios!"); process.exit(0); }
+        if (isCancel(next)) { cancel("Cancelled. Haere rā!"); process.exit(0); }
         if (next) user = next;
     }
 
     const res = await confirm({
         message: "Last Chance! This will wipe the install directory. Proceed?",
     })
-    if (isCancel(res)) { cancel("adios!"); process.exit(0); }
-    if (!res) { cancel("Aborted"); process.exit(0); }
+    if (isCancel(res)) { cancel("Cancelled. Haere rā!"); process.exit(0); }
+    if (!res) { cancel("Aborted. Haere rā!"); process.exit(0); }
 
     const spin = spinner();
     spin.start("Clearing Install Directory");
