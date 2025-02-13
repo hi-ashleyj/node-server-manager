@@ -55,7 +55,7 @@
                 <label for="auto">Production Server Auto-Start</label>
                 <div class="text-left h-8">
                     <InputWrapper initial={false} bind:value={auto} let:check >
-                        <SlideToggle name="auto" active="bg-primary-500" bind:value={auto} on:input={check} />
+                        <SlideToggle name="auto" active="bg-primary-500" bind:checked={auto} on:input={check} />
                     </InputWrapper>
                 </div>
 
@@ -70,7 +70,7 @@
                     </InputWrapper>
                     <label for="install-force" class="pl-8">force</label>
                     <InputWrapper initial={false} bind:value={deps_force} let:check >
-                        <SlideToggle name="install-force" active="bg-primary-500" bind:value={deps_force} on:input={check} />
+                        <SlideToggle name="install-force" active="bg-primary-500" bind:checked={deps_force} on:input={check} />
                     </InputWrapper>
                 </div>
 

@@ -52,14 +52,14 @@
             <div class="card w-full h-max p-4 mb-4 grid grid-cols-[1fr_2fr] items-center gap-y-4 gap-x-6">
                 <label for="auto">Production Server Auto-Start</label>
                 <div class="text-left h-8">
-                    <InputWrapper initial={data.info.auto} bind:value={auto} let:check >
-                        <SlideToggle name="auto" active="bg-primary-500" bind:value={auto} on:input={check} />
+                    <InputWrapper name="auto" initial={data.info.auto} bind:value={auto} let:check >
+                        <SlideToggle name="auto" active="bg-primary-500" bind:checked={auto} on:input={check} />
                     </InputWrapper>
                 </div>
 
                 <label for="deps">Install Dependencies</label>
                 <div class="grid grid-cols-[max-content_max-content_max-content] items-center gap-4">
-                    <InputWrapper initial={data.info.install} bind:value={deps} let:check >
+                    <InputWrapper name="deps" initial={data.info.install} bind:value={deps} let:check >
                         <RadioGroup active="variant-filled-primary">
                             <RadioItem bind:group={deps} on:change={check} name="deps" value="">disabled</RadioItem>
                             <RadioItem bind:group={deps} on:change={check} name="deps" value="install">npm install</RadioItem>
@@ -67,8 +67,8 @@
                         </RadioGroup>
                     </InputWrapper>
                     <label for="install-force" class="pl-8">force</label>
-                    <InputWrapper initial={data.info.force_install} bind:value={deps_force} let:check >
-                        <SlideToggle name="install-force" active="bg-primary-500" bind:value={deps_force} on:input={check} />
+                    <InputWrapper name="install-force" initial={data.info.force_install} bind:value={deps_force} let:check >
+                        <SlideToggle name="install-force" active="bg-primary-500" bind:checked={deps_force} on:input={check} />
                     </InputWrapper>
                 </div>
 

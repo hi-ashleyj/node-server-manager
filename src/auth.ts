@@ -18,7 +18,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
                     id: answer.id,
                     name: answer.id,
                     email: answer.name,
-                }
+                }   
 
             },
         }),
