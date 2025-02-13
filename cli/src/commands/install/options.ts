@@ -23,7 +23,7 @@ type InstallCommandOptionManual = {
     install: "manual"
 }
 
-type InstallCommandOptionLinux = {
+export type InstallCommandOptionLinux = {
     install: "linux" | "linux-print"
     serviceUser: string,
     node: string,

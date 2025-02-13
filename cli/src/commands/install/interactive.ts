@@ -1,7 +1,7 @@
 import { text, intro, cancel, log, isCancel, select, spinner, confirm, outro } from "@clack/prompts";
 import type { InstallCommandOptions } from "./options.js";
 import color from 'picocolors';
-import { setTimeout } from "node:timers/promises";
+import { action as doInstall } from "./action.js";
 
 export const interact = async (partial: Partial<InstallCommandOptions>): Promise<void> => {
     // Opening Line
@@ -24,7 +24,7 @@ export const interact = async (partial: Partial<InstallCommandOptions>): Promise
     // TODO: STAT AND READDIR IT
 
     // Install Type
-    let install = "manual";
+    let install: InstallCommandOptions["install"] = "manual";
     if (partial.install) {
         install = partial.install;
     } else {
@@ -71,14 +71,23 @@ export const interact = async (partial: Partial<InstallCommandOptions>): Promise
     if (!res) { cancel("Aborted. Haere rā!"); process.exit(0); }
 
     const spin = spinner();
-    spin.start("Clearing Install Directory");
-    await setTimeout(200);
-    spin.message("Downloading Latest Release");
-    await setTimeout(2000);
-    spin.message("Unzipping");
-    await setTimeout(200);
-    spin.message("Installing Service");
-    await setTimeout(200);
-    spin.stop("Installed");
-    outro("Ready to go!");
+    spin.start("Starting...");
+    const [ installed, error ] = await doInstall({
+        location,
+        install,
+        node,
+        serviceUser: user,
+    }, (str) => spin.message(str));
+
+    if (error) {
+        cancel(color.bgRed(`Error occured:\n${error}\nApologies.`));
+        process.exit(0);
+    }
+
+    outro(color.bgGreen(installed.success));
+    console.log("Next Steps:");
+    installed.steps.map(it => console.log(it));
+    console.log(color.inverse("DO NOT FORGET TO CHANGE YOUR ADMIN PASSWORD"));
+    console.log("Haere Rā!\n");
+    if (installed.post) console.log(installed.post);
 }

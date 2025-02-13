@@ -23,7 +23,7 @@ export default defineConfig({
         sourcemap: true,
         target: "esnext",
         rollupOptions: {
-            external: (dep) => dep.startsWith("node:"),
+            external: (dep) => dep.startsWith("node:") || dep === "unzipper",
         }
     },
 })
