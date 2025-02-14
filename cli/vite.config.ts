@@ -1,6 +1,5 @@
 import { defineConfig } from "vite";
 import packageJSON from "./package.json" with { type: "json" };
-import { externalizeDeps } from 'vite-plugin-externalize-deps'
 
 declare global {
     const __PKG_NAME__: string;
