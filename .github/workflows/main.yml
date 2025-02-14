@@ -23,7 +23,7 @@ jobs:
         name: Build NPM Package
       - run: npm run build:cli
         name: Build CLI
-      - uses: AButler/upload-release-assets@v3
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          files: manager.zip
+      - run: gh release upload ${{ github.event.release.tag_name }} manager.zip
+        name: Upload Manager Artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
