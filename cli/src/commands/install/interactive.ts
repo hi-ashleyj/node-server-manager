@@ -84,8 +84,8 @@ export const interact = async (partial: Partial<InstallCommandOptions>): Promise
         process.exit(0);
     }
 
-    outro(color.bgGreen(installed.success));
-    console.log("Next Steps:");
+    spin.stop(color.bgGreen(installed.success));
+    outro("Next Steps:");
     installed.steps.map(it => console.log(it));
     console.log(color.inverse("DO NOT FORGET TO CHANGE YOUR ADMIN PASSWORD"));
     console.log("Haere Rā!\n");

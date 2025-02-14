@@ -22,7 +22,7 @@ export default defineConfig({
         sourcemap: true,
         target: "esnext",
         rollupOptions: {
-            external: (dep) => dep.startsWith("node:") || dep === "unzipper",
+            external: (dep) => dep.startsWith("node:") || dep === "extract-zip",
         }
     },
 })
