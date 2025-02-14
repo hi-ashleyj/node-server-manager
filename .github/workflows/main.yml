@@ -1,8 +1,7 @@
 name: Build System
 on:
   release:
-    types:
-      - released
+    - created
 
 jobs:
   build_and_deploy:
@@ -16,9 +15,14 @@ jobs:
           node-version: 22
       - run: npm install
         name: Install Deps
-      - run: npm run build
-        name: Build
+      - run: npm run executable
+        name: Build Manager & Zip
       - run: npm run package
-        name: Package
+        name: Build NPM Package
       - run: npm run build:cli
         name: Build CLI
+      - uses: AButler/upload-release-assets@v2.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          files: manager.zip
+          release-tag: ${{ github.ref }}
