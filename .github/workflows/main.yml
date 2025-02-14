@@ -23,8 +23,7 @@ jobs:
         name: Build NPM Package
       - run: npm run build:cli
         name: Build CLI
-      - uses: AButler/upload-release-assets@v2.0
+      - uses: AButler/upload-release-assets@v3
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           files: manager.zip
-          release-tag: ${{ github.ref }}
