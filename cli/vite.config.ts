@@ -1,10 +1,14 @@
 import { defineConfig } from "vite";
 import packageJSON from "./package.json" with { type: "json" };
+import { fileURLToPath } from "node:url";
+import { builtinModules } from "node:module";
 
 declare global {
     const __PKG_NAME__: string;
     const __PKG_VERSION__: string;
 }
+
+const libdir = fileURLToPath(new URL("./src/lib", import.meta.url).href);
 
 export default defineConfig({
     define: {
@@ -22,7 +26,12 @@ export default defineConfig({
         sourcemap: true,
         target: "esnext",
         rollupOptions: {
-            external: (dep) => dep.startsWith("node:") || dep === "extract-zip",
-        }
+            external: (dep) => dep.startsWith("node:") || builtinModules.includes(dep) // dep === "extract-zip",
+        },
     },
+    resolve: {
+        alias: {
+            "@": libdir,
+        }
+    }
 })

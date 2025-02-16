@@ -4,7 +4,16 @@ import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import extract from "extract-zip";
-import { setupWindows, installService } from "../../lib/windows-service.js";
+import { setupWindows, installService } from "@/windows-service.js";
+import { summonFromEther } from "@/spawn.js";
+
+
+/** This is what NPX AUTH SECRET does */
+function randomString(size = 32) {
+    const bytes = crypto.getRandomValues(new Uint8Array(size))
+    // @ts-expect-error
+    return Buffer.from(bytes, "base64").toString("base64")
+  }
 
 const RELEASE_URL = "https://github.com/hi-ashleyj/node-server-manager/releases/latest/download/manager.zip";
 
@@ -17,8 +26,7 @@ Type=simple
 Restart=always
 RestartSec=1
 User=${options.serviceUser}
-ExecStart=${options.node} ${options.location}
-Environment="PORT=14664"
+ExecStart=${options.node} ${join(options.location, "index.js")}
 
 [Install]
 WantedBy=multi-user.target`;
@@ -62,6 +70,13 @@ export const action = async (options: InstallCommandOptions, progress: (str) => 
         await extract(file, { dir: options.location })
     } catch (e) {
         return [ null, "Failed to Unzip file" ];
+    }
+
+    progress("Writing to .env file");
+    try {
+        await writeFile(join(options.location, ".env"), `AUTH_TRUST_HOST=true\nAUTH_SECRET="${randomString()}"`);
+    } catch (e) {
+        return [ null, "Failed to prepare env file" ];
     }
 
     progress("Installing Service (expect UAC prompting)");

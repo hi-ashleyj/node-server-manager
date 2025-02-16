@@ -1,11 +1,15 @@
 {
 	"compilerOptions": {
-		"lib": [ "es6" ],
+		"lib": [ "es2020" ],
         "moduleResolution": "nodenext",
         "esModuleInterop": true,
         "resolveJsonModule": true,
         "declaration": true,
-		"module": "nodenext"
+		"module": "nodenext",
+		"paths": {
+			"@": [ "./src/lib" ],
+			"@/*": [ "./src/lib/*" ]
+		}
 	}
 	// Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
 	//
