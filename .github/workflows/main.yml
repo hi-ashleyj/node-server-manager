@@ -27,3 +27,11 @@ jobs:
         name: Upload Manager Artifact
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: npm publish ./dist --access public -q
+        name: Publish NSM package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm publish ./cli --access public -q
+        name: Publish CLI package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
