@@ -1,6 +1,6 @@
 {
   "name": "@hi-ashleyj/nsm-cli",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "bin": "dist/bin.js",
   "main": "dist/bin.js",
   "scripts": {

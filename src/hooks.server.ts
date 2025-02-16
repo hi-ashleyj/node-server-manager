@@ -30,6 +30,10 @@ events.on("disconnect", (p) => console.log(`[events] disconnected from hub (${p 
 events.on("close", () => console.log("[events] close"));
 events.on("error", (p) => console.log(`[events] error fired (${p})`));
 
+process.on("beforeExit", () => {
+    events?.disconnect();
+})
+
 let manager: ServerManager;
 const defaultData = { servers: [], paths: {} };
 const db = await JSONFilePreset<ServerDatabase>(join(homedir(), "nsm", "servers.json"), defaultData);
