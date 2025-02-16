@@ -80,6 +80,15 @@ const localHandle: Handle = async ({ event, resolve }) => {
             }
         })
     }
+    if (auth && event.route.id && event.route.id.startsWith("/login")) {
+        // accessing login as logged in - probably want to end up at home
+        return new Response(null, {
+            status: 307,
+            headers: {
+                Location: `/`,
+            }
+        })
+    }
     event.locals.db = db;
     event.locals.manager = manager;
     event.locals.paths = setPaths;
