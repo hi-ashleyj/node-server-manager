@@ -32,6 +32,12 @@ events.on("error", (p) => console.log(`[events] error fired (${p})`));
 
 process.on("beforeExit", () => {
     events?.disconnect();
+    eventHubDeath();
+})
+// sveltekit fires a custom shutdown event
+process.on("sveltekit:shutdown", () => {
+    events?.disconnect();
+    eventHubDeath();
 })
 
 let manager: ServerManager;
