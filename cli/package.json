@@ -1,7 +1,7 @@
 {
   "name": "@hi-ashleyj/nsm-cli",
-  "version": "1.0.0-alpha.7",
-  "bin": "dist/bin.js",
+  "version": "1.0.0-alpha.8",
+  "bin": "./dist/bin.js",
   "main": "dist/bin.js",
   "scripts": {
     "build": "vite build",
