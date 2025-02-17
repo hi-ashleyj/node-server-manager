@@ -15,6 +15,7 @@ jobs:
         name: Setup Node
         with:
           node-version: 22
+          registry-url: https://registry.npmjs.org/
       - run: npm install
         name: Install Deps
       - run: npm run executable
@@ -27,11 +28,11 @@ jobs:
         name: Upload Manager Artifact
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: npm publish ./dist --access public -q
+      - run: npm publish ./dist --access public
         name: Publish NSM package
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: npm publish ./cli --access public -q
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+      - run: npm publish ./cli --access public
         name: Publish CLI package
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
