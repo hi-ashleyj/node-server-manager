@@ -2,11 +2,6 @@
     "name": "@hi-ashleyj/nsm",
     "version": "2.0.0-alpha.7",
     "scripts": {},
-    "files": [
-        "dist",
-        "!dist/**/*.test.*",
-        "!dist/**/*.spec.*"
-    ],
     "type": "module",
     "exports": {
         "./stats": {
