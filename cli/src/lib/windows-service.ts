@@ -6,7 +6,7 @@ export const setupWindows = async (options: { location: string, node: string }) 
 
     const svc = new Service({
         name: "Node Server Manager Service",
-        description: "Parent service which runs and manages other node.js servers. Configure at localhost:7436",
+        description: "Parent service which runs and manages other node.js servers. Configure at localhost:14664",
         maxRestarts: 3,
         execPath: options.node,
         script: join(options.location, "index.js"),
