@@ -26,7 +26,7 @@ export default defineConfig({
         sourcemap: true,
         target: "esnext",
         rollupOptions: {
-            external: (dep) => dep.startsWith("node:") || builtinModules.includes(dep) // dep === "extract-zip",
+            external: (dep) => dep.startsWith("node:") || builtinModules.includes(dep) || dep === "node-windows" // dep === "extract-zip",
         },
     },
     resolve: {
