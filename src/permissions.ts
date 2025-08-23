@@ -10,6 +10,11 @@ import { Roles } from "$lib/roles.js";
 
 await mkdir(join(homedir(), "nsm"), { recursive: true });
 
+export type AuthorizeReturn = {
+    id: string;
+    name: string;
+}
+
 export type User = {
     id: string,
     username: string,
@@ -37,7 +42,6 @@ const db = await JSONFilePreset<UserDatabase>(join(homedir(), "nsm", "users.json
 await db.read();
 await db.write();
 
-
 export const createUser = (name: string, pass_hash: string): string => {
     const id = ulid();
     const salt = createSalt();
@@ -56,7 +60,7 @@ export const createUser = (name: string, pass_hash: string): string => {
     return id;
 }
 
-export const authorise = (name: string, pass_hash: string): { id: string, name: string } | null => {
+export const authorise = (name: string, pass_hash: string): AuthorizeReturn | null => {
     const user = db.data.users.find(it => it.username === name);
     if (!user) return null;
     const compare = hash(pass_hash, user.salt);

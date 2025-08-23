@@ -1,8 +1,10 @@
-import { signIn } from "../../auth.js";
-import type { Actions } from "./$types.js";
+import type { PageServerLoad } from "./$types";
+import { redirect } from "@sveltejs/kit";
 
-export const actions = { default: signIn } satisfies Actions;
+export const load = (async ({ locals }) => {
+    if (locals.user || locals.session) {
+        redirect(303, "/");
+    }
 
-export const load = async ({ locals }) => {
-    const session = await locals.auth();
-}
+    return {};
+}) satisfies PageServerLoad

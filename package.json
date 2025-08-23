@@ -1,6 +1,6 @@
 {
     "name": "@hi-ashleyj/nsm",
-    "version": "2.0.0-alpha.11",
+    "version": "2.0.0-alpha.12",
     "private": true,
     "scripts": {
         "dev": "vite dev",
@@ -17,14 +17,13 @@
         "polka": "^1.0.0-next.28",
         "sirv": "^3.0.0",
         "@ajwdmedia/svelterial-icons": "^0.1.3",
-        "@auth/sveltekit": "^1.7.2",
         "@floating-ui/dom": "^1.6.11",
         "@skeletonlabs/skeleton": "^2.10.3",
         "@skeletonlabs/tw-plugin": "^0.4.0",
         "@sveltejs/adapter-node": "2.1.2",
         "@sveltejs/kit": "2.9.0",
         "@sveltejs/package": "^2.3.7",
-        "@sveltejs/vite-plugin-svelte": "^3.1.2",
+        "@sveltejs/vite-plugin-svelte": "^3.0.0",
         "@tailwindcss/forms": "^0.5.9",
         "@tailwindcss/typography": "^0.5.14",
         "@types/crypto-js": "^4.2.2",
@@ -42,7 +41,7 @@
         "tslib": "^2.4.1",
         "typescript": "^5.0.0",
         "ulidx": "^2.4.1",
-        "vite": "6.3.4",
+        "vite": "^5.0.0",
         "ws": "^8.17.1"
     },
     "type": "module",
