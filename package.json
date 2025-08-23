@@ -1,6 +1,6 @@
 {
     "name": "@hi-ashleyj/nsm",
-    "version": "2.0.0-alpha.14",
+    "version": "2.0.0-alpha.15",
     "private": true,
     "scripts": {
         "dev": "vite dev",
@@ -46,7 +46,7 @@
     },
     "type": "module",
     "dependencies": {
-        "@hi-ashleyj/sveltekit-adapter-node-fullbundle": "^0.0.5",
+        "@hi-ashleyj/sveltekit-adapter-node-fullbundle": "^0.1.0",
         "bestzip": "^2.2.1",
         "cpy-cli": "^5.0.0",
         "cross-env": "^7.0.3",

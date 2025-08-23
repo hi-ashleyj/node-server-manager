@@ -5,7 +5,6 @@
     import Terminal from "@ajwdmedia/svelterial-icons/Outlined/Terminal.svelte";
     import Home from "@ajwdmedia/svelterial-icons/Outlined/Home.svelte";
 
-    import { signOut } from "@auth/sveltekit/client"
     import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
     export let data;
 
@@ -53,6 +52,6 @@
 
 <div data-popup="signoutPopup">
     <div class="btn-group-vertical variant-ghost-surface">
-        <button class="variant-filled-error hover:variant-filled-error" on:click={signOut}>Log out</button>
+        <a href="/logout" class="variant-filled-error hover:variant-filled-error" >Log out</a>
     </div>
 </div>
