@@ -8,6 +8,7 @@ interface AdapterOptions {
     out?: string;
     precompress?: boolean;
     envPrefix?: string;
+    exts?: string[];
     envs?: Partial<{ [x in typeof import("./files/env.js").envs[number] ]: string }>
 }
 
@@ -23,7 +24,7 @@ const files = fileURLToPath(new URL('./files', import.meta.url).href);
 
 /** @type {import('./index.js').default} */
 export default function (opts: AdapterOptions = {}): Adapter {
-    const { out = 'build', precompress = true, envPrefix = '', envs = {} } = opts;
+    const { out = 'build', precompress = true, envPrefix = '', envs = {}, exts = [] } = opts;
 
     return {
         name: '@hi-ashleyj/nsm/adapter',
@@ -67,7 +68,8 @@ export default function (opts: AdapterOptions = {}): Adapter {
                 },
                 external: [
                     ...builtinModules,
-                    /^node:[\s\S]*/
+                    /^node:[\s\S]*/,
+                    ...exts
                 ],
                 plugins: [
                     nodeResolve({
