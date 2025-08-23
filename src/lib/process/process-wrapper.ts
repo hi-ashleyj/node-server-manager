@@ -10,7 +10,11 @@ type Events = {
 
 export class ProcessWrapper {
     private listeners = new Set<{ event: keyof Events, listener: (...args: any[]) => any }>();
-    protected graceful: boolean = false;
+    private graceful: boolean = false;
+
+    protected shutdown() {
+        this.graceful = true;
+    }
 
     protected wrap(process: ChildProcessWithoutNullStreams) {
         process.stdout.on("data", (chunk) => {

@@ -23,11 +23,25 @@
             "types": "./event-svelte.d.ts",
             "svelte": "./event-svelte.js",
             "import": "./event-svelte.js"
+        },
+        "./adapter": {
+            "types": "./adapter/index.d.ts",
+            "svelte": "./adapter/index.js",
+            "import": "./adapter/index.js"
         }
     },
     "dependencies": {
         "ulidx": "^2.4.1",
-        "ws": "^8.18.0"
+        "ws": "^8.18.0",
+        "vite-plugin-top-level-await": "^1.5.0",
+        "@rollup/plugin-commonjs": "^28.0.1",
+        "@rollup/plugin-json": "^6.1.0",
+        "@rollup/plugin-node-resolve": "^16.0.0",
+        "dotenv": "^16.4.7",
+        "rollup": "^4.9.5",
+        "@polka/url": "^1.0.0-next.28",
+        "polka": "^1.0.0-next.28",
+        "sirv": "^3.0.0"
     },
     "peerDependencies": {
         "@sveltejs/kit": "^2.5.0"

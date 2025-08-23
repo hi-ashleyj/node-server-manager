@@ -34,7 +34,7 @@ export class SpawnedServer extends ProcessWrapper {
 
     stop() {
         if (!this.process) return false;
-        this.graceful = true;
+        this.shutdown();
         this.process.kill();
         this.process = undefined;
         return true;

@@ -73,6 +73,16 @@ export class ServerInstance {
     private is_built = false;
 
     private known_version = "<unknown>";
+    private restartTimer: number = -1;
+    private restartCount = 0;
+
+    private restartCounterBefore() {
+        const nowish = Date.now();
+        if (this.restartTimer <= nowish) {
+            this.restartTimer = nowish + (5 * 60 * 1000);
+            this.restartCount = 0;
+        }
+    }
 
     private updates?: (restart: boolean) => any;
 
@@ -114,7 +124,7 @@ export class ServerInstance {
             const [ packageFile, _p ] = await unwrappedFsRead(join(this.root, "package.json"), { encoding: "utf8" });
             try {
                 if (!packageFile) throw new Error(); // just break out
-                const parsed = JSON.parse(packageFile);
+                const parsed = JSON.parse(packageFile as string);
                 this.known_version = parsed.version;
             } catch (e) {
                 this.known_version = "<unknown>";
@@ -151,7 +161,9 @@ export class ServerInstance {
             this.server = undefined;
             this.timing = undefined;
             if (this.updates) return this.updates(!graceful);
-            if (this.params.restarts && !graceful) {
+            this.restartCounterBefore();
+            if (this.params.restarts && !graceful && this.restartCount < 5) {
+                this.restartCount += 1;
                 setTimeout(this.start.bind(this), 500);
             }
         });
@@ -165,7 +177,9 @@ export class ServerInstance {
             this.server = undefined;
             this.timing = undefined;
             if (this.updates) return this.updates(!graceful);
-            if (this.params.restarts && !graceful) {
+            this.restartCounterBefore();
+            if (this.params.restarts && !graceful && this.restartCount < 5) {
+                this.restartCount += 1;
                 setTimeout(this.start.bind(this), 500);
             }
         });
