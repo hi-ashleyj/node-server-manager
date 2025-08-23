@@ -59,7 +59,8 @@ const messageHandler = (active: ActiveSocket, sockets: Map<string, ActiveSocket>
     }
 }
 
-export const start = (host = "0.0.0.0") => {
+export const start = (host = "0.0.0.0", maybe: (() => void) | null = null) => {
+    if (maybe) maybe();
 
     const server = new WebSocketServer({
         port: 14554,

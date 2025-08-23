@@ -100,7 +100,7 @@ const localHandle: Handle = async ({ event, resolve }) => {
     event.locals.db = db;
     event.locals.manager = manager;
     event.locals.paths = setPaths;
-    event.locals.perms = perms(event.locals.user!.id);
+    event.locals.perms = perms(event.locals.user?.id ?? null);
     event.locals.events = events;
     return resolve(event);
 };
